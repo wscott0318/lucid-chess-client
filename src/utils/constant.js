@@ -37,7 +37,7 @@ export const spotLightProps = {
     }
 }
 
-export const aiLevel = 3;   // 3: advanced Up to 3;
+export const aiLevel = 0;   // 3: advanced Up to 3;
 
 export const alphaBet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 

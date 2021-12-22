@@ -11,7 +11,7 @@ console.log(game);
 // console.log(Object.keys(game.board.configuration.pieces).length);
 
 // const side = getRandomVal(2) === 0 ? 'white' : 'black';
-const side = 'white';
+const side = 'black';
 const mode = gameModes['P2E'];
 
 function App() {

@@ -8,6 +8,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { aiMove } from 'js-chess-engine';
+import { getFenFromMatrixIndex, getMatrixIndexFromFen } from "../../utils/helper";
 
 export default class Scene extends Component {
     componentDidMount() {
@@ -217,10 +218,15 @@ export default class Scene extends Component {
                     }
                 }
             }
+
             // animate every frame
             animate();
             
             renderer.domElement.addEventListener('mousedown', mouseDownAction);
+
+            if( this.props.side === 'black' ) {
+                aiMoveAction(aiLevel);
+            }
         })
 
         const self = this;
@@ -342,6 +348,7 @@ export default class Scene extends Component {
                 this.boardPiecesArray[fromIndex].rowIndex = to_rowIndex;
                 this.boardPiecesArray[fromIndex].colIndex = to_colIndex;
                 this.boardPiecesArray[fromIndex].mesh.position.x = to_colIndex * tileSize - tileSize * 3.5;
+                this.boardPiecesArray[fromIndex].mesh.position.y = 0.6;
                 this.boardPiecesArray[fromIndex].mesh.position.z = -(to_rowIndex * tileSize - tileSize * 3.5);
             }
 
@@ -367,6 +374,49 @@ export default class Scene extends Component {
                             scene.add(this.boardPiecesArray[fromIndex].mesh);
                         }
                     }
+                }
+            }
+
+            // check if king special move case
+            if( this.props.game.board.configuration.turn === 'white' ) {
+                if( this.boardPiecesArray[fromIndex].pieceType === 'K' && to === 'C1' && this.props.game.board.configuration.castling.whiteLong ) {
+                    const matrixIndex = getMatrixIndexFromFen('A1');
+                    const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+                    const targetIndex = getMatrixIndexFromFen('D1');
+                    rook[0].rowIndex = targetIndex.rowIndex;
+                    rook[0].colIndex = targetIndex.colIndex;
+                    rook[0].mesh.position.x = rook[0].colIndex * tileSize - tileSize * 3.5;
+                    rook[0].mesh.position.y = 0.6;
+                    rook[0].mesh.position.z = -(rook[0].rowIndex * tileSize - tileSize * 3.5);
+                } else if( this.boardPiecesArray[fromIndex].pieceType === 'K' && to === 'G1' && this.props.game.board.configuration.castling.whiteShort ) {
+                    const matrixIndex = getMatrixIndexFromFen('H1');
+                    const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+                    const targetIndex = getMatrixIndexFromFen('F1');
+                    rook[0].rowIndex = targetIndex.rowIndex;
+                    rook[0].colIndex = targetIndex.colIndex;
+                    rook[0].mesh.position.x = rook[0].colIndex * tileSize - tileSize * 3.5;
+                    rook[0].mesh.position.y = 0.6;
+                    rook[0].mesh.position.z = -(rook[0].rowIndex * tileSize - tileSize * 3.5);
+                }
+            } else if( this.props.game.board.configuration.turn === 'black' ) {
+                if( this.boardPiecesArray[fromIndex].pieceType === 'k' && to === 'C8' && this.props.game.board.configuration.castling.blackLong ) {
+                    const matrixIndex = getMatrixIndexFromFen('A8');
+                    const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+                    const targetIndex = getMatrixIndexFromFen('D8');
+                    rook[0].rowIndex = targetIndex.rowIndex;
+                    rook[0].colIndex = targetIndex.colIndex;
+                    rook[0].mesh.position.x = rook[0].colIndex * tileSize - tileSize * 3.5;
+                    rook[0].mesh.position.y = 0.6;
+                    rook[0].mesh.position.z = -(rook[0].rowIndex * tileSize - tileSize * 3.5);
+                } else if( this.boardPiecesArray[fromIndex].pieceType === 'k' && to === 'G8' && this.props.game.board.configuration.castling.blackShort ) {
+                    const matrixIndex = getMatrixIndexFromFen('H8');
+                    const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+                    const targetIndex = getMatrixIndexFromFen('F8');
+                    rook[0].rowIndex = targetIndex.rowIndex;
+                    rook[0].colIndex = targetIndex.colIndex;
+                    rook[0].mesh.position.x = rook[0].colIndex * tileSize - tileSize * 3.5;
+                    rook[0].mesh.position.y = 0.6;
+                    rook[0].mesh.position.z = -(rook[0].rowIndex * tileSize - tileSize * 3.5);
                 }
             }
 
