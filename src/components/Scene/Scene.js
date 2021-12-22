@@ -205,11 +205,18 @@ export default class Scene extends Component {
             }
             // animate every frame
             animate();
+            
+            renderer.domElement.addEventListener('mousedown', mouseDownAction);
         })
 
         const self = this;
         // render every frame
         var animate = function () {
+            if( self.props.game.board.configuration.isFinished ) {
+                alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
+                return;
+            }
+
             requestAnimationFrame( animate );
 
             // TODO : light position setting
@@ -250,15 +257,15 @@ export default class Scene extends Component {
             composer.render();
         };
 
-        
-        var raycaster = new THREE.Raycaster();
-        var mouse = new THREE.Vector2();
-        window.addEventListener('mousedown', (event) => {
+        var mouseDownAction = function (event) {
             event.preventDefault();
         
-            if( this.props.game.board.configuration.turn !== this.props.side ) {
+            if( self.props.game.board.configuration.turn !== self.props.side ) {
                 return;
             }
+
+            var raycaster = new THREE.Raycaster();
+            var mouse = new THREE.Vector2();
 
             mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
             mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
@@ -266,96 +273,95 @@ export default class Scene extends Component {
             raycaster.setFromCamera( mouse, camera );
         
             // only can select own chess pieces
-            const myPiecesArray = this.boardPiecesArray.filter((item) => 
-                (this.props.side === 'white' && item.pieceType === item.pieceType.toUpperCase())
-                || (this.props.side === 'black' && item.pieceType !== item.pieceType.toUpperCase())
+            const myPiecesArray = self.boardPiecesArray.filter((item) => 
+                (self.props.side === 'white' && item.pieceType === item.pieceType.toUpperCase())
+                || (self.props.side === 'black' && item.pieceType !== item.pieceType.toUpperCase())
             );
 
             for( let i = 0; i < myPiecesArray.length; i++ ) {
                 const intersect = raycaster.intersectObject( myPiecesArray[i].mesh );
 
                 if( intersect.length > 0 ) {
-                    console.log('chess piece selected');
                     // TODO : this mesh has been clicked
-                    if( this.selectedPiece ) {
-                        if( this.selectedPiece.mesh.uuid === myPiecesArray[i].mesh.uuid ) {
+                    if( self.selectedPiece ) {
+                        if( self.selectedPiece.mesh.uuid === myPiecesArray[i].mesh.uuid ) {
                             return;
                         } else {
-                            this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
-                            const indicator = alphaBet[ this.selectedPiece.colIndex ] + ( this.selectedPiece.rowIndex + 1 );
-                            const possibleMoves = this.props.game.moves(indicator);
+                            self.selectedPiece.mesh.position.y = self.selectedPiece.currentY;
+                            const indicator = alphaBet[ self.selectedPiece.colIndex ] + ( self.selectedPiece.rowIndex + 1 );
+                            const possibleMoves = self.props.game.moves(indicator);
                             possibleMoves.forEach((pos) => {
                                 const alpha = pos[0];
                                 const colIndex = alphaBet.indexOf(alpha);
                                 const rowIndex = pos[1] - 1;
         
-                                this.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( this.boardGroundArray[rowIndex][colIndex].color );
+                                self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( self.boardGroundArray[rowIndex][colIndex].color );
                             });
                         }
                     }
 
                     const indicator = alphaBet[ myPiecesArray[i].colIndex ] + ( myPiecesArray[i].rowIndex + 1 );
-                    const possibleMoves = this.props.game.moves(indicator);
+                    const possibleMoves = self.props.game.moves(indicator);
                     possibleMoves.forEach((pos) => {
                         const alpha = pos[0];
                         const colIndex = alphaBet.indexOf(alpha);
                         const rowIndex = pos[1] - 1;
 
-                        this.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle(selectTone);
+                        self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle(selectTone);
                     });
 
-                    this.selectedPiece = myPiecesArray[i];
-                    this.selectedPiece.currentY = this.selectedPiece.mesh.position.y;
-                    this.selectedPiece.animateDirection = 1;
+                    self.selectedPiece = myPiecesArray[i];
+                    self.selectedPiece.currentY = self.selectedPiece.mesh.position.y;
+                    self.selectedPiece.animateDirection = 1;
                     return;
                 }
             }
 
             for( let i = 0; i < boardSize; i++ ) {
                 for( let j = 0; j < boardSize; j++ ) {
-                    this.boardGroundArray[i][j].mesh.material.color.setStyle( this.boardGroundArray[i][j].color );
+                    self.boardGroundArray[i][j].mesh.material.color.setStyle( self.boardGroundArray[i][j].color );
                 }
             }
 
-            if( this.selectedPiece ) {
-                const indicator = alphaBet[ this.selectedPiece.colIndex ] + ( this.selectedPiece.rowIndex + 1 );
-                const possibleMoves = this.props.game.moves(indicator);
+            if( self.selectedPiece ) {
+                const indicator = alphaBet[ self.selectedPiece.colIndex ] + ( self.selectedPiece.rowIndex + 1 );
+                const possibleMoves = self.props.game.moves(indicator);
 
                 for( let i = 0; i < possibleMoves.length; i++ ) {
                     const alpha = possibleMoves[i][0];
                     const colIndex = alphaBet.indexOf(alpha);
                     const rowIndex = possibleMoves[i][1] - 1;
-                    const groundMesh = this.boardGroundArray[rowIndex][colIndex].mesh;
+                    const groundMesh = self.boardGroundArray[rowIndex][colIndex].mesh;
                     const intersect = raycaster.intersectObject( groundMesh );
 
                     if( intersect.length > 0 ) {    // selected the possible move points
                         // move in game engine
                         const from = indicator;
                         const to = alphaBet[ colIndex ] + ( rowIndex + 1 );
-                        this.props.game.move(from, to);
+                        const res = self.props.game.move(from, to);
+                        console.warn('user', res);
 
                         // check it chess piece eats
-                        const delIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === rowIndex && item.colIndex === colIndex);
+                        const delIndex = self.boardPiecesArray.findIndex((item) => item.rowIndex === rowIndex && item.colIndex === colIndex);
 
                         if( delIndex !== -1 ) {
-                            scene.remove( this.boardPiecesArray[delIndex].mesh );
-                            this.boardPiecesArray.splice(delIndex, 1);
+                            scene.remove( self.boardPiecesArray[delIndex].mesh );
+                            self.boardPiecesArray.splice(delIndex, 1);
                         }
 
                         // move in screen meshes
-                        console.log('possible block selected');
-                        this.selectedPiece.rowIndex = rowIndex;
-                        this.selectedPiece.colIndex = colIndex;
+                        self.selectedPiece.rowIndex = rowIndex;
+                        self.selectedPiece.colIndex = colIndex;
 
                         const modelPosition = {
-                            x: this.selectedPiece.colIndex * tileSize - tileSize * 3.5,
+                            x: self.selectedPiece.colIndex * tileSize - tileSize * 3.5,
                             y: 0.6,
-                            z: -(this.selectedPiece.rowIndex * tileSize - tileSize * 3.5)
+                            z: -(self.selectedPiece.rowIndex * tileSize - tileSize * 3.5)
                         };
-                        this.selectedPiece.mesh.position.x = modelPosition.x;
-                        this.selectedPiece.mesh.position.y = modelPosition.y;
-                        this.selectedPiece.mesh.position.z = modelPosition.z;
-                        this.selectedPiece = null;
+                        self.selectedPiece.mesh.position.x = modelPosition.x;
+                        self.selectedPiece.mesh.position.y = modelPosition.y;
+                        self.selectedPiece.mesh.position.z = modelPosition.z;
+                        self.selectedPiece = null;
 
 
                         aiMoveAction(aiLevel);
@@ -364,18 +370,17 @@ export default class Scene extends Component {
                 }
             }
 
-            console.log('none selected');
-            if( this.selectedPiece ) {
-                this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
-                this.selectedPiece = null;
+            if( self.selectedPiece ) {
+                self.selectedPiece.mesh.position.y = self.selectedPiece.currentY;
+                self.selectedPiece = null;
             }
-        })
+        };
 
         var aiMoveAction = (level) => {
             const thinkingTime = 1;
             setTimeout(() => {
                 const result = this.props.game.aiMove(level);
-                console.log(result);
+                console.warn('aimove', result);
 
                 const from = Object.keys(result)[0];
                 const to = result[from];
@@ -397,7 +402,6 @@ export default class Scene extends Component {
                 }
     
                 const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === from_rowIndex && item.colIndex === from_colIndex );
-                console.log(this.boardPiecesArray, fromIndex, from_rowIndex, from_colIndex);
 
                 if( fromIndex !== -1 ) {
                     this.boardPiecesArray[fromIndex].rowIndex = to_rowIndex;
