@@ -3,13 +3,19 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import backPic from '../../assets/img/background.jpg';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { aiMove } from 'js-chess-engine';
 
 export default class Scene extends Component {
     componentDidMount() {
+        // // TODO : component state implementation
+        // this.state = {
+        //     showPieceSelectModal: false,
+        // }
+
         /**********************************  Scene Environment Setup  **********************************/
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // TODO : Create Three.js Scene, Camera, Renderer
@@ -75,7 +81,8 @@ export default class Scene extends Component {
         this.boardGroundArray = [];
         // TODO : ChessPieces Array
         this.boardPiecesArray = [];
-
+        // TODO : mesh Array
+        this.meshArray = {};
 
         var loader = new GLTFLoader();  // GLTF loader to load gltf models
         
@@ -100,6 +107,13 @@ export default class Scene extends Component {
                 n.receiveShadow = true;
                 if(n.material.map) n.material.map.anisotropy = 16; 
             }});
+
+            this.meshArray['pawn'] = gltfArray[1].scene.clone();
+            this.meshArray['knight'] = gltfArray[2].scene.clone();
+            this.meshArray['bishop'] = gltfArray[3].scene.clone();
+            this.meshArray['rook'] = gltfArray[4].scene.clone();
+            this.meshArray['queen'] = gltfArray[5].scene.clone();
+            this.meshArray['king'] = gltfArray[6].scene.clone();
 
             for( let i = 0; i < boardSize; i++ ) {
                 this.boardGroundArray.push([]);
@@ -210,53 +224,6 @@ export default class Scene extends Component {
         })
 
         const self = this;
-        // render every frame
-        var animate = function () {
-            if( self.props.game.board.configuration.isFinished ) {
-                alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
-                return;
-            }
-
-            requestAnimationFrame( animate );
-
-            // TODO : light position setting
-            light.position.set( 
-                camera.position.x + 20,
-                camera.position.y + 20,
-                camera.position.z + 20,
-            );
-
-            // TODO : Selected Piece Animation
-            if( self.selectedPiece ) {
-                const maxHeight = 0.3;
-                const speed = 0.05;
-                if( self.selectedPiece.mesh.position.y > self.selectedPiece.currentY +  maxHeight || self.selectedPiece.mesh.position.y < self.selectedPiece.currentY) {
-                    self.selectedPiece.animateDirection = -self.selectedPiece.animateDirection;
-                }
-                self.selectedPiece.mesh.position.y += self.selectedPiece.animateDirection * speed;
-            }
-
-            // TODO : show last move history
-            if( self.props.game.board.history.length > 0 ) {
-                const toHistory = self.props.game.board.history.slice(-1)[0]['to'];
-                const fromHistory = self.props.game.board.history.slice(-1)[0]['from'];
-
-                const to_alpha = toHistory[0];
-                const to_colIndex = alphaBet.indexOf(to_alpha);
-                const to_rowIndex = toHistory[1] - 1;
-                self.boardGroundArray[to_rowIndex][to_colIndex].mesh.material.color.setStyle('#d32da7');
-
-                const from_alpha = fromHistory[0];
-                const from_colIndex = alphaBet.indexOf(from_alpha);
-                const from_rowIndex = fromHistory[1] - 1;
-                self.boardGroundArray[from_rowIndex][from_colIndex].mesh.material.color.setStyle('#d32da7');
-            }
-
-
-            // renderer.render( scene, camera );
-            composer.render();
-        };
-
         var mouseDownAction = function (event) {
             event.preventDefault();
         
@@ -284,32 +251,14 @@ export default class Scene extends Component {
                 if( intersect.length > 0 ) {
                     // TODO : this mesh has been clicked
                     if( self.selectedPiece ) {
-                        if( self.selectedPiece.mesh.uuid === myPiecesArray[i].mesh.uuid ) {
+                        if( self.selectedPiece.mesh.uuid === myPiecesArray[i].mesh.uuid ) { // TODO : do nothing when reselect the current selected chess piece
                             return;
                         } else {
-                            self.selectedPiece.mesh.position.y = self.selectedPiece.currentY;
-                            const indicator = alphaBet[ self.selectedPiece.colIndex ] + ( self.selectedPiece.rowIndex + 1 );
-                            const possibleMoves = self.props.game.moves(indicator);
-                            possibleMoves.forEach((pos) => {
-                                const alpha = pos[0];
-                                const colIndex = alphaBet.indexOf(alpha);
-                                const rowIndex = pos[1] - 1;
-        
-                                self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( self.boardGroundArray[rowIndex][colIndex].color );
-                            });
+                            self.selectedPiece.mesh.position.y = self.selectedPiece.currentY;   // TODO : restore height of the old selected piece
                         }
                     }
 
-                    const indicator = alphaBet[ myPiecesArray[i].colIndex ] + ( myPiecesArray[i].rowIndex + 1 );
-                    const possibleMoves = self.props.game.moves(indicator);
-                    possibleMoves.forEach((pos) => {
-                        const alpha = pos[0];
-                        const colIndex = alphaBet.indexOf(alpha);
-                        const rowIndex = pos[1] - 1;
-
-                        self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle(selectTone);
-                    });
-
+                    // TODO : select new chess piece
                     self.selectedPiece = myPiecesArray[i];
                     self.selectedPiece.currentY = self.selectedPiece.mesh.position.y;
                     self.selectedPiece.animateDirection = 1;
@@ -317,12 +266,7 @@ export default class Scene extends Component {
                 }
             }
 
-            for( let i = 0; i < boardSize; i++ ) {
-                for( let j = 0; j < boardSize; j++ ) {
-                    self.boardGroundArray[i][j].mesh.material.color.setStyle( self.boardGroundArray[i][j].color );
-                }
-            }
-
+            // TODO : check if select move possible position
             if( self.selectedPiece ) {
                 const indicator = alphaBet[ self.selectedPiece.colIndex ] + ( self.selectedPiece.rowIndex + 1 );
                 const possibleMoves = self.props.game.moves(indicator);
@@ -338,38 +282,21 @@ export default class Scene extends Component {
                         // move in game engine
                         const from = indicator;
                         const to = alphaBet[ colIndex ] + ( rowIndex + 1 );
-                        const res = self.props.game.move(from, to);
-                        console.warn('user', res);
+                        const res = {};
+                        res[from] = to;
 
-                        // check it chess piece eats
-                        const delIndex = self.boardPiecesArray.findIndex((item) => item.rowIndex === rowIndex && item.colIndex === colIndex);
-
-                        if( delIndex !== -1 ) {
-                            scene.remove( self.boardPiecesArray[delIndex].mesh );
-                            self.boardPiecesArray.splice(delIndex, 1);
-                        }
-
-                        // move in screen meshes
-                        self.selectedPiece.rowIndex = rowIndex;
-                        self.selectedPiece.colIndex = colIndex;
-
-                        const modelPosition = {
-                            x: self.selectedPiece.colIndex * tileSize - tileSize * 3.5,
-                            y: 0.6,
-                            z: -(self.selectedPiece.rowIndex * tileSize - tileSize * 3.5)
-                        };
-                        self.selectedPiece.mesh.position.x = modelPosition.x;
-                        self.selectedPiece.mesh.position.y = modelPosition.y;
-                        self.selectedPiece.mesh.position.z = modelPosition.z;
+                        performMove(res);
+                        
                         self.selectedPiece = null;
 
-
+                        // TODO : AI move action
                         aiMoveAction(aiLevel);
                         return;
                     }
                 }
             }
 
+            // TODO : none selected
             if( self.selectedPiece ) {
                 self.selectedPiece.mesh.position.y = self.selectedPiece.currentY;
                 self.selectedPiece = null;
@@ -377,46 +304,160 @@ export default class Scene extends Component {
         };
 
         var aiMoveAction = (level) => {
-            const thinkingTime = 1;
+            const thinkingTime = 1; // AI thinking time
+
             setTimeout(() => {
-                const result = this.props.game.aiMove(level);
-                console.warn('aimove', result);
+                const result = aiMove(this.props.game.board.configuration, level);
 
-                const from = Object.keys(result)[0];
-                const to = result[from];
-    
-                const from_alpha = from[0];
-                const from_colIndex = alphaBet.indexOf(from_alpha);
-                const from_rowIndex = from[1] - 1;
-    
-                const to_alpha = to[0];
-                const to_colIndex = alphaBet.indexOf(to_alpha);
-                const to_rowIndex = to[1] - 1;
-    
-                // check it chess piece eats
-                const toIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === to_rowIndex && item.colIndex === to_colIndex );
-    
-                if( toIndex !== -1 ) {
-                    scene.remove( this.boardPiecesArray[toIndex].mesh );
-                    this.boardPiecesArray.splice(toIndex, 1);
-                }
-    
-                const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === from_rowIndex && item.colIndex === from_colIndex );
-
-                if( fromIndex !== -1 ) {
-                    this.boardPiecesArray[fromIndex].rowIndex = to_rowIndex;
-                    this.boardPiecesArray[fromIndex].colIndex = to_colIndex;
-                    this.boardPiecesArray[fromIndex].mesh.position.x = to_colIndex * tileSize - tileSize * 3.5;
-                    this.boardPiecesArray[fromIndex].mesh.position.z = -(to_rowIndex * tileSize - tileSize * 3.5);
-                }
+                performMove(result);
     
                 console.log(this.props.game, Object.keys(this.props.game.board.configuration.pieces).length);
             }, 1000 * thinkingTime);
         }
+
+        var performMove = (moveResult) => {
+            const from = Object.keys(moveResult)[0];
+            const to = moveResult[from];
+
+            const from_alpha = from[0];
+            const from_colIndex = alphaBet.indexOf(from_alpha);
+            const from_rowIndex = from[1] - 1;
+
+            const to_alpha = to[0];
+            const to_colIndex = alphaBet.indexOf(to_alpha);
+            const to_rowIndex = to[1] - 1;
+
+            // check chese piece on the target position: eat action performed at that time
+            const toIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === to_rowIndex && item.colIndex === to_colIndex );
+
+            if( toIndex !== -1 ) {
+                scene.remove( this.boardPiecesArray[toIndex].mesh );
+                this.boardPiecesArray.splice(toIndex, 1);
+            }
+
+            // move chese piece to the target position
+            const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === from_rowIndex && item.colIndex === from_colIndex );
+
+            if( fromIndex !== -1 ) {
+                this.boardPiecesArray[fromIndex].rowIndex = to_rowIndex;
+                this.boardPiecesArray[fromIndex].colIndex = to_colIndex;
+                this.boardPiecesArray[fromIndex].mesh.position.x = to_colIndex * tileSize - tileSize * 3.5;
+                this.boardPiecesArray[fromIndex].mesh.position.z = -(to_rowIndex * tileSize - tileSize * 3.5);
+            }
+
+
+            // TODO : check if pawn arrived last spuare
+            if( this.props.mode === gameModes['P2E'] ) {
+                const currentTurn = this.props.game.board.configuration.turn;
+
+                if( currentTurn === this.props.side ) { // user case
+                    if( (this.props.side === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7) 
+                        || (this.props.side === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0) ) {
+
+                        this.setState({ showPieceSelectModal: true });
+                        return;
+                    } else {
+                        if( (currentTurn === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7) 
+                        || (currentTurn === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0) ) {
+                            const type = currentTurn === 'white' ? 'Q' : 'q';
+                            this.props.game.setPiece(to, type);
+                            this.boardPiecesArray[fromIndex].pieceType = type;
+                            scene.remove( this.boardPiecesArray[fromIndex].mesh );
+                            this.boardPiecesArray[fromIndex].mesh = this.meshArray['queen'].clone();
+                            scene.add(this.boardPiecesArray[fromIndex].mesh);
+                        }
+                    }
+                }
+            }
+
+            this.props.game.move(from, to);
+        }
+
+        // render every frame
+        var animate = function () {
+            if( self.props.game.board.configuration.isFinished ) {
+                alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
+                return;
+            }
+
+            requestAnimationFrame( animate );
+
+            // TODO : light position setting
+            light.position.set( 
+                camera.position.x + 20,
+                camera.position.y + 20,
+                camera.position.z + 20,
+            );
+
+            // TODO : Selected Piece Animation
+            if( self.selectedPiece ) {
+                const maxHeight = 0.3;
+                const speed = 0.05;
+                if( self.selectedPiece.mesh.position.y > self.selectedPiece.currentY +  maxHeight || self.selectedPiece.mesh.position.y < self.selectedPiece.currentY) {
+                    self.selectedPiece.animateDirection = -self.selectedPiece.animateDirection;
+                }
+                self.selectedPiece.mesh.position.y += self.selectedPiece.animateDirection * speed;
+            }
+
+
+            // TODO : board ground settings
+            // TODO : clear board ground color
+            for( let i = 0; i < boardSize; i++ ) {
+                for( let j = 0; j < boardSize; j++ ) {
+                    self.boardGroundArray[i][j].mesh.material.color.setStyle( self.boardGroundArray[i][j].color );
+                }
+            }
+
+            // TODO : show last move history
+            if( self.props.game.board.history.length > 0 ) {
+                const toHistory = self.props.game.board.history.slice(-1)[0]['to'];
+                const fromHistory = self.props.game.board.history.slice(-1)[0]['from'];
+
+                const to_alpha = toHistory[0];
+                const to_colIndex = alphaBet.indexOf(to_alpha);
+                const to_rowIndex = toHistory[1] - 1;
+                self.boardGroundArray[to_rowIndex][to_colIndex].mesh.material.color.setStyle(historyTone);
+
+                const from_alpha = fromHistory[0];
+                const from_colIndex = alphaBet.indexOf(from_alpha);
+                const from_rowIndex = fromHistory[1] - 1;
+                self.boardGroundArray[from_rowIndex][from_colIndex].mesh.material.color.setStyle(historyTone);
+            }
+
+            // TODO : show move possible grounds
+            if( self.selectedPiece ) {
+                const indicator = alphaBet[ self.selectedPiece.colIndex ] + ( self.selectedPiece.rowIndex + 1 );
+                const possibleMoves = self.props.game.moves(indicator);
+                possibleMoves.forEach((pos) => {
+                    const alpha = pos[0];
+                    const colIndex = alphaBet.indexOf(alpha);
+                    const rowIndex = pos[1] - 1;
+    
+                    self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( selectTone );
+                });
+            }
+
+            // TODO : show danger for king
+            const pieceType = self.props.game.board.getPlayingColor() === 'white' ? 'K' : 'k';
+
+            const kIndex = self.boardPiecesArray.findIndex((item) => item.pieceType === pieceType);
+            const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
+            const colIndex = self.boardPiecesArray[kIndex].colIndex;
+
+            const pointer = alphaBet[ colIndex ] + (rowIndex + 1);
+            if( self.props.game.board.isPieceUnderAttack(pointer) ) {
+                self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
+            }
+
+
+            // render composer effect
+            composer.render();
+        };
     }
     render() {
         return (
             <div style={{ background: `url(${backPic})` }} ref={ref => (this.container = ref)}>
+                
             </div>
         )
     }

@@ -46,7 +46,8 @@ export const tileSize = 1;
 export const lightTone = '#f7e58f';
 export const darkTone = '#123';
 export const selectTone = '#d78b00';
-export const historyTone = '#ff0000';
+export const historyTone = '#d32da7';
+export const dangerTone = '#ff0000';
 
 export const boardSize = 8;
 
@@ -59,4 +60,9 @@ export const modelProps = {
             z: -0.65,
         }
     }
+}
+
+export const gameModes = {
+    'P2E': 0,
+    'P2P': 1,
 }
