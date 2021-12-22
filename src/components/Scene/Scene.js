@@ -9,6 +9,8 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
+import OneToOneModal from "../OneToOneModal/OneToOneModal";
+
 export default class Scene extends Component {
     componentDidMount() {
         // TODO : Create Three.js Scene, Camera, Renderer
@@ -235,7 +237,10 @@ export default class Scene extends Component {
     }
     render() {
         return (
-            <div style={{ background: `url(${backPic})` }} ref={ref => (this.container = ref)}>
+            <div>
+                <div className="scene" style={{ background: `url(${backPic})` }} ref={ref => (this.container = ref)}>
+                </div>
+                <OneToOneModal />
             </div>
         )
     }

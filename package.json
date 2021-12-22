@@ -8,8 +8,11 @@
     "@testing-library/user-event": "^12.1.10",
     "js-chess-engine": "^1.0.2",
     "react": "^17.0.2",
+    "react-bootstrap": "^2.0.4",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
+    "reactstrap": "^9.0.1",
+    "sass": "^1.45.1",
     "three": "^0.135.0",
     "web-vitals": "^1.0.1"
   },
