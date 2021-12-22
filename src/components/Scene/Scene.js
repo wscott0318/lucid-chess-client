@@ -3,22 +3,22 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import backPic from '../../assets/img/background.jpg';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { ang2Rad } from '../../utils/helper';
 
 export default class Scene extends Component {
     componentDidMount() {
-        /*****************  Scene Environment Setup  *****************/
+        /**********************************  Scene Environment Setup  **********************************/
+        /////////////////////////////////////////////////////////////////////////////////////////////////
         // TODO : Create Three.js Scene, Camera, Renderer
         var scene = new THREE.Scene();
 
         var camera = new THREE.PerspectiveCamera( cameraProps.fov, cameraProps.aspect, cameraProps.near, cameraProps.far );
         camera.position.x = cameraProps.position.x;
         camera.position.y = cameraProps.position.y;
-        camera.position.z = this.props.side === 'white' ? -cameraProps.position.z : cameraProps.position.z;
+        camera.position.z = this.props.side === 'white' ? cameraProps.position.z : -cameraProps.position.z;
 
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -66,7 +66,9 @@ export default class Scene extends Component {
         light.shadow.mapSize.width = 1024 * 4;
         light.shadow.mapSize.height = 1024 * 4;
         scene.add( light );
-        /*************************************************************/
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////
+        /***********************************************************************************************/
 
 
         // TODO : Ground Meshes Array
@@ -104,23 +106,23 @@ export default class Scene extends Component {
                 for( let j = 0; j < boardSize; j++ ) {
                     const tileGeom = new THREE.BoxGeometry(tileSize, 0.1, tileSize);
                     const material = new THREE.MeshPhongMaterial({
-                        color: (j + i) % 2 ? lightTone : darkTone,
+                        color: (i + j) % 2 ? lightTone : darkTone,
                         side: THREE.DoubleSide,
                     });
                     const tileMesh = new THREE.Mesh(tileGeom, material);
-                    tileMesh.position.set(i * tileSize - tileSize * 3.5, 0.5, j * tileSize - tileSize * 3.5);
+                    tileMesh.position.set( j * tileSize - tileSize * 3.5, 0.5, -(i * tileSize - tileSize * 3.5));
                     tileMesh.receiveShadow = true;
 
                     scene.add(tileMesh);
 
-                    const indicator = alphaBet[i] + ( j + 1 );
+                    const indicator = alphaBet[j] + ( i + 1 );
 
                     this.boardGroundArray[i].push({
                         mesh: tileMesh,
                         rowIndex: i,
                         colIndex: j,
                         indicator: indicator,
-                        color: (j + i) % 2 ? lightTone : darkTone,
+                        color: (i + j) % 2 ? lightTone : darkTone,
                     })
 
                     const piece = this.props.game.board.configuration.pieces[ indicator ];
@@ -133,52 +135,52 @@ export default class Scene extends Component {
                         switch(piece) {
                             case 'P':
                                 mesh = gltfArray[1].scene.clone();
+                                mesh.rotation.y = Math.PI;
                             break;
                             case 'p':
                                 mesh = gltfArray[1].scene.clone();
-                                mesh.rotation.y = Math.PI;
                             break;
                             case 'N':
                                 mesh = gltfArray[2].scene.clone();
+                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'n':
                                 mesh = gltfArray[2].scene.clone();
-                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'B':
                                 mesh = gltfArray[3].scene.clone();
+                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'b':
                                 mesh = gltfArray[3].scene.clone();
-                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'R':
                                 mesh = gltfArray[4].scene.clone();
+                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'r':
-                                mesh = gltfArray[4].scene.clone();                                
-                                mesh.rotateOnAxis(axis, Math.PI);
+                                mesh = gltfArray[4].scene.clone();
                             break;
                             case 'Q':
                                 mesh = gltfArray[5].scene.clone();
-                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'q':
                                 mesh = gltfArray[5].scene.clone();
+                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'K':
                                 mesh = gltfArray[6].scene.clone();
+                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'k':
                                 mesh = gltfArray[6].scene.clone();
-                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                         }
 
                         const modelPosition = {
-                            x: i * tileSize - tileSize * 3.5,
+                            x: j * tileSize - tileSize * 3.5,
                             y: 0.6,
-                            z: j * tileSize - tileSize * 3.5
+                            z: - (i * tileSize - tileSize * 3.5)
                         };
                         const modelSize = 0.8;
 
@@ -227,6 +229,23 @@ export default class Scene extends Component {
                 self.selectedPiece.mesh.position.y += self.selectedPiece.animateDirection * speed;
             }
 
+            // TODO : show last move history
+            if( self.props.game.board.history.length > 0 ) {
+                const toHistory = self.props.game.board.history.slice(-1)[0]['to'];
+                const fromHistory = self.props.game.board.history.slice(-1)[0]['from'];
+
+                const to_alpha = toHistory[0];
+                const to_colIndex = alphaBet.indexOf(to_alpha);
+                const to_rowIndex = toHistory[1] - 1;
+                self.boardGroundArray[to_rowIndex][to_colIndex].mesh.material.color.setStyle('#d32da7');
+
+                const from_alpha = fromHistory[0];
+                const from_colIndex = alphaBet.indexOf(from_alpha);
+                const from_rowIndex = fromHistory[1] - 1;
+                self.boardGroundArray[from_rowIndex][from_colIndex].mesh.material.color.setStyle('#d32da7');
+            }
+
+
             // renderer.render( scene, camera );
             composer.render();
         };
@@ -246,10 +265,12 @@ export default class Scene extends Component {
         
             raycaster.setFromCamera( mouse, camera );
         
+            // only can select own chess pieces
             const myPiecesArray = this.boardPiecesArray.filter((item) => 
                 (this.props.side === 'white' && item.pieceType === item.pieceType.toUpperCase())
                 || (this.props.side === 'black' && item.pieceType !== item.pieceType.toUpperCase())
             );
+
             for( let i = 0; i < myPiecesArray.length; i++ ) {
                 const intersect = raycaster.intersectObject( myPiecesArray[i].mesh );
 
@@ -261,25 +282,24 @@ export default class Scene extends Component {
                             return;
                         } else {
                             this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
-                            const indicator = alphaBet[ this.selectedPiece.rowIndex ] + ( this.selectedPiece.colIndex + 1 );
+                            const indicator = alphaBet[ this.selectedPiece.colIndex ] + ( this.selectedPiece.rowIndex + 1 );
                             const possibleMoves = this.props.game.moves(indicator);
                             possibleMoves.forEach((pos) => {
                                 const alpha = pos[0];
-                                const rowIndex = alphaBet.indexOf(alpha);
-                                const colIndex = pos[1] - 1;
+                                const colIndex = alphaBet.indexOf(alpha);
+                                const rowIndex = pos[1] - 1;
         
                                 this.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( this.boardGroundArray[rowIndex][colIndex].color );
                             });
                         }
                     }
 
-                    const indicator = alphaBet[ myPiecesArray[i].rowIndex ] + ( myPiecesArray[i].colIndex + 1 );
+                    const indicator = alphaBet[ myPiecesArray[i].colIndex ] + ( myPiecesArray[i].rowIndex + 1 );
                     const possibleMoves = this.props.game.moves(indicator);
-
                     possibleMoves.forEach((pos) => {
                         const alpha = pos[0];
-                        const rowIndex = alphaBet.indexOf(alpha);
-                        const colIndex = pos[1] - 1;
+                        const colIndex = alphaBet.indexOf(alpha);
+                        const rowIndex = pos[1] - 1;
 
                         this.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle(selectTone);
                     });
@@ -298,30 +318,47 @@ export default class Scene extends Component {
             }
 
             if( this.selectedPiece ) {
-                const indicator = alphaBet[ this.selectedPiece.rowIndex ] + ( this.selectedPiece.colIndex + 1 );
+                const indicator = alphaBet[ this.selectedPiece.colIndex ] + ( this.selectedPiece.rowIndex + 1 );
                 const possibleMoves = this.props.game.moves(indicator);
 
                 for( let i = 0; i < possibleMoves.length; i++ ) {
                     const alpha = possibleMoves[i][0];
-                    const rowIndex = alphaBet.indexOf(alpha);
-                    const colIndex = possibleMoves[i][1] - 1;
+                    const colIndex = alphaBet.indexOf(alpha);
+                    const rowIndex = possibleMoves[i][1] - 1;
                     const groundMesh = this.boardGroundArray[rowIndex][colIndex].mesh;
                     const intersect = raycaster.intersectObject( groundMesh );
 
                     if( intersect.length > 0 ) {    // selected the possible move points
+                        // move in game engine
+                        const from = indicator;
+                        const to = alphaBet[ colIndex ] + ( rowIndex + 1 );
+                        this.props.game.move(from, to);
+
+                        // check it chess piece eats
+                        const delIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === rowIndex && item.colIndex === colIndex);
+
+                        if( delIndex !== -1 ) {
+                            scene.remove( this.boardPiecesArray[delIndex].mesh );
+                            this.boardPiecesArray.splice(delIndex, 1);
+                        }
+
+                        // move in screen meshes
                         console.log('possible block selected');
                         this.selectedPiece.rowIndex = rowIndex;
                         this.selectedPiece.colIndex = colIndex;
 
                         const modelPosition = {
-                            x: this.selectedPiece.rowIndex * tileSize - tileSize * 3.5,
+                            x: this.selectedPiece.colIndex * tileSize - tileSize * 3.5,
                             y: 0.6,
-                            z: this.selectedPiece.colIndex * tileSize - tileSize * 3.5
+                            z: -(this.selectedPiece.rowIndex * tileSize - tileSize * 3.5)
                         };
                         this.selectedPiece.mesh.position.x = modelPosition.x;
                         this.selectedPiece.mesh.position.y = modelPosition.y;
                         this.selectedPiece.mesh.position.z = modelPosition.z;
                         this.selectedPiece = null;
+
+
+                        aiMoveAction(aiLevel);
                         return;
                     }
                 }
@@ -333,6 +370,45 @@ export default class Scene extends Component {
                 this.selectedPiece = null;
             }
         })
+
+        var aiMoveAction = (level) => {
+            const thinkingTime = 1;
+            setTimeout(() => {
+                const result = this.props.game.aiMove(level);
+                console.log(result);
+
+                const from = Object.keys(result)[0];
+                const to = result[from];
+    
+                const from_alpha = from[0];
+                const from_colIndex = alphaBet.indexOf(from_alpha);
+                const from_rowIndex = from[1] - 1;
+    
+                const to_alpha = to[0];
+                const to_colIndex = alphaBet.indexOf(to_alpha);
+                const to_rowIndex = to[1] - 1;
+    
+                // check it chess piece eats
+                const toIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === to_rowIndex && item.colIndex === to_colIndex );
+    
+                if( toIndex !== -1 ) {
+                    scene.remove( this.boardPiecesArray[toIndex].mesh );
+                    this.boardPiecesArray.splice(toIndex, 1);
+                }
+    
+                const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === from_rowIndex && item.colIndex === from_colIndex );
+                console.log(this.boardPiecesArray, fromIndex, from_rowIndex, from_colIndex);
+
+                if( fromIndex !== -1 ) {
+                    this.boardPiecesArray[fromIndex].rowIndex = to_rowIndex;
+                    this.boardPiecesArray[fromIndex].colIndex = to_colIndex;
+                    this.boardPiecesArray[fromIndex].mesh.position.x = to_colIndex * tileSize - tileSize * 3.5;
+                    this.boardPiecesArray[fromIndex].mesh.position.z = -(to_rowIndex * tileSize - tileSize * 3.5);
+                }
+    
+                console.log(this.props.game, Object.keys(this.props.game.board.configuration.pieces).length);
+            }, 1000 * thinkingTime);
+        }
     }
     render() {
         return (
