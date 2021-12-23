@@ -7,29 +7,63 @@
     background-size: 100% 100%;
     position: relative;
     .content {
-      text-align: center;
-      margin: 30px 50px;
-      color: white;
-      font-size: 20px;
+      text-align: left;
+      margin: 200px 150px 0;
+      font-family: "HaettenschweilerRegular";
+      letter-spacing: 0.01em;
+      color: #f9f8cb;
+      font-size: 38.9px;
       vertical-align: middle;
     }
     .footer {
       position: absolute;
-      bottom: 40px;
+      bottom: 60px;
       display: flex;
       width: 100%;
-      justify-content: center;
-      .button {
-        width: 100px;
-        margin: 0 30px;
-        background-color: #16c97ded;
-        height: 30px;
-        border-radius: 15px;
+      padding: 0 60px;
+      justify-content: space-between;
+      .button-div {
+        cursor: pointer;
+        width: 250px;
+        margin: 0 40px;
+        background-image: url('../../../assets/img/blue_button_bg.png');
+        background-repeat:no-repeat;
+        background-size: cover;
+        object-fit: fill;
+        height: 75px;
         text-align: center;
-        vertical-align: middle;
-        color: white;
-        font-weight: bold;
-      }
+        span {
+          color: #f9f8cb;
+          font-size: 55px;
+          font-family: "HaettenschweilerRegular";
+          letter-spacing: 0.01em;
+          line-height: 1.25;
+          text-shadow: 1px 1px 0 #0C6C6D,
+              -1px 1px 0 #0C6C6D,
+              1px -1px 0 #0C6C6D,
+              -1px -1px 0 #0C6C6D,
+              0px 1px 0 #0C6C6D,
+              0px -1px 0 #0C6C6D,
+              -1px 0px 0 #0C6C6D,
+              1px 0px 0 #0C6C6D,
+              2px 2px 0 #0C6C6D,
+              -2px 2px 0 #0C6C6D,
+              2px -2px 0 #0C6C6D,
+              -2px -2px 0 #0C6C6D,
+              0px 2px 0 #0C6C6D,
+              0px -2px 0 #0C6C6D,
+              -2px 0px 0 #0C6C6D,
+              2px 0px 0 #0C6C6D,
+              1px 2px 0 #0C6C6D,
+              -1px 2px 0 #0C6C6D,
+              1px -2px 0 #0C6C6D,
+              -1px -2px 0 #0C6C6D,
+              2px 1px 0 #0C6C6D,
+              -2px 1px 0 #0C6C6D,
+              2px -1px 0 #0C6C6D,
+              -2px -1px 0 #0C6C6D;
+        }
+        }
     }
   }
 }

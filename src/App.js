@@ -1,4 +1,4 @@
-import "./App.css";
+import "./App.scss";
 import Scene from "./components/Scene/Scene";
 import Logo from "./components/UI/Logo"
 import Popup from "./components/UI/Popup/Popup";
