@@ -12,11 +12,11 @@ function App() {
   return (
     <div className="App">
       <Scene game={game} />
-      <BoardControls />
-      {/* <OneToOneModal 
-        // show={modalShow}
-        // onHide={() => setModalShow(false)}
-      /> */}
+      {/* <BoardControls /> */}
+      <OneToOneModal 
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+      />
     </div>
   );
 }
