@@ -1,13 +1,20 @@
-import './App.css';
-import Scene from './components/Scene/Scene';
+import "./App.css";
+import Scene from "./components/Scene/Scene";
+import Logo from "./components/UI/Logo"
+import Popup from "./components/UI/Popup/Popup";
+import {useState} from 'react'
 
-import { Game, move, status, moves, aiMove, getFen } from 'js-chess-engine'
+import { Game, move, status, moves, aiMove, getFen } from "js-chess-engine";
 const game = new Game();
 
 function App() {
+  const [modalShow, setModalShow] = useState(true);
+
   return (
     <div className="App">
-      <Scene game={game} />
+      {/* <Logo show={modalShow} onHide={() => setModalShow(false)}></Logo> */}
+      <Popup show={modalShow} onHide={() => setModalShow(false)}></Popup>
+      {/* <Scene game={game} /> */}
     </div>
   );
 }
