@@ -3,25 +3,26 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import backPic from '../../assets/img/background.jpg';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
-import { getFenFromMatrixIndex, getMatrixIndexFromFen, isSamePoint } from "../../utils/helper";
+import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
 export default class Scene extends Component {
     componentDidMount() {
         // // TODO : component state implementation
-        // this.state = {
-        //     showPieceSelectModal: false,
-        // }
+        this.setState({
+            showPieceSelectModal: false,
+        });
 
         /**********************************  Scene Environment Setup  **********************************/
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // TODO : Create Three.js Scene, Camera, Renderer
         var scene = new THREE.Scene();
+        this.scene = scene;
 
         var camera = new THREE.PerspectiveCamera( cameraProps.fov, cameraProps.aspect, cameraProps.near, cameraProps.far );
         camera.position.x = cameraProps.position.x;
@@ -215,12 +216,7 @@ export default class Scene extends Component {
                             break;
                         }
 
-                        const modelPosition = {
-                            x: j * tileSize - tileSize * 3.5,
-                            y: 0.6,
-                            z: - (i * tileSize - tileSize * 3.5)
-                        };
-                        const modelSize = 0.8;
+                        const modelPosition = getMeshPosition(i, j);
 
                         mesh.position.set( modelPosition.x, modelPosition.y, modelPosition.z );
                         mesh.scale.set(modelSize, modelSize, modelSize);
@@ -266,10 +262,11 @@ export default class Scene extends Component {
         var mouseDownAction = function (event) {
             event.preventDefault();
         
-            if( self.props.game.board.configuration.turn !== self.props.side ) {
+            if( self.props.mode !== gameModes['practise'] && self.props.game.board.configuration.turn !== self.props.side ) {
                 return;
             }
 
+            // detect the collider
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
 
@@ -280,7 +277,8 @@ export default class Scene extends Component {
         
             // only can select own chess pieces
             const myPiecesArray = self.boardPiecesArray.filter((item) => 
-                (self.props.side === 'white' && item.pieceType === item.pieceType.toUpperCase())
+                (self.props.mode === gameModes['practise'])
+                || (self.props.side === 'white' && item.pieceType === item.pieceType.toUpperCase())
                 || (self.props.side === 'black' && item.pieceType !== item.pieceType.toUpperCase())
             );
 
@@ -326,7 +324,7 @@ export default class Scene extends Component {
                         self.selectedPiece = null;
 
                         // TODO : AI move action
-                        if( !self.props.game.board.configuration.isFinished ) {
+                        if( self.props.mode === gameModes['P2E'] && !self.props.game.board.configuration.isFinished && !self.state.pawnTransProps ) {
                             aiMoveAction(aiLevel);
                         }
                         return;
@@ -348,20 +346,15 @@ export default class Scene extends Component {
                 const result = aiMove(this.props.game.board.configuration, level);
 
                 performMove(result);
-    
-                console.log(this.props.game, Object.keys(this.props.game.board.configuration.pieces).length);
             }, 1000 * thinkingTime);
         }
+        this.aiMoveAction = aiMoveAction;
 
         var movePiece = ( piece, rowIndex, colIndex ) => {
             piece.rowIndex = rowIndex;
             piece.colIndex = colIndex;
 
-            const position = {
-                x: colIndex * tileSize - tileSize * 3.5,
-                y: 0.6,
-                z: -(rowIndex * tileSize - tileSize * 3.5)
-            };
+            const position = getMeshPosition(rowIndex, colIndex);
 
             piece.mesh.position.y = position.y;
             
@@ -397,30 +390,6 @@ export default class Scene extends Component {
             }
 
 
-            // TODO : check if pawn arrived last spuare
-            // if( this.props.mode === gameModes['P2E'] ) {
-            //     const currentTurn = this.props.game.board.configuration.turn;
-
-            //     if( currentTurn === this.props.side ) { // user case
-            //         if( (this.props.side === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7) 
-            //             || (this.props.side === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0) ) {
-
-            //             this.setState({ showPieceSelectModal: true });
-            //             return;
-            //         } else {
-            //             if( (currentTurn === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7) 
-            //             || (currentTurn === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0) ) {
-            //                 const type = currentTurn === 'white' ? 'Q' : 'q';
-            //                 this.props.game.setPiece(to, type);
-            //                 this.boardPiecesArray[fromIndex].pieceType = type;
-            //                 scene.remove( this.boardPiecesArray[fromIndex].mesh );
-            //                 this.boardPiecesArray[fromIndex].mesh = this.meshArray['queen'].clone();
-            //                 scene.add(this.boardPiecesArray[fromIndex].mesh);
-            //             }
-            //         }
-            //     }
-            // }
-
             // check if king special move case
             if( this.props.game.board.configuration.turn === 'white' ) {
                 if( this.boardPiecesArray[fromIndex].pieceType === 'K' && to === 'C1' && this.props.game.board.configuration.castling.whiteLong ) {
@@ -451,6 +420,38 @@ export default class Scene extends Component {
                     movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
                 }
             }
+
+
+            // TODO : check if pawn arrived last spuare
+            const currentTurn = this.props.game.board.configuration.turn;
+            if( ( currentTurn === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7 )
+                || ( currentTurn === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0 )
+            ) {
+                if( this.props.mode === gameModes['P2E'] && this.props.side !== currentTurn ) { // AI turn
+                    const type = currentTurn === 'white' ? 'Q' : 'q';
+
+                    this.boardPiecesArray[fromIndex].pieceType = type;
+
+                    scene.remove( this.boardPiecesArray[fromIndex].mesh );
+
+                    this.boardPiecesArray[fromIndex].mesh = this.getTargetMesh( type );
+                    const position = getMeshPosition( this.boardPiecesArray[fromIndex].rowIndex, this.boardPiecesArray[fromIndex].colIndex );
+                    this.boardPiecesArray[fromIndex].mesh.position.set(position.x, position.y, position.z);
+                    this.boardPiecesArray[fromIndex].mesh.scale.set(modelSize, modelSize, modelSize);
+                    this.boardPiecesArray[fromIndex].mesh.rotation.y = type === type.toUpperCase() ? Math.PI : 0;
+
+                    scene.add( this.boardPiecesArray[fromIndex].mesh );
+                } else {
+                    this.setState({ showPieceSelectModal: true });
+                    this.setState({ pawnTransProps: {
+                        fromIndex,
+                        from,
+                        to
+                    } })
+                    return;
+                }
+            }
+
 
             this.props.game.move(from, to);
         }
@@ -544,13 +545,77 @@ export default class Scene extends Component {
 
             // // render composer effect
             renderer.render(scene, camera);
-            composer.render();
+            // composer.render();
         };
+    }
+    getTargetMesh(type) {
+        if( type === 'N' || type === 'n' ) {
+            return this.meshArray['knight'].clone();
+        }
+        if( type === 'B' || type === 'b' ) {
+            return this.meshArray['bishop'].clone();
+        }
+        if( type === 'R' || type === 'r' ) {
+            return this.meshArray['rook'].clone();
+        }
+        if( type === 'Q' || type === 'q' ) {
+            return this.meshArray['queen'].clone();
+        }
+    }
+    pawnTransform( type ) {
+        const currentTurn = this.props.game.board.configuration.turn;
+        let pieceType;
+        if( type === 'Knight' ) {
+            pieceType = currentTurn === 'white' ? 'N' : 'n';
+        } else if( type === 'Bishop' ) {
+            pieceType = currentTurn === 'white' ? 'B' : 'b';
+        } else if( type === 'Rook' ) {
+            pieceType = currentTurn === 'white' ? 'R' : 'r';
+        } else if( type === 'Queen' ) {
+            pieceType = currentTurn === 'white' ? 'Q' : 'q';
+        }
+
+        const targetPiece = this.boardPiecesArray[ this.state.pawnTransProps.fromIndex ];
+        targetPiece.pieceType = pieceType;
+
+        this.scene.remove( targetPiece.mesh );
+
+        targetPiece.mesh = this.getTargetMesh(pieceType);
+        const position = getMeshPosition( targetPiece.rowIndex, targetPiece.colIndex );
+        targetPiece.mesh.position.set(position.x, position.y, position.z);
+        targetPiece.mesh.scale.set(modelSize, modelSize, modelSize);
+        targetPiece.mesh.rotation.y = pieceType === pieceType.toUpperCase() ? Math.PI : 0;
+
+        this.scene.add( targetPiece.mesh );
+
+        this.props.game.move( this.state.pawnTransProps.from, this.state.pawnTransProps.to );
+        this.props.game.setPiece( this.state.pawnTransProps.to, pieceType );
+
+        this.setState({
+            showPieceSelectModal: false,
+            pawnTransProps: null,
+        });
+
+        if( this.props.mode === gameModes['P2E'] ) {    // ai action after select the piece 
+            this.aiMoveAction(aiLevel);
+        }
     }
     render() {
         return (
-            <div style={{ background: `url(${backPic})` }} ref={ref => (this.container = ref)}>
+            <div>
+                <div style={{ background: `url(${backPic})` }} ref={ref => (this.container = ref)}>
+                </div>
                 
+                {
+                    (this.state && this.state.showPieceSelectModal) ? (
+                        <div style={{ position: 'fixed', transform: 'translate3d(-50%, -50%, 0)', left: '50%', top: '50%', width: 600, height: 300, background: '#4c4b4b', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Knight')}>Knight</button>
+                            <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Bishop')}>Bishop</button>
+                            <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Rook')}>Rook</button>
+                            <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Queen')}>Queen</button>
+                        </div>
+                    ) : null
+                }
             </div>
         )
     }

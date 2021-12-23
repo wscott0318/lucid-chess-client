@@ -65,9 +65,11 @@ export const dangerTone = '#ff0000';
 
 export const boardSize = 8;
 
+export const modelSize = 0.8;
+
 export const modelProps = {
     'board': {
-        scale: 0.8,
+        scale: modelSize,
         position: {
             x: 0.45,
             y: 0,
@@ -79,4 +81,5 @@ export const modelProps = {
 export const gameModes = {
     'P2E': 0,
     'P2P': 1,
+    'practise': 2
 }

@@ -5,13 +5,11 @@ import { getRandomVal } from './utils/helper';
 import { gameModes } from './utils/constant';
 
 const game = new Game();
-// game.setPiece('A1', 'Q');
 
 console.log(game);
-// console.log(Object.keys(game.board.configuration.pieces).length);
 
 // const side = getRandomVal(2) === 0 ? 'white' : 'black';
-const side = 'black';
+const side = 'white';
 const mode = gameModes['P2E'];
 
 function App() {
