@@ -7,6 +7,7 @@ import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, model
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
 import { getFenFromMatrixIndex, getMatrixIndexFromFen, isSamePoint } from "../../utils/helper";
 
@@ -51,9 +52,37 @@ export default class Scene extends Component {
         bloomPass.strength = bloomParams.bloomStrength;
         bloomPass.radius = bloomParams.bloomRadius;
 
+        // TODO: Scene Outline Effect - Effect composer
+        const whiteTeamObjects = []
+        const blackTeamObjects = []
+        
+        const outlineParams = {
+            edgeStrength: 2,
+            edgeGlow: 1,
+            edgeThickness: 1.0,
+            pulsePeriod: 0,
+            usePatternTexture: false
+        };
+
+        const redOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
+        redOutlinePass.renderToScreen = true;
+        redOutlinePass.edgeStrength = outlineParams.edgeStrength;
+        redOutlinePass.edgeGlow = outlineParams.edgeGlow;
+        redOutlinePass.visibleEdgeColor.set(0xff0000);
+        redOutlinePass.hiddenEdgeColor.set(0xff0000);
+
+        const blueOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
+        blueOutlinePass.renderToScreen = true;
+        blueOutlinePass.edgeStrength = outlineParams.edgeStrength;
+        blueOutlinePass.edgeGlow = outlineParams.edgeGlow;
+        blueOutlinePass.visibleEdgeColor.set(0x0000ff);
+        blueOutlinePass.hiddenEdgeColor.set(0x0000ff);
+
         const composer = new EffectComposer( renderer );
         composer.addPass( renderScene );
         composer.addPass( bloomPass );
+        composer.addPass( redOutlinePass );
+        composer.addPass( blueOutlinePass );
 
 
         // TODO : light environment setup
@@ -197,6 +226,13 @@ export default class Scene extends Component {
                         mesh.scale.set(modelSize, modelSize, modelSize);
                         scene.add(mesh);
 
+                        //TODO: tag piece by name
+                        if (piece === piece.toUpperCase()) {
+                            whiteTeamObjects.push(mesh)
+                        } else {
+                            blackTeamObjects.push(mesh)
+                        }
+
                         mesh.children[0].traverse(n => { if ( n.isMesh ) {
                             n.castShadow = true;
                             n.receiveShadow = true;
@@ -212,6 +248,9 @@ export default class Scene extends Component {
                     }
                 }
             }
+
+            redOutlinePass.selectedObjects = whiteTeamObjects;
+            blueOutlinePass.selectedObjects = blackTeamObjects;
 
             // animate every frame
             animate();
@@ -505,7 +544,7 @@ export default class Scene extends Component {
 
             // // render composer effect
             renderer.render(scene, camera);
-            // composer.render();
+            composer.render();
         };
     }
     render() {
