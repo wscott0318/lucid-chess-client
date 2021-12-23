@@ -29,7 +29,6 @@
         background-image: url('../../../assets/img/blue_button_bg.png');
         background-repeat:no-repeat;
         background-size: cover;
-        object-fit: fill;
         height: 75px;
         text-align: center;
         span {
@@ -63,7 +62,7 @@
               2px -1px 0 #0C6C6D,
               -2px -1px 0 #0C6C6D;
         }
-        }
+      }
     }
   }
 }
