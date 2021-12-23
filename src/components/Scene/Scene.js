@@ -3,12 +3,12 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import backPic from '../../assets/img/background.jpg';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { aiMove } from 'js-chess-engine';
-import { getFenFromMatrixIndex, getMatrixIndexFromFen } from "../../utils/helper";
+import { getFenFromMatrixIndex, getMatrixIndexFromFen, isSamePoint } from "../../utils/helper";
 
 export default class Scene extends Component {
     componentDidMount() {
@@ -29,6 +29,7 @@ export default class Scene extends Component {
 
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
+            antialias: true,
         });
         renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.shadowMap.enabled = true;
@@ -37,25 +38,18 @@ export default class Scene extends Component {
 
 
         // TODO : Camera Orbit control
-        const controls = new OrbitControls(camera, this.container);
-        controls.target.set(0, 0, 0);
+        const controls = new OrbitControls( camera, this.container );
+        controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
         controls.update();
 
 
         // TODO : Scene Bloom Effect - Effect composer
-        const params = {
-            exposure: 1,
-            bloomStrength: 0.25,
-            bloomThreshold: 0,
-            bloomRadius: 0.1
-        };
-
         const renderScene = new RenderPass( scene, camera );
 
-        const bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
-        bloomPass.threshold = params.bloomThreshold;
-        bloomPass.strength = params.bloomStrength;
-        bloomPass.radius = params.bloomRadius;
+        const bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 0, 0, 0 );
+        bloomPass.threshold = bloomParams.bloomThreshold;
+        bloomPass.strength = bloomParams.bloomStrength;
+        bloomPass.radius = bloomParams.bloomRadius;
 
         const composer = new EffectComposer( renderer );
         composer.addPass( renderScene );
@@ -63,15 +57,15 @@ export default class Scene extends Component {
 
 
         // TODO : light environment setup
-        var hemiLight = new THREE.HemisphereLight(0xffdacf, 0x000000, 2);
+        var hemiLight = new THREE.HemisphereLight(hemiLightProps.skyColor, hemiLightProps.groundColor, hemiLightProps.intensity);
         scene.add(hemiLight);
 
-        var light = new THREE.SpotLight(0xffa68a, 2);
-        light.position.set(-50,50,50);
-        light.castShadow = true;
-        light.shadow.bias = -0.0001;
-        light.shadow.mapSize.width = 1024 * 4;
-        light.shadow.mapSize.height = 1024 * 4;
+        var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
+        light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
+        light.castShadow = spotLightProps.castShadow;
+        light.shadow.bias = spotLightProps.shadow.bias;
+        light.shadow.mapSize.width = spotLightProps.shadow.mapSize.width;
+        light.shadow.mapSize.height = spotLightProps.shadow.mapSize.height;
         scene.add( light );
 
         /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,9 +98,9 @@ export default class Scene extends Component {
             scene.add(board);
 
             board.traverse(n => { if ( n.isMesh ) {
-                n.castShadow = true; 
+                n.castShadow = true;
                 n.receiveShadow = true;
-                if(n.material.map) n.material.map.anisotropy = 16; 
+                if(n.material.map) n.material.map.anisotropy = 16;
             }});
 
             this.meshArray['pawn'] = gltfArray[1].scene.clone();
@@ -224,7 +218,7 @@ export default class Scene extends Component {
             
             renderer.domElement.addEventListener('mousedown', mouseDownAction);
 
-            if( this.props.side === 'black' ) {
+            if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' ) {
                 aiMoveAction(aiLevel);
             }
         })
@@ -272,31 +266,30 @@ export default class Scene extends Component {
                 }
             }
 
-            // TODO : check if select move possible position
+            // TODO : check if select move possible position 
             if( self.selectedPiece ) {
-                const indicator = alphaBet[ self.selectedPiece.colIndex ] + ( self.selectedPiece.rowIndex + 1 );
+                const indicator = getFenFromMatrixIndex(self.selectedPiece.rowIndex, self.selectedPiece.colIndex);
                 const possibleMoves = self.props.game.moves(indicator);
 
                 for( let i = 0; i < possibleMoves.length; i++ ) {
-                    const alpha = possibleMoves[i][0];
-                    const colIndex = alphaBet.indexOf(alpha);
-                    const rowIndex = possibleMoves[i][1] - 1;
-                    const groundMesh = self.boardGroundArray[rowIndex][colIndex].mesh;
+                    const groundIndex = getMatrixIndexFromFen( possibleMoves[i] );
+                    const groundMesh = self.boardGroundArray[ groundIndex.rowIndex][ groundIndex.colIndex ].mesh;
                     const intersect = raycaster.intersectObject( groundMesh );
 
                     if( intersect.length > 0 ) {    // selected the possible move points
                         // move in game engine
                         const from = indicator;
-                        const to = alphaBet[ colIndex ] + ( rowIndex + 1 );
-                        const res = {};
-                        res[from] = to;
+                        const to = getFenFromMatrixIndex( groundIndex.rowIndex, groundIndex.colIndex );
+                        const res = {}; res[from] = to;
 
                         performMove(res);
                         
                         self.selectedPiece = null;
 
                         // TODO : AI move action
-                        aiMoveAction(aiLevel);
+                        if( !self.props.game.board.configuration.isFinished ) {
+                            aiMoveAction(aiLevel);
+                        }
                         return;
                     }
                 }
@@ -321,20 +314,36 @@ export default class Scene extends Component {
             }, 1000 * thinkingTime);
         }
 
+        var movePiece = ( piece, rowIndex, colIndex ) => {
+            piece.rowIndex = rowIndex;
+            piece.colIndex = colIndex;
+
+            const position = {
+                x: colIndex * tileSize - tileSize * 3.5,
+                y: 0.6,
+                z: -(rowIndex * tileSize - tileSize * 3.5)
+            };
+
+            piece.mesh.position.y = position.y;
+            
+            piece.moveAnim = {
+                target: position,
+                speed: {
+                    x: (position.x - piece.mesh.position.x) / pieceMoveSpeed,
+                    z: (position.z - piece.mesh.position.z) / pieceMoveSpeed,
+                }
+            }
+        }
+
         var performMove = (moveResult) => {
             const from = Object.keys(moveResult)[0];
             const to = moveResult[from];
 
-            const from_alpha = from[0];
-            const from_colIndex = alphaBet.indexOf(from_alpha);
-            const from_rowIndex = from[1] - 1;
-
-            const to_alpha = to[0];
-            const to_colIndex = alphaBet.indexOf(to_alpha);
-            const to_rowIndex = to[1] - 1;
+            const fromMatrixIndex = getMatrixIndexFromFen(from);
+            const toMatrixIndex = getMatrixIndexFromFen(to);
 
             // check chese piece on the target position: eat action performed at that time
-            const toIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === to_rowIndex && item.colIndex === to_colIndex );
+            const toIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === toMatrixIndex.rowIndex && item.colIndex === toMatrixIndex.colIndex );
 
             if( toIndex !== -1 ) {
                 scene.remove( this.boardPiecesArray[toIndex].mesh );
@@ -342,40 +351,36 @@ export default class Scene extends Component {
             }
 
             // move chese piece to the target position
-            const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === from_rowIndex && item.colIndex === from_colIndex );
+            const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === fromMatrixIndex.rowIndex && item.colIndex === fromMatrixIndex.colIndex );
 
             if( fromIndex !== -1 ) {
-                this.boardPiecesArray[fromIndex].rowIndex = to_rowIndex;
-                this.boardPiecesArray[fromIndex].colIndex = to_colIndex;
-                this.boardPiecesArray[fromIndex].mesh.position.x = to_colIndex * tileSize - tileSize * 3.5;
-                this.boardPiecesArray[fromIndex].mesh.position.y = 0.6;
-                this.boardPiecesArray[fromIndex].mesh.position.z = -(to_rowIndex * tileSize - tileSize * 3.5);
+                movePiece( this.boardPiecesArray[fromIndex], toMatrixIndex.rowIndex, toMatrixIndex.colIndex );
             }
 
 
             // TODO : check if pawn arrived last spuare
-            if( this.props.mode === gameModes['P2E'] ) {
-                const currentTurn = this.props.game.board.configuration.turn;
+            // if( this.props.mode === gameModes['P2E'] ) {
+            //     const currentTurn = this.props.game.board.configuration.turn;
 
-                if( currentTurn === this.props.side ) { // user case
-                    if( (this.props.side === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7) 
-                        || (this.props.side === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0) ) {
+            //     if( currentTurn === this.props.side ) { // user case
+            //         if( (this.props.side === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7) 
+            //             || (this.props.side === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0) ) {
 
-                        this.setState({ showPieceSelectModal: true });
-                        return;
-                    } else {
-                        if( (currentTurn === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7) 
-                        || (currentTurn === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0) ) {
-                            const type = currentTurn === 'white' ? 'Q' : 'q';
-                            this.props.game.setPiece(to, type);
-                            this.boardPiecesArray[fromIndex].pieceType = type;
-                            scene.remove( this.boardPiecesArray[fromIndex].mesh );
-                            this.boardPiecesArray[fromIndex].mesh = this.meshArray['queen'].clone();
-                            scene.add(this.boardPiecesArray[fromIndex].mesh);
-                        }
-                    }
-                }
-            }
+            //             this.setState({ showPieceSelectModal: true });
+            //             return;
+            //         } else {
+            //             if( (currentTurn === 'white' && this.boardPiecesArray[fromIndex].pieceType === 'P' && this.boardPiecesArray[fromIndex].rowIndex === 7) 
+            //             || (currentTurn === 'black' && this.boardPiecesArray[fromIndex].pieceType === 'p' && this.boardPiecesArray[fromIndex].rowIndex === 0) ) {
+            //                 const type = currentTurn === 'white' ? 'Q' : 'q';
+            //                 this.props.game.setPiece(to, type);
+            //                 this.boardPiecesArray[fromIndex].pieceType = type;
+            //                 scene.remove( this.boardPiecesArray[fromIndex].mesh );
+            //                 this.boardPiecesArray[fromIndex].mesh = this.meshArray['queen'].clone();
+            //                 scene.add(this.boardPiecesArray[fromIndex].mesh);
+            //             }
+            //         }
+            //     }
+            // }
 
             // check if king special move case
             if( this.props.game.board.configuration.turn === 'white' ) {
@@ -383,40 +388,28 @@ export default class Scene extends Component {
                     const matrixIndex = getMatrixIndexFromFen('A1');
                     const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
                     const targetIndex = getMatrixIndexFromFen('D1');
-                    rook[0].rowIndex = targetIndex.rowIndex;
-                    rook[0].colIndex = targetIndex.colIndex;
-                    rook[0].mesh.position.x = rook[0].colIndex * tileSize - tileSize * 3.5;
-                    rook[0].mesh.position.y = 0.6;
-                    rook[0].mesh.position.z = -(rook[0].rowIndex * tileSize - tileSize * 3.5);
+
+                    movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
                 } else if( this.boardPiecesArray[fromIndex].pieceType === 'K' && to === 'G1' && this.props.game.board.configuration.castling.whiteShort ) {
                     const matrixIndex = getMatrixIndexFromFen('H1');
                     const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
                     const targetIndex = getMatrixIndexFromFen('F1');
-                    rook[0].rowIndex = targetIndex.rowIndex;
-                    rook[0].colIndex = targetIndex.colIndex;
-                    rook[0].mesh.position.x = rook[0].colIndex * tileSize - tileSize * 3.5;
-                    rook[0].mesh.position.y = 0.6;
-                    rook[0].mesh.position.z = -(rook[0].rowIndex * tileSize - tileSize * 3.5);
+                    
+                    movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
                 }
             } else if( this.props.game.board.configuration.turn === 'black' ) {
                 if( this.boardPiecesArray[fromIndex].pieceType === 'k' && to === 'C8' && this.props.game.board.configuration.castling.blackLong ) {
                     const matrixIndex = getMatrixIndexFromFen('A8');
                     const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
                     const targetIndex = getMatrixIndexFromFen('D8');
-                    rook[0].rowIndex = targetIndex.rowIndex;
-                    rook[0].colIndex = targetIndex.colIndex;
-                    rook[0].mesh.position.x = rook[0].colIndex * tileSize - tileSize * 3.5;
-                    rook[0].mesh.position.y = 0.6;
-                    rook[0].mesh.position.z = -(rook[0].rowIndex * tileSize - tileSize * 3.5);
+                    
+                    movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
                 } else if( this.boardPiecesArray[fromIndex].pieceType === 'k' && to === 'G8' && this.props.game.board.configuration.castling.blackShort ) {
                     const matrixIndex = getMatrixIndexFromFen('H8');
                     const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
                     const targetIndex = getMatrixIndexFromFen('F8');
-                    rook[0].rowIndex = targetIndex.rowIndex;
-                    rook[0].colIndex = targetIndex.colIndex;
-                    rook[0].mesh.position.x = rook[0].colIndex * tileSize - tileSize * 3.5;
-                    rook[0].mesh.position.y = 0.6;
-                    rook[0].mesh.position.z = -(rook[0].rowIndex * tileSize - tileSize * 3.5);
+                    
+                    movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
                 }
             }
 
@@ -463,27 +456,21 @@ export default class Scene extends Component {
                 const toHistory = self.props.game.board.history.slice(-1)[0]['to'];
                 const fromHistory = self.props.game.board.history.slice(-1)[0]['from'];
 
-                const to_alpha = toHistory[0];
-                const to_colIndex = alphaBet.indexOf(to_alpha);
-                const to_rowIndex = toHistory[1] - 1;
-                self.boardGroundArray[to_rowIndex][to_colIndex].mesh.material.color.setStyle(historyTone);
+                const toMatrixIndex = getMatrixIndexFromFen(toHistory);
+                self.boardGroundArray[ toMatrixIndex.rowIndex ][ toMatrixIndex.colIndex ].mesh.material.color.setStyle(historyTone);
 
-                const from_alpha = fromHistory[0];
-                const from_colIndex = alphaBet.indexOf(from_alpha);
-                const from_rowIndex = fromHistory[1] - 1;
-                self.boardGroundArray[from_rowIndex][from_colIndex].mesh.material.color.setStyle(historyTone);
+                const fromMatrixIndex = getMatrixIndexFromFen(fromHistory);
+                self.boardGroundArray[ fromMatrixIndex.rowIndex ][ fromMatrixIndex.colIndex ].mesh.material.color.setStyle(historyTone);
             }
 
             // TODO : show move possible grounds
             if( self.selectedPiece ) {
-                const indicator = alphaBet[ self.selectedPiece.colIndex ] + ( self.selectedPiece.rowIndex + 1 );
+                const indicator = getFenFromMatrixIndex(self.selectedPiece.rowIndex, self.selectedPiece.colIndex);
                 const possibleMoves = self.props.game.moves(indicator);
                 possibleMoves.forEach((pos) => {
-                    const alpha = pos[0];
-                    const colIndex = alphaBet.indexOf(alpha);
-                    const rowIndex = pos[1] - 1;
+                    const matrixIndex = getMatrixIndexFromFen(pos);
     
-                    self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( selectTone );
+                    self.boardGroundArray[ matrixIndex.rowIndex ][ matrixIndex.colIndex ].mesh.material.color.setStyle( selectTone );
                 });
             }
 
@@ -494,14 +481,31 @@ export default class Scene extends Component {
             const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
             const colIndex = self.boardPiecesArray[kIndex].colIndex;
 
-            const pointer = alphaBet[ colIndex ] + (rowIndex + 1);
+            const pointer = getFenFromMatrixIndex( rowIndex, colIndex );
             if( self.props.game.board.isPieceUnderAttack(pointer) ) {
                 self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
             }
 
+            self.boardPiecesArray.forEach((item) => {
+                if( item.moveAnim && !isSamePoint(item.moveAnim.target, item.mesh.position) ) {
+                    item.mesh.position.x += item.moveAnim.speed.x;
+                    item.mesh.position.z += item.moveAnim.speed.z;
 
-            // render composer effect
-            composer.render();
+                    const preX = item.moveAnim.speed.x > 0 ? 1 : -1;
+                    const preZ = item.moveAnim.speed.z > 0 ? 1 : -1;
+
+                    if( preX * item.mesh.position.x >= preX * item.moveAnim.target.x ) {
+                        item.mesh.position.x = item.moveAnim.target.x;
+                    }
+                    if( preZ * item.mesh.position.z >= preZ * item.moveAnim.target.z ) {
+                        item.mesh.position.z = item.moveAnim.target.z;
+                    }
+                }
+            });
+
+            // // render composer effect
+            renderer.render(scene, camera);
+            // composer.render();
         };
     }
     render() {
