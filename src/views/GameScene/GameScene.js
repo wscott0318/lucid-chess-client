@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import backPic from '../../assets/img/background.jpg';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -11,11 +11,19 @@ import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
 import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
+import io from 'socket.io-client';
+import { socketServerPort } from "../../config";
+import { socketEvents } from "../../utils/packet";
+import Waiting from "../../components/GameScene/Waiting";
+
 export default class Scene extends Component {
     componentDidMount() {
-        // // TODO : component state implementation
+        // TODO : component state implementation
         this.setState({
             showPieceSelectModal: false,
+            showWaitingModal: true,
+            waitingModalTitle: "Loading...",
+            showInviteModal: false,
         });
 
         /**********************************  Scene Environment Setup  **********************************/
@@ -27,7 +35,8 @@ export default class Scene extends Component {
         var camera = new THREE.PerspectiveCamera( cameraProps.fov, cameraProps.aspect, cameraProps.near, cameraProps.far );
         camera.position.x = cameraProps.position.x;
         camera.position.y = cameraProps.position.y;
-        camera.position.z = this.props.side === 'white' ? cameraProps.position.z : -cameraProps.position.z;
+        camera.position.z = cameraProps.position.z;
+        this.camera = camera;
 
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -52,6 +61,7 @@ export default class Scene extends Component {
         bloomPass.threshold = bloomParams.bloomThreshold;
         bloomPass.strength = bloomParams.bloomStrength;
         bloomPass.radius = bloomParams.bloomRadius;
+
 
         // TODO: Scene Outline Effect - Effect composer
         const whiteTeamObjects = []
@@ -140,6 +150,7 @@ export default class Scene extends Component {
             this.meshArray['queen'] = gltfArray[5].scene.clone();
             this.meshArray['king'] = gltfArray[6].scene.clone();
 
+            // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
                 this.boardGroundArray.push([]);
                 for( let j = 0; j < boardSize; j++ ) {
@@ -248,21 +259,65 @@ export default class Scene extends Component {
             redOutlinePass.selectedObjects = whiteTeamObjects;
             blueOutlinePass.selectedObjects = blackTeamObjects;
 
-            // animate every frame
-            animate();
-            
             renderer.domElement.addEventListener('mousedown', mouseDownAction);
 
-            if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' ) {
-                aiMoveAction(aiLevel);
+            console.error('load finished!');
+            if( this.props.mode === gameModes['P2P'] ) {
+                this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
+
+                const data = {};
+                if( this.props.userType === userTypes['creator'] ) {
+                    // create Room
+                    data.username = this.props.username;
+                    data.friendMatch = this.props.friendMatch;
+
+                    this.socket.emit( socketEvents['CS_CreateRoom'], data );
+                    this.socket.on( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
+
+                    this.setState({
+                        waitingModalTitle: 'Waiting other player to Join',
+                    })
+                } else if( this.props.userType === userTypes['joiner'] ) {
+                    //join Friend Match Room
+                    data.username = this.props.username;
+                    data.friendMatch = this.props.friendMatch;
+                    data.roomId = this.props.roomId;
+
+                    this.socket.emit( socketEvents['CS_JoinRoom'], data );
+
+                    this.setState({
+                        waitingModalTitle: 'Waiting other player to Join',
+                    })
+                }
+
+                this.socket.on( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
+                this.socket.on( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
+                this.socket.on( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
+                this.socket.on( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
+                this.socket.on( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
+                this.socket.on( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
+                this.socket.on( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
+                this.socket.on( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
+            } else {
+                this.setState({
+                    showWaitingModal: false,
+                })
+                // animate every frame
+                animate();
+
+                if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' ) {
+                    aiMoveAction(aiLevel);
+                }
             }
         })
 
         const self = this;
         var mouseDownAction = function (event) {
             event.preventDefault();
-        
-            if( self.props.mode !== gameModes['practise'] && self.props.game.board.configuration.turn !== self.props.side ) {
+
+            if( self.props.mode === gameModes['P2P'] && self.currentPlayer !== self.socket.id ) {
+                return;
+            } else if( self.props.mode === gameModes['P2E'] && self.props.game.board.configuration.turn !== self.props.side ) {
                 return;
             }
 
@@ -276,56 +331,61 @@ export default class Scene extends Component {
             raycaster.setFromCamera( mouse, camera );
         
             // only can select own chess pieces
-            const myPiecesArray = self.boardPiecesArray.filter((item) => 
-                (self.props.mode === gameModes['practise'])
-                || (self.props.side === 'white' && item.pieceType === item.pieceType.toUpperCase())
-                || (self.props.side === 'black' && item.pieceType !== item.pieceType.toUpperCase())
-            );
+            const myPiecesArray = self.boardPiecesArray.filter(item => {
+                if( self.props.mode === gameModes['practise'] ) {
+                    return true;
+                } else if( self.props.mode === gameModes['P2E'] ) {
+                    return (self.props.side === 'white' && item.pieceType === item.pieceType.toUpperCase())
+                    || (self.props.side === 'black' && item.pieceType !== item.pieceType.toUpperCase());
+                } else if( self.props.mode === gameModes['P2P'] ) {
+                    return (self.side === 'white' && item.pieceType === item.pieceType.toUpperCase())
+                    || (self.side === 'black' && item.pieceType !== item.pieceType.toUpperCase());
+                }
+                return false;
+            });
 
             for( let i = 0; i < myPiecesArray.length; i++ ) {
                 const intersect = raycaster.intersectObject( myPiecesArray[i].mesh );
 
                 if( intersect.length > 0 ) {
-                    // TODO : this mesh has been clicked
-                    if( self.selectedPiece ) {
-                        if( self.selectedPiece.mesh.uuid === myPiecesArray[i].mesh.uuid ) { // TODO : do nothing when reselect the current selected chess piece
-                            return;
-                        } else {
-                            self.selectedPiece.mesh.position.y = self.selectedPiece.currentY;   // TODO : restore height of the old selected piece
-                        }
-                    }
+                    if( self.props.mode === gameModes['P2P'] ) {
+                        const fen = getFenFromMatrixIndex( myPiecesArray[i].rowIndex, myPiecesArray[i].colIndex );
+                        self.socket.emit( socketEvents['CS_SelectPiece'], { fen } );
+                    } else {
+                        // TODO : this mesh has been clicked
+                        self.selectPiece( myPiecesArray[i] );
 
-                    // TODO : select new chess piece
-                    self.selectedPiece = myPiecesArray[i];
-                    self.selectedPiece.currentY = self.selectedPiece.mesh.position.y;
-                    self.selectedPiece.animateDirection = 1;
+                        const indicator = getFenFromMatrixIndex(myPiecesArray[i].rowIndex, myPiecesArray[i].colIndex);
+                        self.possibleMoves = self.props.game.moves(indicator);
+                    }
                     return;
                 }
             }
 
             // TODO : check if select move possible position 
             if( self.selectedPiece ) {
-                const indicator = getFenFromMatrixIndex(self.selectedPiece.rowIndex, self.selectedPiece.colIndex);
-                const possibleMoves = self.props.game.moves(indicator);
-
-                for( let i = 0; i < possibleMoves.length; i++ ) {
-                    const groundIndex = getMatrixIndexFromFen( possibleMoves[i] );
+                for( let i = 0; i < self.possibleMoves.length; i++ ) {
+                    const groundIndex = getMatrixIndexFromFen( self.possibleMoves[i] );
                     const groundMesh = self.boardGroundArray[ groundIndex.rowIndex][ groundIndex.colIndex ].mesh;
                     const intersect = raycaster.intersectObject( groundMesh );
 
                     if( intersect.length > 0 ) {    // selected the possible move points
-                        // move in game engine
-                        const from = indicator;
+                        const from = getFenFromMatrixIndex(self.selectedPiece.rowIndex, self.selectedPiece.colIndex);
                         const to = getFenFromMatrixIndex( groundIndex.rowIndex, groundIndex.colIndex );
-                        const res = {}; res[from] = to;
+                        if( self.props.mode === gameModes['P2P'] ) {
+                            self.socket.emit( socketEvents['CS_PerformMove'], { from, to } );
+                        } else {
+                            // move in game engine
+                            const res = {}; res[from] = to;
 
-                        performMove(res);
-                        
-                        self.selectedPiece = null;
+                            performMove(res);
+                            
+                            self.selectedPiece = null;
 
-                        // TODO : AI move action
-                        if( self.props.mode === gameModes['P2E'] && !self.props.game.board.configuration.isFinished && !self.state.pawnTransProps ) {
-                            aiMoveAction(aiLevel);
+                            // TODO : AI move action
+                            if( self.props.mode === gameModes['P2E'] && !self.props.game.board.configuration.isFinished && !self.state.pawnTransProps ) {
+                                aiMoveAction(aiLevel);
+                            }
                         }
                         return;
                     }
@@ -334,8 +394,12 @@ export default class Scene extends Component {
 
             // TODO : none selected
             if( self.selectedPiece ) {
-                self.selectedPiece.mesh.position.y = self.selectedPiece.currentY;
-                self.selectedPiece = null;
+                if( self.props.mode === gameModes['P2P'] ) {
+                    self.socket.emit( socketEvents['CS_UnSelectPiece'] );
+                } else {
+                    self.selectedPiece.mesh.position.y = self.selectedPiece.currentY;
+                    self.selectedPiece = null;
+                }
             }
         };
 
@@ -366,6 +430,7 @@ export default class Scene extends Component {
                 }
             }
         }
+        this.movePiece = movePiece;
 
         var performMove = (moveResult) => {
             const from = Object.keys(moveResult)[0];
@@ -458,7 +523,9 @@ export default class Scene extends Component {
 
         // render every frame
         var animate = function () {
-            if( self.props.game.board.configuration.isFinished ) {
+            if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
+                return;
+            } else if( self.props.game.board.configuration.isFinished ) {
                 alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
                 return;
             }
@@ -471,6 +538,10 @@ export default class Scene extends Component {
                 camera.position.y + 20,
                 camera.position.z + 20,
             );
+
+            // TODO : Camera Target Update
+            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            controls.update();
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
@@ -492,40 +563,62 @@ export default class Scene extends Component {
             }
 
             // TODO : show last move history
-            if( self.props.game.board.history.length > 0 ) {
-                const toHistory = self.props.game.board.history.slice(-1)[0]['to'];
-                const fromHistory = self.props.game.board.history.slice(-1)[0]['from'];
+            let toHistory, fromHistory;
+            if( self.props.mode === gameModes['P2P'] ) {
+                if( self.lastMoveHistory ) {
+                    toHistory = self.lastMoveHistory['to'];
+                    fromHistory = self.lastMoveHistory['from'];
 
-                const toMatrixIndex = getMatrixIndexFromFen(toHistory);
-                self.boardGroundArray[ toMatrixIndex.rowIndex ][ toMatrixIndex.colIndex ].mesh.material.color.setStyle(historyTone);
+                    const toMatrixIndex = getMatrixIndexFromFen(toHistory);
+                    self.boardGroundArray[ toMatrixIndex.rowIndex ][ toMatrixIndex.colIndex ].mesh.material.color.setStyle(historyTone);
+        
+                    const fromMatrixIndex = getMatrixIndexFromFen(fromHistory);
+                    self.boardGroundArray[ fromMatrixIndex.rowIndex ][ fromMatrixIndex.colIndex ].mesh.material.color.setStyle(historyTone);
+                }
+            } else {
+                if( self.props.game.board.history.length > 0 ) {
+                    toHistory = self.props.game.board.history.slice(-1)[0]['to'];
+                    fromHistory = self.props.game.board.history.slice(-1)[0]['from'];
 
-                const fromMatrixIndex = getMatrixIndexFromFen(fromHistory);
-                self.boardGroundArray[ fromMatrixIndex.rowIndex ][ fromMatrixIndex.colIndex ].mesh.material.color.setStyle(historyTone);
+                    const toMatrixIndex = getMatrixIndexFromFen(toHistory);
+                    self.boardGroundArray[ toMatrixIndex.rowIndex ][ toMatrixIndex.colIndex ].mesh.material.color.setStyle(historyTone);
+
+                    const fromMatrixIndex = getMatrixIndexFromFen(fromHistory);
+                    self.boardGroundArray[ fromMatrixIndex.rowIndex ][ fromMatrixIndex.colIndex ].mesh.material.color.setStyle(historyTone);
+                }
+            }
+
+            // TODO : show danger for king
+            if( self.props.mode === gameModes['P2P'] && self.dangerKing && ( self.dangerKing['K'] || self.dangerKing['k'] ) ) {
+                const pieceType = self.dangerKing['K'] ? 'K' : 'k';
+                const kIndex = self.boardPiecesArray.findIndex((item) => item.pieceType === pieceType);
+                const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
+                const colIndex = self.boardPiecesArray[kIndex].colIndex;
+
+                self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
+            } else {
+                const pieceType = self.props.game.board.getPlayingColor() === 'white' ? 'K' : 'k';
+
+                const kIndex = self.boardPiecesArray.findIndex((item) => item.pieceType === pieceType);
+                const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
+                const colIndex = self.boardPiecesArray[kIndex].colIndex;
+    
+                const pointer = getFenFromMatrixIndex( rowIndex, colIndex );
+                if( self.props.game.board.isPieceUnderAttack(pointer) ) {
+                    self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
+                }
             }
 
             // TODO : show move possible grounds
-            if( self.selectedPiece ) {
-                const indicator = getFenFromMatrixIndex(self.selectedPiece.rowIndex, self.selectedPiece.colIndex);
-                const possibleMoves = self.props.game.moves(indicator);
-                possibleMoves.forEach((pos) => {
+            if( self.selectedPiece && self.possibleMoves ) {
+                self.possibleMoves.forEach((pos) => {
                     const matrixIndex = getMatrixIndexFromFen(pos);
     
                     self.boardGroundArray[ matrixIndex.rowIndex ][ matrixIndex.colIndex ].mesh.material.color.setStyle( selectTone );
                 });
             }
 
-            // TODO : show danger for king
-            const pieceType = self.props.game.board.getPlayingColor() === 'white' ? 'K' : 'k';
-
-            const kIndex = self.boardPiecesArray.findIndex((item) => item.pieceType === pieceType);
-            const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
-            const colIndex = self.boardPiecesArray[kIndex].colIndex;
-
-            const pointer = getFenFromMatrixIndex( rowIndex, colIndex );
-            if( self.props.game.board.isPieceUnderAttack(pointer) ) {
-                self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
-            }
-
+            // TODO : piece move animation
             self.boardPiecesArray.forEach((item) => {
                 if( item.moveAnim && !isSamePoint(item.moveAnim.target, item.mesh.position) ) {
                     item.mesh.position.x += item.moveAnim.speed.x;
@@ -547,6 +640,7 @@ export default class Scene extends Component {
             renderer.render(scene, camera);
             // composer.render();
         };
+        this.animate = animate;
     }
     getTargetMesh(type) {
         if( type === 'N' || type === 'n' ) {
@@ -563,7 +657,7 @@ export default class Scene extends Component {
         }
     }
     pawnTransform( type ) {
-        const currentTurn = this.props.game.board.configuration.turn;
+        const currentTurn = this.props.mode === gameModes['P2P'] ? this.currentTurn : this.props.game.board.configuration.turn;
         let pieceType;
         if( type === 'Knight' ) {
             pieceType = currentTurn === 'white' ? 'N' : 'n';
@@ -588,18 +682,199 @@ export default class Scene extends Component {
 
         this.scene.add( targetPiece.mesh );
 
-        this.props.game.move( this.state.pawnTransProps.from, this.state.pawnTransProps.to );
-        this.props.game.setPiece( this.state.pawnTransProps.to, pieceType );
-
         this.setState({
             showPieceSelectModal: false,
             pawnTransProps: null,
         });
 
-        if( this.props.mode === gameModes['P2E'] ) {    // ai action after select the piece 
-            this.aiMoveAction(aiLevel);
+        if( this.props.mode === gameModes['P2P'] ) {
+            console.error('socket_emited');
+            this.socket.emit( socketEvents['CS_PawnTransform'], { from: this.state.pawnTransProps.from, to: this.state.pawnTransProps.to, pieceType: pieceType } );
+        } else {
+            this.props.game.move( this.state.pawnTransProps.from, this.state.pawnTransProps.to );
+            this.props.game.setPiece( this.state.pawnTransProps.to, pieceType );
+    
+            if( this.props.mode === gameModes['P2E'] ) {    // ai action after select the piece 
+                this.aiMoveAction(aiLevel);
+            }
         }
     }
+
+    selectPiece( piece ) {
+        if( this.selectedPiece ) {
+            if( this.selectedPiece.mesh.uuid === piece.mesh.uuid ) { // TODO : do nothing when reselect the current selected chess piece
+                return;
+            } else {
+                this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;   // TODO : restore height of the old selected piece
+            }
+        }
+
+        // TODO : select new chess piece
+        this.selectedPiece = piece;
+        this.selectedPiece.currentY = this.selectedPiece.mesh.position.y;
+        this.selectedPiece.animateDirection = 1;
+    }
+
+    /**************************************************** Socket Handlers ******************************************************/
+    handleRoomCreated(params) {
+        this.setState({
+            roomId: params.roomId,
+            showInviteModal: true,
+        });
+    }
+
+    handleGameStarted(params) {
+        this.setState({
+            showWaitingModal: false,
+            showInviteModal: false,
+        });
+
+        const { white, black } = params;
+
+        if( this.socket.id === white ) {
+            this.camera.position.z = cameraProps.position.z;
+        } else if( this.socket.id === black ) {
+            this.camera.position.z = -cameraProps.position.z;
+        }
+
+        this.animate();
+    }
+
+    handleChangeTurn(params) {
+        this.isFinished = params.isFinished ? true : false;
+        if( this.isFinished ) {
+            alert('finished');
+        }
+
+        this.currentTurn = params.currentTurn;
+        this.currentPlayer = params.currentPlayer;
+
+        if( this.currentPlayer === this.socket.id ) {
+            this.side = this.currentTurn;
+        } else {
+            this.side = this.currentTurn === 'white' ? 'black' : 'white';
+        }
+
+        this.dangerKing = params.dangerKing;
+        this.lastMoveHistory = params.lastMoveHistory;
+
+        console.error(params);
+    }
+
+    handleSelectPiece(params) {
+        const { fen, possibleMoves } = params;
+
+        const matrixIndex = getMatrixIndexFromFen(fen);
+        const meshIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+
+        this.selectPiece( this.boardPiecesArray[ meshIndex ] );
+
+        if( this.side === this.currentTurn ) {
+            this.possibleMoves = possibleMoves;
+        }
+    }
+
+    handlePlayerLogOut(params) {
+        const username = params.username;
+        alert(username + ' log out!');
+    }
+
+    handleForceExit(params) {
+        // TODO : Redirect to the frist page or etc
+        alert(params.message);
+    }
+
+    handlePawnTransform(params) {
+        if( this.side !== this.currentTurn )
+            return;
+
+        const { from, to } = params;
+
+        const matrixIndex = getMatrixIndexFromFen( from );
+        const fromIndex = this.boardPiecesArray.findIndex(item => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+
+        this.setState({ showPieceSelectModal: true });
+        this.setState({ pawnTransProps: {
+            fromIndex,
+            from,
+            to
+        } });
+    }
+
+    handlePerformMove(params) {
+        const { from, to, castling, pieceType } = params;
+
+        const fromMatrixIndex = getMatrixIndexFromFen(from);
+        const toMatrixIndex = getMatrixIndexFromFen(to);
+
+        // check chese piece on the target position: eat action performed at that time
+        const toIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === toMatrixIndex.rowIndex && item.colIndex === toMatrixIndex.colIndex );
+
+        if( toIndex !== -1 ) {
+            this.scene.remove( this.boardPiecesArray[toIndex].mesh );
+            this.boardPiecesArray.splice(toIndex, 1);
+        }
+
+        // move chese piece to the target position
+        const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === fromMatrixIndex.rowIndex && item.colIndex === fromMatrixIndex.colIndex );
+
+        if( fromIndex !== -1 ) {
+            if( pieceType ) {
+                this.boardPiecesArray[fromIndex].pieceType = pieceType;
+
+                this.scene.remove( this.boardPiecesArray[fromIndex].mesh );
+
+                this.boardPiecesArray[fromIndex].mesh = this.getTargetMesh(pieceType);
+                const position = getMeshPosition( this.boardPiecesArray[fromIndex].rowIndex, this.boardPiecesArray[fromIndex].colIndex );
+                this.boardPiecesArray[fromIndex].mesh.position.set(position.x, position.y, position.z);
+                this.boardPiecesArray[fromIndex].mesh.scale.set(modelSize, modelSize, modelSize);
+                this.boardPiecesArray[fromIndex].mesh.rotation.y = pieceType === pieceType.toUpperCase() ? Math.PI : 0;
+
+                this.scene.add( this.boardPiecesArray[fromIndex].mesh );
+            }
+
+            this.movePiece( this.boardPiecesArray[fromIndex], toMatrixIndex.rowIndex, toMatrixIndex.colIndex );
+        }
+
+        if( castling.whiteLong ) {
+            const matrixIndex = getMatrixIndexFromFen('A1');
+            const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+            const targetIndex = getMatrixIndexFromFen('D1');
+
+            this.movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
+        } else if ( castling.whiteShort ) {
+            const matrixIndex = getMatrixIndexFromFen('H1');
+            const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+            const targetIndex = getMatrixIndexFromFen('F1');
+            
+            this.movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
+        } else if( castling.blackLong ) {
+            const matrixIndex = getMatrixIndexFromFen('A8');
+            const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+            const targetIndex = getMatrixIndexFromFen('D8');
+            
+            this.movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
+        } else if( castling.blackShort ) {
+            const matrixIndex = getMatrixIndexFromFen('H8');
+            const rook = this.boardPiecesArray.filter((item) => item.rowIndex === matrixIndex.rowIndex && item.colIndex === matrixIndex.colIndex);
+            const targetIndex = getMatrixIndexFromFen('F8');
+            
+            this.movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
+        }
+
+        this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+        this.selectedPiece = null;
+        this.possibleMoves = null;
+    }
+
+    handleUnSelectPiece() {
+        this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+        this.selectedPiece = null;
+        this.possibleMoves = null;
+    }
+
+    /***************************************************************************************************************************/
+
     render() {
         return (
             <div>
@@ -613,6 +888,22 @@ export default class Scene extends Component {
                             <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Bishop')}>Bishop</button>
                             <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Rook')}>Rook</button>
                             <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Queen')}>Queen</button>
+                        </div>
+                    ) : null
+                }
+
+                {
+                    (this.state && this.state.showWaitingModal) ? (
+                        <Waiting title={ this.state.waitingModalTitle } />
+                    ) : null
+                }
+
+                {
+                    (this.state && this.state.showInviteModal) ? (
+                        <div style={{ position: 'fixed', zIndex: 100, top: 0, width: '100%', height: '100%', backgroundColor: '#3311277d', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                            <input readOnly value={ this.state.roomId }/>
+                            <button onClick={() => navigator.clipboard.writeText( this.state.roomId ) }>copy</button>
+                            <button onClick={() => this.setState({ showInviteModal: false })}>Got it</button>
                         </div>
                     ) : null
                 }

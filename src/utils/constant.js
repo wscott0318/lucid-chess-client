@@ -83,3 +83,9 @@ export const gameModes = {
     'P2P': 1,
     'practise': 2
 }
+
+export const userTypes = {
+    'creator': 0,
+    'joiner': 1,
+    'observer': 2,
+}

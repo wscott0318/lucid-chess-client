@@ -1,22 +1,22 @@
 import './App.css';
-import { Game } from 'js-chess-engine'
-import Scene from './components/Scene/Scene';
-import { getRandomVal } from './utils/helper';
-import { gameModes } from './utils/constant';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-const game = new Game();
-
-console.log(game);
-
-// const side = getRandomVal(2) === 0 ? 'white' : 'black';
-const side = 'white';
-const mode = gameModes['P2E'];
+import ModeSelect from './views/ModeSelect';
+import FriendPlay from './views/ModeSelect/FriendPlay';
+import GameScene from './views/GameScene';
 
 function App() {
 	return (
-		<div className="App">
-			<Scene game={game} side={side} mode={mode}/>
-		</div>
+		<BrowserRouter>
+			<div className="App">
+				<Routes>
+					<Route path="/" element={<ModeSelect />} />
+					<Route path="/friendPlay/*" element={<FriendPlay />} />
+					<Route path="/gameScene" element={<GameScene />} />
+					<Route path="/machinePlay" element={<GameScene />}  />
+				</Routes>
+			</div>
+		</BrowserRouter>
 	);
 }
 
