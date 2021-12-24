@@ -2,6 +2,7 @@ import "./App.css";
 import Scene from "./components/Scene/Scene";
 import Logo from "./components/UI/Logo"
 import Popup from "./components/UI/Popup/Popup";
+import Victory from "./components/UI/Victory/Victory";
 import {useState} from 'react'
 
 import { Game, move, status, moves, aiMove, getFen } from "js-chess-engine";
@@ -13,7 +14,8 @@ function App() {
   return (
     <div className="App">
       {/* <Logo show={modalShow} onHide={() => setModalShow(false)}></Logo> */}
-      <Popup show={modalShow} onHide={() => setModalShow(false)}></Popup>
+      {/* <Popup show={modalShow} onHide={() => setModalShow(false)}></Popup> */}
+      <Victory show={modalShow} onHide={() => setModalShow(false)}></Victory>
       {/* <Scene game={game} /> */}
     </div>
   );
