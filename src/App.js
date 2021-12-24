@@ -3,6 +3,8 @@ import Scene from "./components/Scene/Scene";
 import Logo from "./components/UI/Logo"
 import Popup from "./components/UI/Popup/Popup";
 import RoomsModal from "./components/UI/RoomsModal/RoomsModal";
+import PawnModal from "./components/UI/PawnModal/PawnModal";
+
 
 import {useState} from 'react'
 
@@ -16,7 +18,8 @@ function App() {
     <div className="App">
       {/* <Logo show={modalShow} onHide={() => setModalShow(false)}></Logo> */}
       {/* <Popup show={modalShow} onHide={() => setModalShow(false)}></Popup> */}
-      <RoomsModal show={modalShow} onHide={() => setModalShow(false)}></RoomsModal>
+      {/* <RoomsModal show={modalShow} onHide={() => setModalShow(false)}></RoomsModal> */}
+      <PawnModal show={modalShow} onHide={() => setModalShow(false)} />
       {/* <Scene game={game} /> */}
     </div>
   );
