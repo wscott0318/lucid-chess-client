@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Modal } from "react-bootstrap";
+import { Modal, Image, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Victory.scss";
 import backImg from "../../../assets/img/back_bg.png";
@@ -19,15 +19,17 @@ export default class Victory extends Component {
       >
         <Modal.Body>
           <div className="u-container">
-            <img className="u-background" src={backImg} alt=" "></img>
-            <div className="u-content">
-              <img className="u-mark" src={markImg} alt=" "></img>
+            <Image className="u-background" src={backImg}></Image>
+            <div className="u-foreground">
+              <Image className="u-mark" src={markImg}></Image>
               <div className="u-list">
-                <div className="u-item">
-                  <img src={item1Img} alt=" "></img>2446
+                <div className="u-list-item">
+                  <Image className="u-item-image" src={item1Img}></Image>
+                  <div className="u-item-text">2446</div>
                 </div>
-                <div className="u-item">
-                  <img src={item2Img} alt=" "></img>7
+                <div className="u-list-item">
+                  <Image className="u-item-image" src={item2Img}></Image>
+                  <div className="u-item-text">7</div>
                 </div>
               </div>
               <button className="u-button">Return Home</button>

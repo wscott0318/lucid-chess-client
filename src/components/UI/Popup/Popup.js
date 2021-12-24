@@ -14,14 +14,16 @@ export default class Popup extends Component {
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
-        <div className="form">
-          <div className="content">
-            and need a popup window (in general) to show information, example :
-            confirm if user quit the game, deposit money...
+        <div className="u-container">
+          <div className="u-content">
+            In the example above, you can see that the bottom of the image is
+            cut off on wider screens, and that the sides get cut off on portrait
+            screens. Regardless, there will never be any gaps or “open” space,
+            and the image will always adjust to accomodate proper filling.
           </div>
-          <div className="footer">
-            <button className="button">Quit</button>
-            <button className="button">Deposit</button>
+          <div className="u-footer">
+            <button className="u-button">Quit</button>
+            <button className="u-button">Reposit</button>
           </div>
         </div>
       </Modal>

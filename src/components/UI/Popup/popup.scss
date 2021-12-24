@@ -1,34 +1,55 @@
 .Popup {
-  .form {
+  .u-container {
     width: 100%;
-    height: 70vh;
+    height: 100vh;
+    max-width: 70vmin;
+    max-height: 70vmin;
+    margin: 0 auto;
+    position: relative;
     background-image: url("../../../assets/img/back_bg.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    position: relative;
-    .content {
-      text-align: center;
-      margin: 30px 50px;
-      color: white;
-      font-size: 20px;
-      vertical-align: middle;
+
+    * {
+      max-width: 70vmin;
+      max-height: 70vmin;
     }
-    .footer {
+
+    .u-content {
+      width: 80%;
+      margin: 10%;
+      font-size: 3vmin;
+      color: white;
+      font-family: fantasy, Courier, monospace;
+    }
+
+    .u-footer {
       position: absolute;
-      bottom: 40px;
-      display: flex;
+      bottom: 10%;
       width: 100%;
-      justify-content: center;
-      .button {
-        width: 100px;
-        margin: 0 30px;
-        background-color: #16c97ded;
-        height: 30px;
-        border-radius: 15px;
+      display: flex;
+      justify-content: space-evenly;
+
+      .u-button {
+        position: relative;
         text-align: center;
-        vertical-align: middle;
+        background-image: url("../../../assets/img/victory_button.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        width: 20vmin;
+        height: 10%;
+        border-radius: 100px;
         color: white;
-        font-weight: bold;
+        font-family: fantasy, Courier, monospace;
+        font-size: 4vmin;
+        background-color: transparent;
+        border-color: transparent;
+        text-shadow: -2px 2px 2px #0d6c6e, 2px 2px 2px #0d6c6e,
+          2px -2px 2px #0d6c6e, -2px -2px 2px #0d6c6e;
+      }
+
+      .u-button:active {
+        color: black;
       }
     }
   }
