@@ -530,8 +530,6 @@ export default class Scene extends Component {
                 return;
             }
 
-            requestAnimationFrame( animate );
-
             // TODO : light position setting
             light.position.set( 
                 camera.position.x + 20,
@@ -639,6 +637,8 @@ export default class Scene extends Component {
             // // render composer effect
             renderer.render(scene, camera);
             composer.render();
+            
+            requestAnimationFrame( animate );
         };
         this.animate = animate;
     }
