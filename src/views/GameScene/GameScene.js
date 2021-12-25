@@ -635,7 +635,7 @@ export default class Scene extends Component {
             });
 
             // // render composer effect
-            renderer.render(scene, camera);
+            // renderer.render(scene, camera);
             composer.render();
             
             requestAnimationFrame( animate );
