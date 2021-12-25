@@ -91,7 +91,7 @@ export default class Scene extends Component {
 
         const composer = new EffectComposer( renderer );
         composer.addPass( renderScene );
-        composer.addPass( bloomPass );
+        // composer.addPass( bloomPass );
         composer.addPass( redOutlinePass );
         composer.addPass( blueOutlinePass );
 
@@ -638,7 +638,7 @@ export default class Scene extends Component {
 
             // // render composer effect
             renderer.render(scene, camera);
-            // composer.render();
+            composer.render();
         };
         this.animate = animate;
     }
