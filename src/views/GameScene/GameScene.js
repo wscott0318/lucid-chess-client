@@ -129,7 +129,7 @@ export default class Scene extends Component {
             loader.loadAsync( 'models/piece/Keo502.glb' ),
             loader.loadAsync( 'models/piece/Bahamut.glb' ),
             loader.loadAsync( 'models/piece/Medusa.glb' ),
-            loader.loadAsync( 'models/piece/Medusa.glb' ),
+            loader.loadAsync( 'models/piece/Kong.glb' ),
         ]).then((gltfArray) => {
             // TODO : Add chess board to the scene
             var board = gltfArray[0].scene.clone();
