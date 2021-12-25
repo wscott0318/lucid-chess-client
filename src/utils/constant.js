@@ -89,3 +89,5 @@ export const userTypes = {
     'joiner': 1,
     'observer': 2,
 }
+
+export const resizeUpdateInterval = 500;

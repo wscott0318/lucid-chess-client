@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import backPic from '../../assets/img/background.jpg';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -15,6 +15,8 @@ import io from 'socket.io-client';
 import { socketServerPort } from "../../config";
 import { socketEvents } from "../../utils/packet";
 import Waiting from "../../components/GameScene/Waiting";
+
+import { throttle } from 'lodash-es';
 
 export default class Scene extends Component {
     componentDidMount() {
@@ -36,6 +38,10 @@ export default class Scene extends Component {
         camera.position.x = cameraProps.position.x;
         camera.position.y = cameraProps.position.y;
         camera.position.z = cameraProps.position.z;
+
+        if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' )
+            camera.position.z = -cameraProps.position.z;
+
         this.camera = camera;
 
         var renderer = new THREE.WebGLRenderer({
@@ -91,7 +97,7 @@ export default class Scene extends Component {
 
         const composer = new EffectComposer( renderer );
         composer.addPass( renderScene );
-        // composer.addPass( bloomPass );
+        composer.addPass( bloomPass );
         composer.addPass( redOutlinePass );
         composer.addPass( blueOutlinePass );
 
@@ -110,6 +116,34 @@ export default class Scene extends Component {
 
         /////////////////////////////////////////////////////////////////////////////////////////////////
         /***********************************************************************************************/
+
+        // TODO : Windows Resize Handle
+        var setCanvasDimensions = ( canvas, width, height, set2dTransform = false ) => {
+            const ratio = window.devicePixelRatio;
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            if (set2dTransform) {
+              canvas.getContext('2d').setTransform(ratio, 0, 0, ratio, 0, 0);
+            }
+        }
+
+        window.addEventListener(
+            'resize',
+            throttle(
+                () => {
+                    const width = window.innerWidth;
+                    const height = window.innerHeight;
+                    camera.aspect = width / height;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(width, height);
+                    setCanvasDimensions(renderer.domElement, width, height);
+                },
+                resizeUpdateInterval,
+                { trailing: true }
+            )
+        );
 
 
         // TODO : Ground Meshes Array
@@ -383,7 +417,7 @@ export default class Scene extends Component {
                             self.selectedPiece = null;
 
                             // TODO : AI move action
-                            if( self.props.mode === gameModes['P2E'] && !self.props.game.board.configuration.isFinished && !self.state.pawnTransProps ) {
+                            if( self.props.mode === gameModes['P2E'] && !self.checkIfFinished() && !self.state.pawnTransProps ) {
                                 aiMoveAction(aiLevel);
                             }
                         }
@@ -525,7 +559,7 @@ export default class Scene extends Component {
         var animate = function () {
             if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
                 return;
-            } else if( self.props.game.board.configuration.isFinished ) {
+            } else if( self.checkIfFinished() ) {
                 alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
                 return;
             }
@@ -642,6 +676,14 @@ export default class Scene extends Component {
         };
         this.animate = animate;
     }
+    checkIfFinished() {
+        const moves = this.props.game.moves();
+        let totalCount = 0;
+        for( const i in moves ) {
+            totalCount += moves[i].length;
+        }
+        return totalCount === 0 || this.props.game.board.configuration.isFinished;
+    }
     getTargetMesh(type) {
         if( type === 'N' || type === 'n' ) {
             return this.meshArray['knight'].clone();
@@ -688,7 +730,6 @@ export default class Scene extends Component {
         });
 
         if( this.props.mode === gameModes['P2P'] ) {
-            console.error('socket_emited');
             this.socket.emit( socketEvents['CS_PawnTransform'], { from: this.state.pawnTransProps.from, to: this.state.pawnTransProps.to, pieceType: pieceType } );
         } else {
             this.props.game.move( this.state.pawnTransProps.from, this.state.pawnTransProps.to );
