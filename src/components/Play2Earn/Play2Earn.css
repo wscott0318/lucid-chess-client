@@ -1,0 +1,31 @@
+.joingameBut{
+	top : 60vh;
+}
+@media only screen and (max-width:  324px) {
+
+  .joingameBut{
+   	 top: 50vh;
+  }
+
+}
+@media only screen and (max-height:  624px) {
+
+  .joingameBut{
+    top : 40%;
+  }
+
+}
+@media only screen and (max-height:  468px) {
+
+  .joingameBut{
+   	 top: 10rem !important;
+  }
+
+}
+
+/*@media only screen and (max-height: 364px){
+	.but1 .joingameBut {
+	    top: 10rem;
+	}
+}
+*/

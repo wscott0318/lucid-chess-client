@@ -1,0 +1,96 @@
+.Level {
+  .u-container {
+    position: relative;
+    width: 70vw;
+    height: calc(70vw * 0.6);
+    top: 5vw;
+    margin: auto;
+    background-image: url("../../../assets/img/level_back.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+    vertical-align: middle;
+    // border: 1px solid red;
+
+    .u-content {
+      position: relative;
+      width: 50vw;
+      height: calc(50vw * 0.6);
+      // border: 1px solid red;
+    }
+
+    .u-ribbon {
+      position: absolute;
+      width: 60%;
+      height: 6vw;
+      left: 20%;
+      top: -2.5vw;
+      background-image: url("../../../assets/img/ribbon.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      font-size: 3.5vw;
+      text-align: center;
+      font-family: fantasy, Courier, monospace;
+      color: #fbfbe3;
+    }
+
+    .u-content {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: calc(70vw * 0.6 - 3vw);
+      display: grid;
+      // border: 1px solid red;
+
+      .u-content-container {
+        width: 80%;
+        height: 66%;
+        margin: auto;
+        display: grid;
+        background-color: #422736;
+        border-radius: 10px;
+        border: 1px solid #80545b;
+
+        .u-table-wrap {
+          width: 100%;
+          height: 100%;
+          display: grid;
+          padding: 5vw calc(5vw * 0.6);
+
+          .u-row {
+            display: flex;
+            justify-content: space-evenly;
+
+            .u-item-container {
+              display: grid;
+
+              .u-item {
+                display: grid;
+                align-self: center;
+                align-items: center;
+                background-image: url("../../../assets/img/victory_button.png");
+                background-repeat: no-repeat;
+                background-size: 100% 100%;
+                width: 24vw;
+                height: 90%;
+                margin: auto;
+                color: #f9f7c9;
+                font-family: fantasy, Courier, monospace;
+                text-shadow: -2px 2px 2px #0d6c6e, 2px 2px 2px #0d6c6e,
+                  2px -2px 2px #0d6c6e, -2px -2px 2px #0d6c6e;
+                -webkit-text-stroke: 0.05em #0d6c6e;
+                font-size: 2.5vw;
+                background-color: transparent;
+                border-color: transparent;
+              }
+
+              .u-item:active {
+                font-size: 2.49vw;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

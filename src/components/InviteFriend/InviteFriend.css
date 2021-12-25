@@ -1,0 +1,128 @@
+.gotBut{
+  top : 65%;
+}
+.inputCode{
+  top: 30%;
+  left: calc(50% - 22rem);
+  width: 28rem;
+  text-align: center;
+}
+
+.copyBut{
+  background: url(../../assets/image/copybutton.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  border: 0;
+  border-radius: 21px;
+  width: 5rem;
+  z-index: 100;
+  position: absolute;
+  text-shadow: -2px 2px 2px #0d6c6e, 2px 2px 2px #0d6c6e, 2px -2px 2px #0d6c6e, -2px -2px 2px #0d6c6e;
+  height: 70px;
+  top: 31vh;
+  left: calc(50% - -8.5rem);
+}
+.joinCommentDiv{
+  background-color: rgba(0,0,0,0.2);
+  position: absolute;
+  height: 5rem;
+  width: 50rem;
+  left : calc(50% - 25rem);
+  top : calc(52% - 2.5rem);
+  z-index : 101;
+  border-radius: 10px;
+  text-align: center;
+  padding : 0.5rem;
+  letter-spacing: 3px;
+}
+
+.shareCommnet{
+  font-size : 1.5rem;
+  color: white;
+}
+
+@media only screen and (max-width:  1200px) {
+  .inputCode {
+     width: 20rem ;
+     left: calc(50% - 15rem);
+  }
+  .joinCommentDiv{
+      width : 60vw;
+      left: calc(50% - 30vw);
+  }
+}
+
+@media only screen and (max-width:  800px) {
+  .inputCode {
+     width: 16rem ;
+     left: calc(50% - 12rem);
+  }
+  .shareCommnet{
+    font-size: 1.3rem;
+  }
+}
+@media only screen and (max-width:  576px) {
+  .inputCode {
+     width: 40vw ;
+     left: calc(50% - 32vw);
+  }
+  .copyBut{
+    left: calc(50% + 20vw);
+  }
+  .joinCommentDiv{
+    height: 7.5rem;
+  }
+  .gotBut{
+    top : 70%
+  }
+}
+
+@media only screen and (max-width: 324px) {
+  .joinCommentDiv{
+    height: 10rem;
+    width: 75%;
+    left : calc(50% - 35%);
+    top : 16rem;
+  }
+  .gotBut{
+    top: 28rem;
+    position: absolute;
+  }
+  .inputCode {
+    top : 11rem;
+    position: absolute;
+  }
+  .copyBut{
+    top : 11rem;
+  }
+}
+
+@media only screen and (max-height: 574px) {
+  .joinCommentDiv{
+    display: none;
+  }
+  .inputCode .copyBut{
+    top : 40%;
+    position: absolute;
+  }
+}
+
+@media only screen and (max-height:  364px) {
+
+  .inputName{
+    top: 8rem;
+  }
+  .copyBut{
+    top: 8rem !important;
+    position: fixed;
+  }
+ .but1{
+    top: 14rem;
+  }
+  .ribbon {
+    /*height: 5rem;*/
+    top: 8px;
+   
+  }
+}
+
