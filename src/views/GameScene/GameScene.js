@@ -57,6 +57,9 @@ export default class Scene extends Component {
         // TODO : Camera Orbit control
         const controls = new OrbitControls( camera, this.container );
         controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        controls.maxDistance = orbitControlProps.maxDistance;
+        controls.minDistance = orbitControlProps.minDistance;
         controls.update();
 
 
@@ -164,6 +167,8 @@ export default class Scene extends Component {
             loader.loadAsync( 'models/piece/Bahamut.glb' ),
             loader.loadAsync( 'models/piece/Medusa.glb' ),
             loader.loadAsync( 'models/piece/Kong.glb' ),
+            loader.loadAsync( 'models/piece/Fox.glb' ),
+            loader.loadAsync( 'models/piece/Lucifer.glb' ),
         ]).then((gltfArray) => {
             // TODO : Add chess board to the scene
             var board = gltfArray[0].scene.clone();
@@ -183,6 +188,8 @@ export default class Scene extends Component {
             this.meshArray['rook'] = gltfArray[4].scene.clone();
             this.meshArray['queen'] = gltfArray[5].scene.clone();
             this.meshArray['king'] = gltfArray[6].scene.clone();
+            this.meshArray['fox'] = gltfArray[7].scene.clone();
+            this.meshArray['lucifer'] = gltfArray[8].scene.clone();
 
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
@@ -247,17 +254,17 @@ export default class Scene extends Component {
                             break;
                             case 'Q':
                                 mesh = gltfArray[5].scene.clone();
+                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'q':
-                                mesh = gltfArray[5].scene.clone();
-                                mesh.rotateOnAxis(axis, Math.PI);
+                                mesh = gltfArray[7].scene.clone();
                             break;
                             case 'K':
                                 mesh = gltfArray[6].scene.clone();
                                 mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'k':
-                                mesh = gltfArray[6].scene.clone();
+                                mesh = gltfArray[8].scene.clone();
                             break;
                         }
 
@@ -557,11 +564,13 @@ export default class Scene extends Component {
 
         // render every frame
         var animate = function () {
-            if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
-                return;
-            } else if( self.checkIfFinished() ) {
-                alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
-                return;
+            if( self.moveFinished() ) {
+                if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
+                    return;
+                } else if( self.checkIfFinished() ) {
+                    alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
+                    return;
+                }
             }
 
             // TODO : light position setting
@@ -572,7 +581,7 @@ export default class Scene extends Component {
             );
 
             // TODO : Camera Target Update
-            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
             controls.update();
 
             // TODO : Selected Piece Animation
@@ -667,14 +676,11 @@ export default class Scene extends Component {
                     }
                 }
             });
-
             
             requestAnimationFrame( animate );
-            // // render composer effect
+            // render composer effect
             renderer.render(scene, camera);
             // composer.render();
-            
-            
         };
         this.animate = animate;
     }
@@ -684,7 +690,17 @@ export default class Scene extends Component {
         for( const i in moves ) {
             totalCount += moves[i].length;
         }
+
         return totalCount === 0 || this.props.game.board.configuration.isFinished;
+    }
+    moveFinished() {
+        let isFinished = true;
+        this.boardPiecesArray.forEach((item) => {
+            if( item.moveAnim && !isSamePoint(item.moveAnim.target, item.mesh.position) ) {
+                isFinished = false;
+            }
+        })
+        return isFinished;
     }
     getTargetMesh(type) {
         if( type === 'N' || type === 'n' ) {
@@ -698,6 +714,9 @@ export default class Scene extends Component {
         }
         if( type === 'Q' || type === 'q' ) {
             return this.meshArray['queen'].clone();
+        }
+        if( type === 'q' ) {
+            return this.meshArray['fox'].clone();
         }
     }
     pawnTransform( type ) {

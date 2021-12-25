@@ -1,3 +1,5 @@
+import { ang2Rad } from "./helper";
+
 export const cameraProps = {
     fov: 75,
     aspect: window.innerWidth / window.innerHeight,
@@ -15,7 +17,10 @@ export const orbitControlProps = {
         x: 0,
         y: 0,
         z: 0,
-    }
+    },
+    maxPolarAngle: ang2Rad(70),
+    maxDistance: 20,
+    minDistance: 3,
 }
 
 export const bloomParams = {
@@ -51,7 +56,7 @@ export const spotLightProps = {
 
 export const pieceMoveSpeed = 10;
 
-export const aiLevel = 0;   // 3: advanced Up to 3;
+export const aiLevel = 3;   // 3: advanced Up to 3;
 
 export const alphaBet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
