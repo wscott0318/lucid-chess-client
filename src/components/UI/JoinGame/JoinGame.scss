@@ -3,13 +3,11 @@
     position: relative;
     width: 70vw;
     height: calc(70vw * 0.6);
-    top: 5vw;
     margin: auto;
     background-image: url("../../../assets/img/level_back.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     text-align: center;
-    vertical-align: middle;
 
     .u-ribbon {
       position: absolute;
@@ -22,9 +20,17 @@
       background-size: 100% 100%;
       font-size: 3.5vw;
       text-align: center;
-      font-family: Haettenschweiler, fantasy, Courier, monospace;
+      font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
       color: #fbfae2;
-      -webkit-text-stroke: 0.05em #792a4d;
+      // -webkit-text-stroke: 0.05em #792a4d;
+      text-shadow: 1px 1px 0 #792a4d, -1px 1px 0 #792a4d, 1px -1px 0 #792a4d,
+        -1px -1px 0 #792a4d, 0px 1px 0 #792a4d, 0px -1px 0 #792a4d,
+        -1px 0px 0 #792a4d, 1px 0px 0 #792a4d, 2px 2px 0 #792a4d,
+        -2px 2px 0 #792a4d, 2px -2px 0 #792a4d, -2px -2px 0 #792a4d,
+        0px 2px 0 #792a4d, 0px -2px 0 #792a4d, -2px 0px 0 #792a4d,
+        2px 0px 0 #792a4d, 1px 2px 0 #792a4d, -1px 2px 0 #792a4d,
+        1px -2px 0 #792a4d, -1px -2px 0 #792a4d, 2px 1px 0 #792a4d,
+        -2px 1px 0 #792a4d, 2px -1px 0 #792a4d, -2px -1px 0 #792a4d;
     }
 
     .u-content {
@@ -61,19 +67,20 @@
           border-width: 0;
           border-radius: 2.5vw;
           font-size: 2.5vw;
-          color: white;
+          color: #fdf9e8;
           padding-left: 0.5em;
-          font-family: Haettenschweiler, fantasy, Courier, monospace;
-        }
-
-        .u-input {
+          font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
           outline: none;
           border: 0;
+        }
+
+        .u-input::placeholder {
+          color: #84617b;
         }
       }
 
       .u-button {
-        margin-top: 2vw;
+        margin-top: 1vw;
         text-align: center;
         align-items: center;
         background-image: url("../../../assets/img/victory_button.png");
@@ -83,16 +90,23 @@
         height: 5vw;
         border-radius: 100px;
         color: #f9f8cb;
-        font-family: Haettenschweiler, fantasy, Courier, monospace;
+        font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
         font-size: 2.5vw;
         background-color: transparent;
         border-color: transparent;
-        text-shadow: -1px 1px 1px #0d6c6e, 1px 1px 1px #0d6c6e,
-          1px -1px 1px #0d6c6e, -1px -1px 1px #0d6c6e;
+        // -webkit-text-stroke: 0.05em #0c6c6d;
+        text-shadow: 1px 1px 0 #0c6c6d, -1px 1px 0 #0c6c6d, 1px -1px 0 #0c6c6d,
+          -1px -1px 0 #0c6c6d, 0px 1px 0 #0c6c6d, 0px -1px 0 #0c6c6d,
+          -1px 0px 0 #0c6c6d, 1px 0px 0 #0c6c6d, 2px 2px 0 #0c6c6d,
+          -2px 2px 0 #0c6c6d, 2px -2px 0 #0c6c6d, -2px -2px 0 #0c6c6d,
+          0px 2px 0 #0c6c6d, 0px -2px 0 #0c6c6d, -2px 0px 0 #0c6c6d,
+          2px 0px 0 #0c6c6d, 1px 2px 0 #0c6c6d, -1px 2px 0 #0c6c6d,
+          1px -2px 0 #0c6c6d, -1px -2px 0 #0c6c6d, 2px 1px 0 #0c6c6d,
+          -2px 1px 0 #0c6c6d, 2px -1px 0 #0c6c6d, -2px -1px 0 #0c6c6d;
       }
 
       .u-button:active {
-        font-size: 2.49vw;
+        font-size: 2.4vw;
       }
     }
   }

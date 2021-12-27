@@ -1,16 +1,9 @@
 .Victory {
   .u-container {
-    width: 80%;
-    height: 100vh;
-    max-width: 80vmin;
-    max-height: 90vmin;
+    width: 90vmin;
+    height: 90vmin;
     margin: auto;
     position: relative;
-
-    * {
-      max-width: 80vmin;
-      max-height: 90vmin;
-    }
 
     .u-background {
       width: 100%;
@@ -50,11 +43,19 @@
           }
 
           .u-item-text {
-            font-family: fantasy, Courier, monospace;
-            color: #f8cf29;
-            text-shadow: -2px 2px 2px #3a0b15, 2px 2px 2px #3a0b15, 2px -2px 2px #3a0b15, -2px -2px 2px #3a0b15;
+            font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+            color: #f7cf29;
             font-size: 6vmin;
-            -webkit-text-stroke: 0.03em #3a0b15;
+            // -webkit-text-stroke: 0.07em #390b13;
+            text-shadow: 1px 1px 0 #390b13, -1px 1px 0 #390b13,
+              1px -1px 0 #390b13, -1px -1px 0 #390b13, 0px 1px 0 #390b13,
+              0px -1px 0 #390b13, -1px 0px 0 #390b13, 1px 0px 0 #390b13,
+              2px 2px 0 #390b13, -2px 2px 0 #390b13, 2px -2px 0 #390b13,
+              -2px -2px 0 #390b13, 0px 2px 0 #390b13, 0px -2px 0 #390b13,
+              -2px 0px 0 #390b13, 2px 0px 0 #390b13, 1px 2px 0 #390b13,
+              -1px 2px 0 #390b13, 1px -2px 0 #390b13, -1px -2px 0 #390b13,
+              2px 1px 0 #390b13, -2px 1px 0 #390b13, 2px -1px 0 #390b13,
+              -2px -1px 0 #390b13;
             padding-right: 15%;
           }
         }
@@ -72,13 +73,20 @@
         width: 34vmin;
         height: 10%;
         border-radius: 100px;
-        color: #f9f8ca;
-        font-family: fantasy, Courier, monospace;
+        color: #f9f8cb;
+        font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
         font-size: 4vmin;
         background-color: transparent;
         border-color: transparent;
-        text-shadow: -2px 2px 2px #0d6c6e, 2px 2px 2px #0d6c6e, 2px -2px 2px #0d6c6e, -2px -2px 2px #0d6c6e;
-        -webkit-text-stroke: 0.05em #0d6c6e;
+        // -webkit-text-stroke: 0.07em #0c6c6d;
+        text-shadow: 1px 1px 0 #0c6c6d, -1px 1px 0 #0c6c6d, 1px -1px 0 #0c6c6d,
+          -1px -1px 0 #0c6c6d, 0px 1px 0 #0c6c6d, 0px -1px 0 #0c6c6d,
+          -1px 0px 0 #0c6c6d, 1px 0px 0 #0c6c6d, 2px 2px 0 #0c6c6d,
+          -2px 2px 0 #0c6c6d, 2px -2px 0 #0c6c6d, -2px -2px 0 #0c6c6d,
+          0px 2px 0 #0c6c6d, 0px -2px 0 #0c6c6d, -2px 0px 0 #0c6c6d,
+          2px 0px 0 #0c6c6d, 1px 2px 0 #0c6c6d, -1px 2px 0 #0c6c6d,
+          1px -2px 0 #0c6c6d, -1px -2px 0 #0c6c6d, 2px 1px 0 #0c6c6d,
+          -2px 1px 0 #0c6c6d, 2px -1px 0 #0c6c6d, -2px -1px 0 #0c6c6d;
       }
 
       .u-button:active {

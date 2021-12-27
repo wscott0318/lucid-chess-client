@@ -1,23 +1,25 @@
 import React, { Component } from "react";
-import { Modal } from "react-bootstrap";
+import { Modal, Image } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./JoinGame.scss";
+import "./Play2Earn.scss";
+// import joinGameImg from "../../assets/img/join_game.png";
 
-export default class JoinGame extends Component {
+export default class Play2Earn extends Component {
   render() {
+    console.log("test")
     return (
       <Modal
-        className="JoinGame"
+        className="Play2Earn"
         {...this.props}
         size="lg"
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
-        <Modal.Body>
+        {/* <Modal.Body> */}
           <div className="u-container">
-            <div className="u-ribbon">Join game</div>
+            <div className="u-ribbon">Play2Earn</div>
             <div className="u-content">
-              <div className="u-description">
+              {/* <div className="u-description">
                 Name must have minimum 2 and maximum 20 characters
               </div>
               <div className="u-input-wrap">
@@ -33,11 +35,22 @@ export default class JoinGame extends Component {
                   type="text"
                   placeholder="Secret key"
                 ></input>
+              </div> */}
+              <div className="u-logo"></div>
+
+              <div className="u-buttongroup">
+                <button className="u-button">Create Game</button>
+                <button className="u-button">Join Game</button>
               </div>
-              <button className="u-button">Join</button>
             </div>
           </div>
-        </Modal.Body>
+          {/* <Image
+            className="u-item-image"
+            src={joinGameImg}
+            width={500}
+            height={500}
+          ></Image> */}
+        {/* </Modal.Body> */}
       </Modal>
     );
   }

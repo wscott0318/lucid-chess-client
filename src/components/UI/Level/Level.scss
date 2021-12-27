@@ -37,7 +37,16 @@
 			font-size: 3.5vw;
 			text-align: center;
 			font-family: fantasy, Courier, monospace;
-			color: #fbfbe3;
+			color: #fbfae2;
+			// -webkit-text-stroke: 0.05em #792a4d;
+			text-shadow: 1px 1px 0 #792a4d, -1px 1px 0 #792a4d, 1px -1px 0 #792a4d,
+				-1px -1px 0 #792a4d, 0px 1px 0 #792a4d, 0px -1px 0 #792a4d,
+				-1px 0px 0 #792a4d, 1px 0px 0 #792a4d, 2px 2px 0 #792a4d,
+				-2px 2px 0 #792a4d, 2px -2px 0 #792a4d, -2px -2px 0 #792a4d,
+				0px 2px 0 #792a4d, 0px -2px 0 #792a4d, -2px 0px 0 #792a4d,
+				2px 0px 0 #792a4d, 1px 2px 0 #792a4d, -1px 2px 0 #792a4d,
+				1px -2px 0 #792a4d, -1px -2px 0 #792a4d, 2px 1px 0 #792a4d,
+				-2px 1px 0 #792a4d, 2px -1px 0 #792a4d, -2px -1px 0 #792a4d;
 		}
 
 		.u-content {
