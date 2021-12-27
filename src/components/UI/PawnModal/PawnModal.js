@@ -1,4 +1,3 @@
-import React, { Component } from "react";
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../ui_common.css";
@@ -16,6 +15,7 @@ import SYMBOL_KNIGHT from "../../../assets/img/pawn_knight_wolf.png";
 import SYMBOL_BISHOP from "../../../assets/img/pawn_bishop_cyborg.png";
 import SYMBOL_ROOK from "../../../assets/img/pawn_rook_dragon.png";
 import SYMBOL_QUEEN from "../../../assets/img/pawn_queen_medusa_fox.png";
+import { useState } from "react";
 
 const PAWN_ITEMS = [
     {
@@ -60,46 +60,43 @@ const PAWN_ITEMS = [
     }
 ];
 
-export default class PawnModal extends Component {
-  constructor(props) {
-      super(props);
-  }
-
-  render() {
+export const PawnModal = ({ show, pawnTransform }) => {
+    const [currentPiece, setCurrentPiece] = useState(null);
+    
     return (
-      <Modal
-        className="pawn-modal"
-        {...this.props}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <div className="pawn">
-            <div className="pawn-desc">
-                Your Pawn has reach the endpoint, please choose a Character to transform
-            </div>
-            <div className="pawn-cards">
-                {
-                    PAWN_ITEMS.map((item, index) => (
-                        <div className="pawn-card" key={index} style={{backgroundImage: `url(${item.bg})`}}>
-                            <div className="pawn-card-symbol-image" style={{backgroundImage: `url(${item.symbol})`, width: item.width, height: item.height, top: item.top}}></div>
-                            <div className="pawn-card-content">
-                                <div className="pawn-card-content-header">
-                                    <img className="pawn-card-content-header-icon" src={item.icon}></img>
-                                    <div className="pawn-card-content-header-title">{item.type}</div>
+        <Modal
+            className="pawn-modal"
+            show={show}
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+        >
+            <div className="pawn">
+                <div className="pawn-desc">
+                    Your Pawn has reach the endpoint, please choose a Character to transform
+                </div>
+                <div className="pawn-cards">
+                    {
+                        PAWN_ITEMS.map((item, index) => (
+                            <div className={`pawn-card ${ currentPiece === item.type ? 'active' : '' }`} key={index} style={{backgroundImage: `url(${item.bg})`}} onClick={() => setCurrentPiece(item.type)}>
+                                <div className="pawn-card-symbol-image" style={{backgroundImage: `url(${item.symbol})`, width: item.width, height: item.height, top: item.top}}></div>
+                                <div className="pawn-card-content">
+                                    <div className="pawn-card-content-header">
+                                        <img className="pawn-card-content-header-icon" src={item.icon}></img>
+                                        <div className="pawn-card-content-header-title">{item.type}</div>
+                                    </div>
+                                    <div className="pawn-card-content-desc">{item.desc}</div>
                                 </div>
-                                <div className="pawn-card-content-desc">{item.desc}</div>
                             </div>
-                        </div>
-                    ))
-                }
+                        ))
+                    }
+                </div>
+                <div className="pawn-button" onClick={() => pawnTransform(currentPiece)}>
+                    Confirm
+                </div>
             </div>
-            <div className="pawn-button">
-                Confirm
-            </div>
-        </div>
-      </Modal>
-    )
-  }
-
+        </Modal>
+    );
 }
+
+export default PawnModal;

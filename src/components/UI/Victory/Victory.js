@@ -1,19 +1,20 @@
 import React, { Component } from "react";
-import { Modal, Image, Button } from "react-bootstrap";
+import { Modal, Image } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Victory.scss";
 import backImg from "../../../assets/img/back_bg.png";
 import markImg from "../../../assets/img/victory_mark.png";
 import item1Img from "../../../assets/img/victory_item1.png";
 import item2Img from "../../../assets/img/victory_item2.png";
-import testImg from "../../../assets/img/winner.jpg";
+import { useNavigate } from "react-router-dom";
 
-export default class Victory extends Component {
-  render() {
+export const Victory = ({ show }) => {
+	const navigate = useNavigate();
+
     return (
       <Modal
         className="Victory"
-        {...this.props}
+        show={show}
         size="lg"
         aria-labelledby="contained-modal-title-vcenter"
         centered
@@ -33,12 +34,12 @@ export default class Victory extends Component {
                   <div className="u-item-text">7</div>
                 </div>
               </div>
-              <button className="u-button">Return Home</button>
+              <button className="u-button" onClick={ () => { alert(1); navigate('/')} }>Return Home</button>
             </div>
           </div>
-          {/* <Image className="u-background" src={testImg}></Image> */}
         </Modal.Body>
       </Modal>
     );
-  }
 }
+
+export default Victory;

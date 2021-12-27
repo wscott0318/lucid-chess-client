@@ -3,8 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import backPic from '../../assets/img/background.jpg';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -16,6 +15,8 @@ import io from 'socket.io-client';
 import { socketServerPort } from "../../config";
 import { socketEvents } from "../../utils/packet";
 import Waiting from "../../components/GameScene/Waiting";
+import PawnModal from "../../components/UI/PawnModal/PawnModal";
+import Victory from "../../components/UI/Victory/Victory";
 
 import { throttle } from 'lodash-es';
 
@@ -383,7 +384,7 @@ export default class Scene extends Component {
                 animate();
 
                 if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' ) {
-                    aiMoveAction(aiLevel);
+                    aiMoveAction(this.props.aiLevel);
                 }
             }
         })
@@ -461,7 +462,7 @@ export default class Scene extends Component {
 
                             // TODO : AI move action
                             if( self.props.mode === gameModes['P2E'] && !self.checkIfFinished() && !self.state.pawnTransProps ) {
-                                aiMoveAction(aiLevel);
+                                aiMoveAction(self.props.aiLevel);
                             }
                         }
                         return;
@@ -602,9 +603,30 @@ export default class Scene extends Component {
         var animate = function () {
             if( self.moveFinished() ) {
                 if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
+                    if( self.side != self.currentTurn ) {
+                        this.setState({
+                            showVictoryModal: true,
+                            showLoseModal: false,
+                        });
+                    } else {
+                        this.setState({
+                            showVictoryModal: false,
+                            showLoseModal: true,
+                        });
+                    }
                     return;
                 } else if( self.checkIfFinished() ) {
-                    alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
+                    if( self.props.side != self.props.game.board.configuration.turn ) {
+                        this.setState({
+                            showVictoryModal: true,
+                            showLoseModal: false,
+                        });
+                    } else {
+                        this.setState({
+                            showVictoryModal: false,
+                            showLoseModal: true,
+                        });
+                    }
                     return;
                 }
             }
@@ -754,7 +776,7 @@ export default class Scene extends Component {
         if( type === 'R' || type === 'r' ) {
             return this.meshArray['rook'].clone();
         }
-        if( type === 'Q' || type === 'q' ) {
+        if( type === 'Q' ) {
             return this.meshArray['queen'].clone();
         }
         if( type === 'q' ) {
@@ -762,6 +784,9 @@ export default class Scene extends Component {
         }
     }
     pawnTransform( type ) {
+        if( !type || type === '' )
+            return;
+
         const currentTurn = this.props.mode === gameModes['P2P'] ? this.currentTurn : this.props.game.board.configuration.turn;
         let pieceType;
         if( type === 'Knight' ) {
@@ -799,7 +824,7 @@ export default class Scene extends Component {
             this.props.game.setPiece( this.state.pawnTransProps.to, pieceType );
     
             if( this.props.mode === gameModes['P2E'] ) {    // ai action after select the piece 
-                this.aiMoveAction(aiLevel);
+                this.aiMoveAction(this.props.aiLevel);
             }
         }
     }
@@ -846,9 +871,6 @@ export default class Scene extends Component {
 
     handleChangeTurn(params) {
         this.isFinished = params.isFinished ? true : false;
-        if( this.isFinished ) {
-            alert('finished');
-        }
 
         this.currentTurn = params.currentTurn;
         this.currentPlayer = params.currentPlayer;
@@ -982,19 +1004,12 @@ export default class Scene extends Component {
     render() {
         return (
             <div>
-                <div style={{ background: `url(${backPic})` }} ref={ref => (this.container = ref)}>
+                <div ref={ref => (this.container = ref)}>
                 </div>
                 
-                {
-                    (this.state && this.state.showPieceSelectModal) ? (
-                        <div style={{ position: 'fixed', transform: 'translate3d(-50%, -50%, 0)', left: '50%', top: '50%', width: 600, height: 300, background: '#4c4b4b', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Knight')}>Knight</button>
-                            <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Bishop')}>Bishop</button>
-                            <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Rook')}>Rook</button>
-                            <button style={{ padding: 20 }} onClick={() => this.pawnTransform('Queen')}>Queen</button>
-                        </div>
-                    ) : null
-                }
+                <PawnModal show={ this.state && this.state.showPieceSelectModal } pawnTransform={ this.pawnTransform.bind(this) } />
+
+                <Victory show={ this.state && this.state.showVictoryModal } />
 
                 {
                     (this.state && this.state.showWaitingModal) ? (

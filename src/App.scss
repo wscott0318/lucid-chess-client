@@ -11,19 +11,8 @@
 }
 
 .App {
-    // position: relative;
-    // height: 100vh;
-    
-    .scene {
-        // position: absolute;
-    }
-
-    .board-controls {
-    }
-
-    .one-to-one-modal {
-        // position: relative;
-        // z-index: 10000;
-    }
+    position: relative;
+    width: 100vw;
+    height: 100vh;
 }
 
