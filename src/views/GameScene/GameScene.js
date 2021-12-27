@@ -2,19 +2,22 @@ import React, { Component } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import backPic from '../../assets/img/background.jpg';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
-import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
+import { ang2Rad, getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
 import io from 'socket.io-client';
 import { socketServerPort } from "../../config";
 import { socketEvents } from "../../utils/packet";
 import Waiting from "../../components/GameScene/Waiting";
+
+import { throttle } from 'lodash-es';
 
 export default class Scene extends Component {
     componentDidMount() {
@@ -36,6 +39,10 @@ export default class Scene extends Component {
         camera.position.x = cameraProps.position.x;
         camera.position.y = cameraProps.position.y;
         camera.position.z = cameraProps.position.z;
+
+        if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' )
+            camera.position.z = -cameraProps.position.z;
+
         this.camera = camera;
 
         var renderer = new THREE.WebGLRenderer({
@@ -47,10 +54,22 @@ export default class Scene extends Component {
 
         this.container.appendChild( renderer.domElement );
 
+        // TODO : setup skybox
+        const skyTexture = new THREE.TextureLoader().load('skybox/1.jpg');
+        const skyGeo = new THREE.SphereBufferGeometry(50, 100, 100);
+        const skyMaterial = new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            map: skyTexture,
+        });
+        const skyMesh = new THREE.Mesh( skyGeo, skyMaterial );
+        scene.add(skyMesh);
 
         // TODO : Camera Orbit control
         const controls = new OrbitControls( camera, this.container );
         controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        controls.maxDistance = orbitControlProps.maxDistance;
+        controls.minDistance = orbitControlProps.minDistance;
         controls.update();
 
 
@@ -91,7 +110,7 @@ export default class Scene extends Component {
 
         const composer = new EffectComposer( renderer );
         composer.addPass( renderScene );
-        // composer.addPass( bloomPass );
+        composer.addPass( bloomPass );
         composer.addPass( redOutlinePass );
         composer.addPass( blueOutlinePass );
 
@@ -111,6 +130,34 @@ export default class Scene extends Component {
         /////////////////////////////////////////////////////////////////////////////////////////////////
         /***********************************************************************************************/
 
+        // TODO : Windows Resize Handle
+        var setCanvasDimensions = ( canvas, width, height, set2dTransform = false ) => {
+            const ratio = window.devicePixelRatio;
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            if (set2dTransform) {
+              canvas.getContext('2d').setTransform(ratio, 0, 0, ratio, 0, 0);
+            }
+        }
+
+        window.addEventListener(
+            'resize',
+            throttle(
+                () => {
+                    const width = window.innerWidth;
+                    const height = window.innerHeight;
+                    camera.aspect = width / height;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(width, height);
+                    setCanvasDimensions(renderer.domElement, width, height);
+                },
+                resizeUpdateInterval,
+                { trailing: true }
+            )
+        );
+
 
         // TODO : Ground Meshes Array
         this.boardGroundArray = [];
@@ -119,7 +166,12 @@ export default class Scene extends Component {
         // TODO : mesh Array
         this.meshArray = {};
 
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/'); // use a full url path
+        dracoLoader.preload();
+
         var loader = new GLTFLoader();  // GLTF loader to load gltf models
+        loader.setDRACOLoader(dracoLoader);
         
         // TODO : Load GLTF models
         Promise.all([
@@ -130,7 +182,26 @@ export default class Scene extends Component {
             loader.loadAsync( 'models/piece/Bahamut.glb' ),
             loader.loadAsync( 'models/piece/Medusa.glb' ),
             loader.loadAsync( 'models/piece/Kong.glb' ),
+            loader.loadAsync( 'models/piece/Fox.glb' ),
+            loader.loadAsync( 'models/piece/Lucifer.glb' ),
+            loader.loadAsync( 'models/env.glb' )
         ]).then((gltfArray) => {
+            // TODO : Add enviroment mountain
+            const mountainMesh = gltfArray[9].scene.clone();
+            mountainMesh.position.set( modelProps.mountain.position.x, modelProps.mountain.position.y, modelProps.mountain.position.z );
+            mountainMesh.scale.set( modelProps.mountain.scale, modelProps.mountain.scale, modelProps.mountain.scale );
+            mountainMesh.rotation.y = ang2Rad(modelProps.mountain.rotate.y);
+            scene.add(mountainMesh);
+
+            // mountainMesh.traverse(n => { 
+            //     console.log(n, n.isMesh);
+            //     if ( n.isMesh ) {
+            //         n.castShadow = true;
+            //         n.receiveShadow = true;
+            //         if(n.material.map) n.material.map.anisotropy = 16;
+            //     }
+            // });
+            
             // TODO : Add chess board to the scene
             var board = gltfArray[0].scene.clone();
             board.scale.set( modelProps.board.scale, modelProps.board.scale, modelProps.board.scale );
@@ -149,6 +220,8 @@ export default class Scene extends Component {
             this.meshArray['rook'] = gltfArray[4].scene.clone();
             this.meshArray['queen'] = gltfArray[5].scene.clone();
             this.meshArray['king'] = gltfArray[6].scene.clone();
+            this.meshArray['fox'] = gltfArray[7].scene.clone();
+            this.meshArray['lucifer'] = gltfArray[8].scene.clone();
 
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
@@ -213,17 +286,17 @@ export default class Scene extends Component {
                             break;
                             case 'Q':
                                 mesh = gltfArray[5].scene.clone();
+                                mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'q':
-                                mesh = gltfArray[5].scene.clone();
-                                mesh.rotateOnAxis(axis, Math.PI);
+                                mesh = gltfArray[7].scene.clone();
                             break;
                             case 'K':
                                 mesh = gltfArray[6].scene.clone();
                                 mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'k':
-                                mesh = gltfArray[6].scene.clone();
+                                mesh = gltfArray[8].scene.clone();
                             break;
                         }
 
@@ -265,30 +338,34 @@ export default class Scene extends Component {
             if( this.props.mode === gameModes['P2P'] ) {
                 this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
 
+                
                 const data = {};
-                if( this.props.userType === userTypes['creator'] ) {
-                    // create Room
+                if( this.props.friendMatch ) {  // friend match
+                    if( this.props.userType === userTypes['creator'] ) {
+                        // create Room
+                        data.username = this.props.username;
+                        data.friendMatch = this.props.friendMatch;
+    
+                        this.socket.emit( socketEvents['CS_CreateRoom'], data );
+                        this.socket.on( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
+                    } else if( this.props.userType === userTypes['joiner'] ) {
+                        //join Friend Match Room
+                        data.username = this.props.username;
+                        data.friendMatch = this.props.friendMatch;
+                        data.roomId = this.props.roomId;
+    
+                        this.socket.emit( socketEvents['CS_JoinRoom'], data );
+                    }
+                } else {    // match matching
                     data.username = this.props.username;
-                    data.friendMatch = this.props.friendMatch;
+                    data.friendMatch = false;
 
-                    this.socket.emit( socketEvents['CS_CreateRoom'], data );
-                    this.socket.on( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
-
-                    this.setState({
-                        waitingModalTitle: 'Waiting other player to Join',
-                    })
-                } else if( this.props.userType === userTypes['joiner'] ) {
-                    //join Friend Match Room
-                    data.username = this.props.username;
-                    data.friendMatch = this.props.friendMatch;
-                    data.roomId = this.props.roomId;
-
-                    this.socket.emit( socketEvents['CS_JoinRoom'], data );
-
-                    this.setState({
-                        waitingModalTitle: 'Waiting other player to Join',
-                    })
+                    this.socket.emit( socketEvents['CS_MatchPlayLogin'], data );
                 }
+                
+                this.setState({
+                    waitingModalTitle: 'Waiting other player to Join',
+                })
 
                 this.socket.on( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
                 this.socket.on( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
@@ -383,7 +460,7 @@ export default class Scene extends Component {
                             self.selectedPiece = null;
 
                             // TODO : AI move action
-                            if( self.props.mode === gameModes['P2E'] && !self.props.game.board.configuration.isFinished && !self.state.pawnTransProps ) {
+                            if( self.props.mode === gameModes['P2E'] && !self.checkIfFinished() && !self.state.pawnTransProps ) {
                                 aiMoveAction(aiLevel);
                             }
                         }
@@ -523,19 +600,14 @@ export default class Scene extends Component {
 
         // render every frame
         var animate = function () {
-            if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
-                return;
-            } else if( self.props.game.board.configuration.isFinished ) {
-                alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
-                return;
+            if( self.moveFinished() ) {
+                if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
+                    return;
+                } else if( self.checkIfFinished() ) {
+                    alert( (self.props.game.board.configuration.turn === 'white' ? 'black' : 'white') + ' won!');
+                    return;
+                }
             }
-
-            // TODO : light position setting
-            light.position.set( 
-                camera.position.x + 20,
-                camera.position.y + 20,
-                camera.position.z + 20,
-            );
 
             // TODO : Camera Target Update
             controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
@@ -633,16 +705,44 @@ export default class Scene extends Component {
                     }
                 }
             });
-
             
             requestAnimationFrame( animate );
-            // // render composer effect
-            renderer.render(scene, camera);
-            // composer.render();
-            
-            
+            // render composer effect
+            // renderer.render(scene, camera);
+            composer.render();
         };
         this.animate = animate;
+    }
+    componentWillUnmount() {
+        this.socket.off( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
+        this.socket.off( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
+        this.socket.off( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
+        this.socket.off( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
+        this.socket.off( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
+        this.socket.off( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
+        this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
+        this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
+        this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
+
+        this.socket.close();
+    }
+    checkIfFinished() {
+        const moves = this.props.game.moves();
+        let totalCount = 0;
+        for( const i in moves ) {
+            totalCount += moves[i].length;
+        }
+
+        return totalCount === 0 || this.props.game.board.configuration.isFinished;
+    }
+    moveFinished() {
+        let isFinished = true;
+        this.boardPiecesArray.forEach((item) => {
+            if( item.moveAnim && !isSamePoint(item.moveAnim.target, item.mesh.position) ) {
+                isFinished = false;
+            }
+        })
+        return isFinished;
     }
     getTargetMesh(type) {
         if( type === 'N' || type === 'n' ) {
@@ -656,6 +756,9 @@ export default class Scene extends Component {
         }
         if( type === 'Q' || type === 'q' ) {
             return this.meshArray['queen'].clone();
+        }
+        if( type === 'q' ) {
+            return this.meshArray['fox'].clone();
         }
     }
     pawnTransform( type ) {
@@ -690,7 +793,6 @@ export default class Scene extends Component {
         });
 
         if( this.props.mode === gameModes['P2P'] ) {
-            console.error('socket_emited');
             this.socket.emit( socketEvents['CS_PawnTransform'], { from: this.state.pawnTransProps.from, to: this.state.pawnTransProps.to, pieceType: pieceType } );
         } else {
             this.props.game.move( this.state.pawnTransProps.from, this.state.pawnTransProps.to );

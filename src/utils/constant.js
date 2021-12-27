@@ -1,3 +1,5 @@
+import { ang2Rad } from "./helper";
+
 export const cameraProps = {
     fov: 75,
     aspect: window.innerWidth / window.innerHeight,
@@ -13,9 +15,12 @@ export const cameraProps = {
 export const orbitControlProps = {
     target: {
         x: 0,
-        y: 0,
+        y: 0.5,
         z: 0,
-    }
+    },
+    maxPolarAngle: ang2Rad(70),
+    maxDistance: 6.5,
+    minDistance: 5,
 }
 
 export const bloomParams = {
@@ -35,9 +40,9 @@ export const spotLightProps = {
     color: 0xffa68a,
     intensity: 2,
     position: {
-        x: -50,
-        y: 50,
-        z: 50,
+        x: -25,
+        y: 25,
+        z: 25,
     },
     castShadow: true,
     shadow: {
@@ -51,7 +56,7 @@ export const spotLightProps = {
 
 export const pieceMoveSpeed = 10;
 
-export const aiLevel = 0;   // 3: advanced Up to 3;
+export const aiLevel = 3;   // 3: advanced Up to 3;
 
 export const alphaBet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
@@ -68,6 +73,19 @@ export const boardSize = 8;
 export const modelSize = 0.8;
 
 export const modelProps = {
+    'mountain': {
+        scale: 1.2,
+        position: {
+            x: 16,
+            y: 0,
+            z: 5,
+        },
+        rotate: {
+            x: 0,
+            y: 10,
+            z: 0,
+        }
+    },
     'board': {
         scale: modelSize,
         position: {
@@ -89,3 +107,5 @@ export const userTypes = {
     'joiner': 1,
     'observer': 2,
 }
+
+export const resizeUpdateInterval = 500;

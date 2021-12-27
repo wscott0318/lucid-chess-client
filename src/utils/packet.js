@@ -5,6 +5,7 @@ export const socketEvents = {
     'CS_PerformMove': 0xff0004,
     'CS_PawnTransform': 0xff0005,
     'CS_UnSelectPiece': 0xff0006,
+    'CS_MatchPlayLogin': 0xff0007,
 
     'SC_RoomCreated': 0xff1001,
     'SC_GameStarted': 0xff1002,

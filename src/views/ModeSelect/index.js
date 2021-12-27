@@ -5,7 +5,7 @@ export const ModeSelect = () => {
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <button style={{ padding: 20 }}>
-                <Link to="/mathPlay">Math Matching</Link>
+                <Link to="/matchPlay" state={{ mode: gameModes['P2P'], friendMatch: false, username: 'testetest' }}>Match Matching</Link>
             </button>
             <button style={{ padding: 20 }}>
                 <Link to="/friendPlay">Friend Matching</Link>
