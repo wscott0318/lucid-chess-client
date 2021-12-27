@@ -3,6 +3,7 @@
     position: relative;
     width: 70vw;
     height: calc(70vw * 0.6);
+    top: 5vw;
     margin: auto;
     background-image: url("../../../assets/img/level_back.png");
     background-repeat: no-repeat;
@@ -48,6 +49,7 @@
       .u-input-wrap {
         padding: 1vw;
         height: 7vw;
+        align-items: center;
 
         .u-input {
           text-align: center;
@@ -64,6 +66,8 @@
           font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
           outline: none;
           border: 0;
+          box-sizing: border-box;
+          line-height: 5vw;
         }
 
         .u-input::placeholder {

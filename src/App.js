@@ -9,7 +9,6 @@ import Victory from "./components/UI/Victory/Victory";
 import Level from "./components/UI/Level/Level";
 import GameSelect from "./components/UI/GameSelect/GameSelect";
 import JoinGame from "./components/UI/JoinGame/JoinGame";
-import "./components/UI/ui_common.css";
 
 import { Game, move, status, moves, aiMove, getFen } from "js-chess-engine";
 const game = new Game();
@@ -19,8 +18,8 @@ function App() {
 
   return (
     <div className="App">
-      <Logo show={modalShow} onHide={() => setModalShow(false)}></Logo>
-      {/* <JoinGame show={modalShow} onHide={() => setModalShow(false)}></JoinGame> */}
+      {/* <Logo show={modalShow} onHide={() => setModalShow(false)}></Logo> */}
+      <JoinGame show={modalShow} onHide={() => setModalShow(false)}></JoinGame>
       {/* <Popup show={modalShow} onHide={() => setModalShow(false)}></Popup> */}
       {/* <RoomsModal show={modalShow} onHide={() => setModalShow(false)}></RoomsModal> */}
       {/* <PawnModal show={modalShow} onHide={() => setModalShow(false)} /> */}

@@ -10,13 +10,11 @@
     background-size: 100% 100%;
     text-align: center;
     vertical-align: middle;
-    // border: 1px solid red;
 
     .u-content {
       position: relative;
       width: 50vw;
       height: calc(50vw * 0.6);
-      // border: 1px solid red;
     }
 
     .u-ribbon {
@@ -30,8 +28,9 @@
       background-size: 100% 100%;
       font-size: 3.5vw;
       text-align: center;
-      font-family: fantasy, Courier, monospace;
-      color: #fbfbe3;
+      font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+      color: #fbfae2;
+      -webkit-text-stroke: 0.05em #792a4d;
     }
 
     .u-content {
@@ -40,7 +39,6 @@
       width: 100%;
       height: calc(70vw * 0.6 - 3vw);
       display: grid;
-      // border: 1px solid red;
 
       .u-content-container {
         width: 80%;
@@ -74,18 +72,17 @@
                 width: 24vw;
                 height: 90%;
                 margin: auto;
-                color: #f9f7c9;
-                font-family: fantasy, Courier, monospace;
-                text-shadow: -2px 2px 2px #0d6c6e, 2px 2px 2px #0d6c6e,
-                  2px -2px 2px #0d6c6e, -2px -2px 2px #0d6c6e;
-                -webkit-text-stroke: 0.05em #0d6c6e;
+                color: #f9f8cb;
+                -webkit-text-stroke: 0.05em #0c6c6d;
+                font-family: "HaettenschweilerRegular", fantasy, Courier,
+                  monospace;
                 font-size: 2.5vw;
                 background-color: transparent;
                 border-color: transparent;
               }
 
               .u-item:active {
-                font-size: 2.49vw;
+                font-size: 2.4vw;
               }
             }
           }

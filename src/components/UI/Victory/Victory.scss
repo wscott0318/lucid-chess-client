@@ -1,16 +1,9 @@
 .Victory {
   .u-container {
-    width: 80%;
-    height: 100vh;
-    max-width: 80vmin;
-    max-height: 90vmin;
+    width: 90vmin;
+    height: 90vmin;
     margin: auto;
     position: relative;
-
-    * {
-      max-width: 80vmin;
-      max-height: 90vmin;
-    }
 
     .u-background {
       width: 100%;
@@ -51,10 +44,9 @@
 
           .u-item-text {
             font-family: fantasy, Courier, monospace;
-            color: #f8cf29;
-            text-shadow: -2px 2px 2px #3a0b15, 2px 2px 2px #3a0b15, 2px -2px 2px #3a0b15, -2px -2px 2px #3a0b15;
+            color: #f7cf29;
             font-size: 6vmin;
-            -webkit-text-stroke: 0.03em #3a0b15;
+            -webkit-text-stroke: 0.07em #390b13;
             padding-right: 15%;
           }
         }
@@ -72,13 +64,12 @@
         width: 34vmin;
         height: 10%;
         border-radius: 100px;
-        color: #f9f8ca;
+        color: #f9f8cb;
         font-family: fantasy, Courier, monospace;
         font-size: 4vmin;
         background-color: transparent;
         border-color: transparent;
-        text-shadow: -2px 2px 2px #0d6c6e, 2px 2px 2px #0d6c6e, 2px -2px 2px #0d6c6e, -2px -2px 2px #0d6c6e;
-        -webkit-text-stroke: 0.05em #0d6c6e;
+        -webkit-text-stroke: 0.07em #0c6c6d;
       }
 
       .u-button:active {

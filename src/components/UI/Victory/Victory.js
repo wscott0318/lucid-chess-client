@@ -1,12 +1,11 @@
 import React, { Component } from "react";
-import { Modal, Image, Button } from "react-bootstrap";
+import { Modal, Image } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Victory.scss";
 import backImg from "../../../assets/img/back_bg.png";
 import markImg from "../../../assets/img/victory_mark.png";
 import item1Img from "../../../assets/img/victory_item1.png";
 import item2Img from "../../../assets/img/victory_item2.png";
-import testImg from "../../../assets/img/winner.jpg";
 
 export default class Victory extends Component {
   render() {
@@ -36,7 +35,6 @@ export default class Victory extends Component {
               <button className="u-button">Return Home</button>
             </div>
           </div>
-          {/* <Image className="u-background" src={testImg}></Image> */}
         </Modal.Body>
       </Modal>
     );

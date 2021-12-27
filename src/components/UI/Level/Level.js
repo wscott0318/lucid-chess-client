@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Modal, Image, Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Level.scss";
-import testImg from "../../../assets/img/level.jpg";
 
 export default class Level extends Component {
   render() {
@@ -40,11 +39,6 @@ export default class Level extends Component {
               </div>
             </div>
           </div>
-          {/* <Image
-            className="u-background"
-            src={testImg}
-            style={{ width: "200%", height: "200px" }}
-          ></Image> */}
         </Modal.Body>
       </Modal>
     );
