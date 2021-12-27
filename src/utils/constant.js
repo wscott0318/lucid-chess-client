@@ -4,7 +4,7 @@ export const cameraProps = {
     fov: 75,
     aspect: window.innerWidth / window.innerHeight,
     near: 0.1,
-    far: 1000,
+    far: 2000,
     position: {
         x: 0,
         y: 8,
@@ -31,13 +31,13 @@ export const bloomParams = {
 };
 
 export const hemiLightProps = {
-    skyColor: 0xffdacf,
+    skyColor: 0xcccccc,
     groundColor: 0x000000,
     intensity: 2,
 }
 
 export const spotLightProps = {
-    color: 0xffa68a,
+    color: 0xcccccc,
     intensity: 2,
     position: {
         x: -25,
@@ -63,7 +63,7 @@ export const alphaBet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 export const tileSize = 1;
 
 export const lightTone = '#f7e58f';
-export const darkTone = '#123';
+export const darkTone = '#111';
 export const selectTone = '#d78b00';
 export const historyTone = '#d32da7';
 export const dangerTone = '#ff0000';
@@ -77,7 +77,7 @@ export const modelProps = {
         scale: 1.2,
         position: {
             x: 16,
-            y: 0,
+            y: 0.4,
             z: 5,
         },
         rotate: {
