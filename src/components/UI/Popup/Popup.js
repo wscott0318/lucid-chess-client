@@ -14,8 +14,8 @@ export default class Popup extends Component {
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
-        <div className="u-container">
-          <div className="u-content">
+        <div className="form">
+          <div className="content">
             In the example above, you can see that the bottom of the image is
             cut off on wider screens, and that the sides get cut off on portrait
             screens. Regardless, there will never be any gaps or “open” space,

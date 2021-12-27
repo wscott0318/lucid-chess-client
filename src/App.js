@@ -31,7 +31,6 @@ function App() {
 					<Route path="/gameScene" element={<GameScene />} />
 					<Route path="/machinePlay" element={<GameScene />}  />
           
-
           {/* <CreateGame show={modalShow} onHide={() => setModalShow(false)}/> */}
           {/* <InviteFriend show={modalShow} onHide={() => setModalShow(false)}/> */}
           {/* <Play2Earn show={modalShow} onHide={() => setModalShow(false)}/> */}

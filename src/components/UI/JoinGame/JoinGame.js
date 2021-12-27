@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import { Modal, Image } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./JoinGame.scss";
-import joinGameImg from "../../../assets/img/join_game.png";
 
 export default class JoinGame extends Component {
   render() {
@@ -26,7 +25,6 @@ export default class JoinGame extends Component {
                   className="u-input"
                   type="text"
                   placeholder="Enter your name"
-                  placeholderTextColor="#84617B"
                 ></input>
               </div>
               <div className="u-input-wrap">
@@ -34,18 +32,11 @@ export default class JoinGame extends Component {
                   className="u-input"
                   type="text"
                   placeholder="Secret key"
-                  placeholderTextColor="#84617B"
                 ></input>
               </div>
               <button className="u-button">Join</button>
             </div>
           </div>
-          {/* <Image
-            className="u-item-image"
-            src={joinGameImg}
-            width={500}
-            height={500}
-          ></Image> */}
         </Modal.Body>
       </Modal>
     );

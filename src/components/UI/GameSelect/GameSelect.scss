@@ -28,10 +28,17 @@
       background-size: 100% 100%;
       font-size: 3.5vw;
       text-align: center;
-      font-family: fantasy, Courier, monospace;
-      color: #fbfbe3;
-      // text-shadow: -2px 2px 2px #792a4d, 2px 2px 2px #792a4d, 2px -2px 2px #792a4d, -2px -2px 2px #792a4d;
-      -webkit-text-stroke: 0.05em #792a4d;
+      font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+      color: #fbfae2;
+      // -webkit-text-stroke: 0.05em #792a4d;
+      text-shadow: 1px 1px 0 #792a4d, -1px 1px 0 #792a4d, 1px -1px 0 #792a4d,
+        -1px -1px 0 #792a4d, 0px 1px 0 #792a4d, 0px -1px 0 #792a4d,
+        -1px 0px 0 #792a4d, 1px 0px 0 #792a4d, 2px 2px 0 #792a4d,
+        -2px 2px 0 #792a4d, 2px -2px 0 #792a4d, -2px -2px 0 #792a4d,
+        0px 2px 0 #792a4d, 0px -2px 0 #792a4d, -2px 0px 0 #792a4d,
+        2px 0px 0 #792a4d, 1px 2px 0 #792a4d, -1px 2px 0 #792a4d,
+        1px -2px 0 #792a4d, -1px -2px 0 #792a4d, 2px 1px 0 #792a4d,
+        -2px 1px 0 #792a4d, 2px -1px 0 #792a4d, -2px -1px 0 #792a4d;
     }
 
     .u-content {
@@ -59,8 +66,17 @@
           display: grid;
           text-align: center;
           align-items: center;
-          font-family: fantasy, Courier, monospace;
-          color: #fbfbe3;
+          font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+          color: #fbfae2;
+          -webkit-text-stroke: 0.03em #390b13;
+          // text-shadow: 1px 1px 0 #390b13, -1px 1px 0 #390b13, 1px -1px 0 #390b13,
+          //   -1px -1px 0 #390b13, 0px 1px 0 #390b13, 0px -1px 0 #390b13,
+          //   -1px 0px 0 #390b13, 1px 0px 0 #390b13, 2px 2px 0 #390b13,
+          //   -2px 2px 0 #390b13, 2px -2px 0 #390b13, -2px -2px 0 #390b13,
+          //   0px 2px 0 #390b13, 0px -2px 0 #390b13, -2px 0px 0 #390b13,
+          //   2px 0px 0 #390b13, 1px 2px 0 #390b13, -1px 2px 0 #390b13,
+          //   1px -2px 0 #390b13, -1px -2px 0 #390b13, 2px 1px 0 #390b13,
+          //   -2px 1px 0 #390b13, 2px -1px 0 #390b13, -2px -1px 0 #390b13;
           font-size: 1.3vw;
         }
 
