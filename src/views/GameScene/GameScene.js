@@ -112,8 +112,8 @@ export default class Scene extends Component {
         const composer = new EffectComposer( renderer );
         composer.addPass( renderScene );
         composer.addPass( bloomPass );
-        composer.addPass( redOutlinePass );
-        composer.addPass( blueOutlinePass );
+        // composer.addPass( redOutlinePass );
+        // composer.addPass( blueOutlinePass );
 
 
         // TODO : light environment setup
@@ -127,6 +127,11 @@ export default class Scene extends Component {
         light.shadow.mapSize.width = spotLightProps.shadow.mapSize.width;
         light.shadow.mapSize.height = spotLightProps.shadow.mapSize.height;
         scene.add( light );
+
+        // var fogColor = new THREE.Color(0xbbbbbb);
+        // scene.background = fogColor;
+        // scene.fog = new THREE.Fog(fogColor, 8, 30);
+
 
         /////////////////////////////////////////////////////////////////////////////////////////////////
         /***********************************************************************************************/
@@ -195,13 +200,77 @@ export default class Scene extends Component {
             scene.add(mountainMesh);
 
             // mountainMesh.traverse(n => { 
-            //     console.log(n, n.isMesh);
             //     if ( n.isMesh ) {
+            //         console.log(n.material.name)
             //         n.castShadow = true;
             //         n.receiveShadow = true;
             //         if(n.material.map) n.material.map.anisotropy = 16;
             //     }
             // });
+
+            gltfArray[1].scene.traverse(n => {  //Golem
+                if ( n.isMesh ) {
+                    n.material.metalness = 0.5
+                    n.material.roughness = 0.3
+                    n.material.refractionRatio = 3
+                }
+            });
+
+            gltfArray[2].scene.traverse(n => { //Cerberus
+                if ( n.isMesh ) {
+                    n.material.metalness = 0.3
+                    n.material.roughness = 0.5
+                    n.material.refractionRatio = 1
+                }
+            });
+
+            gltfArray[3].scene.traverse(n => {  //Keo502
+                if ( n.isMesh ) {
+                    n.material.metalness = 0.5
+                    n.material.roughness = 0.1
+                    n.material.refractionRatio = 2
+                }
+            });
+
+            gltfArray[4].scene.traverse(n => { //Bahamut
+                if ( n.isMesh ) {
+                    n.material.metalness = 0.6
+                    n.material.roughness = 0.1
+                    n.material.refractionRatio = 3
+                }
+            });
+
+            gltfArray[5].scene.traverse(n => { //Medusa
+                if ( n.isMesh ) {
+                    n.material.metalness = 0.25
+                    n.material.roughness = 0.0
+                    n.material.refractionRatio = 3
+                }
+            });
+
+            gltfArray[6].scene.traverse(n => { //Kong
+                if ( n.isMesh ) {
+                    n.material.metalness = 0.3
+                    n.material.roughness = 1
+                    n.material.refractionRatio = 0
+                }
+            });
+
+            gltfArray[7].scene.traverse(n => { //Fox
+                if ( n.isMesh ) {
+                    n.material.metalness = 0.5
+                    n.material.roughness = 1
+                    n.material.refractionRatio = 0
+                }
+            });
+
+            gltfArray[8].scene.traverse(n => { //Lucifer
+                if ( n.isMesh ) {
+                    n.material.metalness = 1
+                    n.material.roughness = 1
+                    n.material.refractionRatio = 0
+                }
+            });
             
             // TODO : Add chess board to the scene
             var board = gltfArray[0].scene.clone();
@@ -229,9 +298,12 @@ export default class Scene extends Component {
                 this.boardGroundArray.push([]);
                 for( let j = 0; j < boardSize; j++ ) {
                     const tileGeom = new THREE.BoxGeometry(tileSize, 0.1, tileSize);
-                    const material = new THREE.MeshPhongMaterial({
+                    const material = new THREE.MeshStandardMaterial({
                         color: (i + j) % 2 ? lightTone : darkTone,
                         side: THREE.DoubleSide,
+                        roughness: 1,
+                        metalness: 0,
+                        refractionRatio: 0,
                     });
                     const tileMesh = new THREE.Mesh(tileGeom, material);
                     tileMesh.position.set( j * tileSize - tileSize * 3.5, 0.5, -(i * tileSize - tileSize * 3.5));
