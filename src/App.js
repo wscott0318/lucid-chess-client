@@ -1,6 +1,5 @@
-import "./components/UI/ui_common.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-// import {useState} from 'react'
+import {useState} from 'react'
 // import Scene from "./components/Scene/Scene";
 // import Logo from "./components/UI/Logo/Logo";
 
@@ -12,12 +11,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // import Level from "./components/UI/Level/Level";
 // import GameSelect from "./components/UI/GameSelect/GameSelect";
 // import JoinGame from "./components/UI/JoinGame/JoinGame";
+// import CreateGame from "./components/UI/CreateGame/CreateGame";
+// import InviteFriend from "./components/UI/InviteFriend/InviteFriend";
+// import Play2Earn from "./components/UI/Play2Earn/Play2Earn";
+import "./App.scss";
+
 import ModeSelect from './views/ModeSelect';
 import FriendPlay from './views/ModeSelect/FriendPlay';
 import GameScene from './views/GameScene';
 
 function App() {
-  // const [modalShow, setModalShow] = useState(true);
+  const [modalShow, setModalShow] = useState(true);
 	return (
 		<BrowserRouter>
 			<div className="App">
@@ -28,10 +32,9 @@ function App() {
 					<Route path="/machinePlay" element={<GameScene />}  />
           
 
-          {/* <JoinGame /> */}
-          {/* <CreateGame /> */}
-          {/* <InviteFriend /> */}
-
+          {/* <CreateGame show={modalShow} onHide={() => setModalShow(false)}/> */}
+          {/* <InviteFriend show={modalShow} onHide={() => setModalShow(false)}/> */}
+          {/* <Play2Earn show={modalShow} onHide={() => setModalShow(false)}/> */}
           {/* <Logo show={modalShow} onHide={() => setModalShow(false)}></Logo> */}
           {/* <JoinGame show={modalShow} onHide={() => setModalShow(false)}></JoinGame> */}
           {/* <Popup show={modalShow} onHide={() => setModalShow(false)}></Popup> */}
