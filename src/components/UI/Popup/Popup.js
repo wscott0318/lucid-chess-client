@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../ui_common.css";
-import "./popup.scss";
+import "./Popup.scss";
 
 export default class Popup extends Component {
   render() {
