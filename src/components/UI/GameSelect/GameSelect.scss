@@ -30,6 +30,8 @@
       text-align: center;
       font-family: fantasy, Courier, monospace;
       color: #fbfbe3;
+      // text-shadow: -2px 2px 2px #792a4d, 2px 2px 2px #792a4d, 2px -2px 2px #792a4d, -2px -2px 2px #792a4d;
+      -webkit-text-stroke: 0.05em #792a4d;
     }
 
     .u-content {

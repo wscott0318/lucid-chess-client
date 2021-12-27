@@ -21,9 +21,9 @@ export default class Popup extends Component {
             screens. Regardless, there will never be any gaps or “open” space,
             and the image will always adjust to accomodate proper filling.
           </div>
-          <div className="u-footer">
-            <button className="u-button">Quit</button>
-            <button className="u-button">Reposit</button>
+          <div className="footer">
+            <div className="button-div">Quit</div>
+            <div className="button-div">Deposit</div>
           </div>
         </div>
       </Modal>

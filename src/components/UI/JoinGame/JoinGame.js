@@ -1,28 +1,53 @@
-import '../../../assets/css/index.css';
-import './JoinGame.css';
+import React, { Component } from "react";
+import { Modal, Image } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./JoinGame.scss";
+import joinGameImg from "../../../assets/img/join_game.png";
 
-
-import logo from '../../../assets/image/chesslogo.png';
-import ribbon from '../../../assets/image/joingameRibbon.png';
-import popup from '../../../assets/image/popup.png';
-
-export const JoinGame = () => {
-
+export default class JoinGame extends Component {
+  render() {
     return (
-        <section className = 'joingame' >
-          <div>
-            <img className = 'ribbon' src = {ribbon} />
-            <img className = "popup joinPopup" src = {popup} />
-            <div className = 'joinCommentDiv' >
-                <span className = "shareCommnet">Name must have minimum 2 and maximum 20 characters.</span>              
+      <Modal
+        className="JoinGame"
+        {...this.props}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Body>
+          <div className="u-container">
+            <div className="u-ribbon">Join game</div>
+            <div className="u-content">
+              <div className="u-description">
+                Name must have minimum 2 and maximum 20 characters
+              </div>
+              <div className="u-input-wrap">
+                <input
+                  className="u-input"
+                  type="text"
+                  placeholder="Enter your name"
+                  placeholderTextColor="#84617B"
+                ></input>
+              </div>
+              <div className="u-input-wrap">
+                <input
+                  className="u-input"
+                  type="text"
+                  placeholder="Secret key"
+                  placeholderTextColor="#84617B"
+                ></input>
+              </div>
+              <button className="u-button">Join</button>
             </div>
-            <div className = "group">
-              <input className = "inputName inputKey" placeholder='Enter your name' placeholderTextColor="#84617B" type = 'text' ></input>
-              <input className = "inputName inputJoin" placeholder='Secret Key' placeholderTextColor="#84617B" type = 'text' ></input>
-              <button className = "but1 joinBut" ><span>Join</span></button>
-           </div>
           </div>
-        </section>
-    )
+          {/* <Image
+            className="u-item-image"
+            src={joinGameImg}
+            width={500}
+            height={500}
+          ></Image> */}
+        </Modal.Body>
+      </Modal>
+    );
+  }
 }
-export default JoinGame;

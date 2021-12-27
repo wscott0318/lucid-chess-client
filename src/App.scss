@@ -1,0 +1,29 @@
+@font-face {
+	font-family: 'Haettenschweiler';
+	src: local('Haettenschweiler'),
+		 url('./assets/fonts/Haettenschweiler.ttf') format('truetype'), /* Super Modern Browsers */
+}
+
+@font-face {
+	font-family: 'HaettenschweilerRegular';
+	src: local('HaettenschweilerRegular'),
+		 url('./assets/fonts/Haettenschweiler Regular.ttf') format('truetype'), /* Super Modern Browsers */
+}
+
+.App {
+    // position: relative;
+    // height: 100vh;
+    
+    .scene {
+        // position: absolute;
+    }
+
+    .board-controls {
+    }
+
+    .one-to-one-modal {
+        // position: relative;
+        // z-index: 10000;
+    }
+}
+
