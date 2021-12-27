@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import logoPng from "../../assets/img/logo.png";
-import "./ui_common.css";
+import logoPng from "../../../assets/img/logo.png";
+import "./Logo.scss";
 
 export default class Logo extends Component {
   render() {
@@ -14,7 +14,9 @@ export default class Logo extends Component {
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
-        <img src={logoPng}></img>
+        <Modal.Body>
+          <img src={logoPng} alt=""></img>
+        </Modal.Body>
       </Modal>
     );
   }

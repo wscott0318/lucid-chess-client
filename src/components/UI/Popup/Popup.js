@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../ui_common.css";
-import "./Popup.scss";
+import "./popup.scss";
 
 export default class Popup extends Component {
   render() {
@@ -14,10 +14,12 @@ export default class Popup extends Component {
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
-        <div className="form">
-          <div className="content">
-            and need a popup window (in general) to show information, example :
-            confirm if user quit the game, deposit money...
+        <div className="u-container">
+          <div className="u-content">
+            In the example above, you can see that the bottom of the image is
+            cut off on wider screens, and that the sides get cut off on portrait
+            screens. Regardless, there will never be any gaps or “open” space,
+            and the image will always adjust to accomodate proper filling.
           </div>
           <div className="footer">
             <div className="button-div">Quit</div>
