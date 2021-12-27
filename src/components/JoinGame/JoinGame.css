@@ -1,4 +1,4 @@
-.joinCommentDiv{
+.join{
 	top : 20% !important;
 	letter-spacing: 0!important;
 }
@@ -60,7 +60,7 @@
 	.inputKey {
 		top : 9rem!important;
 	}
-	.joinCommentDiv {
+	.joinCommentDiv{
 		display:none;
 	}
 	.inputJoin {
