@@ -14,6 +14,7 @@ function App() {
 					<Route path="/friendPlay/*" element={<FriendPlay />} />
 					<Route path="/gameScene" element={<GameScene />} />
 					<Route path="/machinePlay" element={<GameScene />}  />
+					<Route path="/matchPlay" element={<GameScene />}  />
 				</Routes>
 			</div>
 		</BrowserRouter>

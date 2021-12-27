@@ -306,30 +306,34 @@ export default class Scene extends Component {
             if( this.props.mode === gameModes['P2P'] ) {
                 this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
 
+                
                 const data = {};
-                if( this.props.userType === userTypes['creator'] ) {
-                    // create Room
+                if( this.props.friendMatch ) {  // friend match
+                    if( this.props.userType === userTypes['creator'] ) {
+                        // create Room
+                        data.username = this.props.username;
+                        data.friendMatch = this.props.friendMatch;
+    
+                        this.socket.emit( socketEvents['CS_CreateRoom'], data );
+                        this.socket.on( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
+                    } else if( this.props.userType === userTypes['joiner'] ) {
+                        //join Friend Match Room
+                        data.username = this.props.username;
+                        data.friendMatch = this.props.friendMatch;
+                        data.roomId = this.props.roomId;
+    
+                        this.socket.emit( socketEvents['CS_JoinRoom'], data );
+                    }
+                } else {    // match matching
                     data.username = this.props.username;
-                    data.friendMatch = this.props.friendMatch;
+                    data.friendMatch = false;
 
-                    this.socket.emit( socketEvents['CS_CreateRoom'], data );
-                    this.socket.on( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
-
-                    this.setState({
-                        waitingModalTitle: 'Waiting other player to Join',
-                    })
-                } else if( this.props.userType === userTypes['joiner'] ) {
-                    //join Friend Match Room
-                    data.username = this.props.username;
-                    data.friendMatch = this.props.friendMatch;
-                    data.roomId = this.props.roomId;
-
-                    this.socket.emit( socketEvents['CS_JoinRoom'], data );
-
-                    this.setState({
-                        waitingModalTitle: 'Waiting other player to Join',
-                    })
+                    this.socket.emit( socketEvents['CS_MatchPlayLogin'], data );
                 }
+                
+                this.setState({
+                    waitingModalTitle: 'Waiting other player to Join',
+                })
 
                 this.socket.on( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
                 this.socket.on( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
@@ -683,6 +687,19 @@ export default class Scene extends Component {
             // composer.render();
         };
         this.animate = animate;
+    }
+    componentWillUnmount() {
+        this.socket.off( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
+        this.socket.off( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
+        this.socket.off( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
+        this.socket.off( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
+        this.socket.off( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
+        this.socket.off( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
+        this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
+        this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
+        this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
+
+        this.socket.close();
     }
     checkIfFinished() {
         const moves = this.props.game.moves();
