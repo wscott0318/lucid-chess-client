@@ -1,7 +1,7 @@
 import "./App.css";
 import "./components/UI/ui_common.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Scene from "./components/Scene/Scene";
+// import Scene from "./components/Scene/Scene";
 import Logo from "./components/UI/Logo/Logo"
 import Popup from "./components/UI/Popup/Popup";
 import Victory from "./components/UI/Victory/Victory";
