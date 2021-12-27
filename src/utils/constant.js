@@ -15,12 +15,12 @@ export const cameraProps = {
 export const orbitControlProps = {
     target: {
         x: 0,
-        y: 0,
+        y: 0.5,
         z: 0,
     },
     maxPolarAngle: ang2Rad(70),
-    maxDistance: 20,
-    minDistance: 3,
+    maxDistance: 6.5,
+    minDistance: 5,
 }
 
 export const bloomParams = {
@@ -40,9 +40,9 @@ export const spotLightProps = {
     color: 0xffa68a,
     intensity: 2,
     position: {
-        x: -50,
-        y: 50,
-        z: 50,
+        x: -25,
+        y: 25,
+        z: 25,
     },
     castShadow: true,
     shadow: {
@@ -73,6 +73,19 @@ export const boardSize = 8;
 export const modelSize = 0.8;
 
 export const modelProps = {
+    'mountain': {
+        scale: 1.2,
+        position: {
+            x: 16,
+            y: 0,
+            z: 5,
+        },
+        rotate: {
+            x: 0,
+            y: 10,
+            z: 0,
+        }
+    },
     'board': {
         scale: modelSize,
         position: {

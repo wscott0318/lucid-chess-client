@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import backPic from '../../assets/img/background.jpg';
 import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, aiLevel, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -9,7 +10,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
-import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
+import { ang2Rad, getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
 import io from 'socket.io-client';
 import { socketServerPort } from "../../config";
@@ -53,6 +54,15 @@ export default class Scene extends Component {
 
         this.container.appendChild( renderer.domElement );
 
+        // TODO : setup skybox
+        const skyTexture = new THREE.TextureLoader().load('skybox/1.jpg');
+        const skyGeo = new THREE.SphereBufferGeometry(50, 100, 100);
+        const skyMaterial = new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            map: skyTexture,
+        });
+        const skyMesh = new THREE.Mesh( skyGeo, skyMaterial );
+        scene.add(skyMesh);
 
         // TODO : Camera Orbit control
         const controls = new OrbitControls( camera, this.container );
@@ -156,7 +166,12 @@ export default class Scene extends Component {
         // TODO : mesh Array
         this.meshArray = {};
 
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/'); // use a full url path
+        dracoLoader.preload();
+
         var loader = new GLTFLoader();  // GLTF loader to load gltf models
+        loader.setDRACOLoader(dracoLoader);
         
         // TODO : Load GLTF models
         Promise.all([
@@ -169,7 +184,24 @@ export default class Scene extends Component {
             loader.loadAsync( 'models/piece/Kong.glb' ),
             loader.loadAsync( 'models/piece/Fox.glb' ),
             loader.loadAsync( 'models/piece/Lucifer.glb' ),
+            loader.loadAsync( 'models/env.glb' )
         ]).then((gltfArray) => {
+            // TODO : Add enviroment mountain
+            const mountainMesh = gltfArray[9].scene.clone();
+            mountainMesh.position.set( modelProps.mountain.position.x, modelProps.mountain.position.y, modelProps.mountain.position.z );
+            mountainMesh.scale.set( modelProps.mountain.scale, modelProps.mountain.scale, modelProps.mountain.scale );
+            mountainMesh.rotation.y = ang2Rad(modelProps.mountain.rotate.y);
+            scene.add(mountainMesh);
+
+            // mountainMesh.traverse(n => { 
+            //     console.log(n, n.isMesh);
+            //     if ( n.isMesh ) {
+            //         n.castShadow = true;
+            //         n.receiveShadow = true;
+            //         if(n.material.map) n.material.map.anisotropy = 16;
+            //     }
+            // });
+            
             // TODO : Add chess board to the scene
             var board = gltfArray[0].scene.clone();
             board.scale.set( modelProps.board.scale, modelProps.board.scale, modelProps.board.scale );
@@ -577,15 +609,8 @@ export default class Scene extends Component {
                 }
             }
 
-            // TODO : light position setting
-            light.position.set( 
-                camera.position.x + 20,
-                camera.position.y + 20,
-                camera.position.z + 20,
-            );
-
             // TODO : Camera Target Update
-            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
             controls.update();
 
             // TODO : Selected Piece Animation
@@ -683,8 +708,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            renderer.render(scene, camera);
-            // composer.render();
+            // renderer.render(scene, camera);
+            composer.render();
         };
         this.animate = animate;
     }
