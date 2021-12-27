@@ -24,8 +24,9 @@ const PAWN_ITEMS = [
         desc: "Cerberus",
         bg: BG_KNIGHT,
         symbol: SYMBOL_KNIGHT,
-        width: "230px",
-        height: "250px",
+        width: "12vw",
+        height: "13vw",
+        top: "-4vw",
     },
     {
         type: "Bishop",
@@ -33,8 +34,9 @@ const PAWN_ITEMS = [
         desc: "Keo502",
         bg: BG_BISHOP,
         symbol: SYMBOL_BISHOP,
-        width: "160px",
-        height: "250px"
+        width: "9vw",
+        height: "13vw",
+        top: "-5.7vw",
     },
     {
         type: "Rook",
@@ -42,8 +44,9 @@ const PAWN_ITEMS = [
         desc: "Bahamut",
         bg: BG_ROOK,
         symbol: SYMBOL_ROOK,
-        width: "160px",
-        height: "250px"
+        width: "14vw",
+        height: "12vw",
+        top: "-4vw",
     },
     {
         type: "Queen",
@@ -51,8 +54,9 @@ const PAWN_ITEMS = [
         desc: "Medusa/Sakura",
         bg: BG_QUEEN,
         symbol: SYMBOL_QUEEN,
-        width: "160px",
-        height: "250px"
+        width: "12vw",
+        height: "13vw",
+        top: "-5.7vw",
     }
 ];
 
@@ -77,8 +81,8 @@ export default class PawnModal extends Component {
             <div className="pawn-cards">
                 {
                     PAWN_ITEMS.map((item, index) => (
-                        <div className="pawn-card" style={{backgroundImage: `url(${item.bg})`}}>
-                            <div className="pawn-card-symbol-image" style={{backgroundImage: `url(${item.symbol})`, width: item.width, height: item.height}}></div>
+                        <div className="pawn-card" key={index} style={{backgroundImage: `url(${item.bg})`}}>
+                            <div className="pawn-card-symbol-image" style={{backgroundImage: `url(${item.symbol})`, width: item.width, height: item.height, top: item.top}}></div>
                             <div className="pawn-card-content">
                                 <div className="pawn-card-content-header">
                                     <img className="pawn-card-content-header-icon" src={item.icon}></img>
@@ -91,7 +95,7 @@ export default class PawnModal extends Component {
                 }
             </div>
             <div className="pawn-button">
-                <span>Confirm</span>
+                Confirm
             </div>
         </div>
       </Modal>
