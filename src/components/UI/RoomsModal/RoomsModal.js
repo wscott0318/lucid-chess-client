@@ -52,6 +52,7 @@ const ROOMS = [
         bg: BG_DIAMOND,
     }
 ];
+
 export default class RoomsModal extends Component {
   constructor(props) {
       super(props);

@@ -20,8 +20,8 @@ export default class Popup extends Component {
             confirm if user quit the game, deposit money...
           </div>
           <div className="footer">
-            <div className="button-div"><span>Quit</span></div>
-            <div className="button-div"><span>Deposit</span></div>
+            <div className="button-div">Quit</div>
+            <div className="button-div">Deposit</div>
           </div>
         </div>
       </Modal>
