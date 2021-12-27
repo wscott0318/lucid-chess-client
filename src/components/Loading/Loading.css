@@ -1,0 +1,49 @@
+body{
+    
+    background-image: url(../../assets/image/background.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* This is what makes the background image rescale based on its container's size */
+    background-size: cover;
+    z-index:0;
+  }
+  
+  .loadDiv{
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+    height: 100px;
+    width: 50vw;
+    border-radius: 20px;
+    background: rgb(0,0,0,0.2);
+    position: absolute;
+    transform: translate3d(-50%, -50%, 0);
+    top: 40%;
+    left: 50%;
+    display : flex;
+    padding : 1%;
+    flex: 0 0 100%;
+}
+
+.star{
+  flex-grow: 1;
+    }
+.text{
+  text-align: center;
+  font: normal normal bold 25px Equinox;
+  letter-spacing: 3px;
+  color: #F9F8CB;
+  line-height: 35px;
+  position:absolute;
+  top : 45%;
+  right : 35%; 
+  font-size : 55px;
+  font-family : Haettenschweiler;
+  font-weight:500;
+}
+  /* For mobile devices */
+  @media only screen and (max-width: 767px) {
+    body {
+     
+    }
+  }
