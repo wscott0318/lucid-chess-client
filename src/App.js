@@ -19,16 +19,16 @@ function App() {
   return (
     <div className="App">
       {/* <Logo show={modalShow} onHide={() => setModalShow(false)}></Logo> */}
-      <JoinGame show={modalShow} onHide={() => setModalShow(false)}></JoinGame>
+      {/* <JoinGame show={modalShow} onHide={() => setModalShow(false)}></JoinGame> */}
       {/* <Popup show={modalShow} onHide={() => setModalShow(false)}></Popup> */}
       {/* <RoomsModal show={modalShow} onHide={() => setModalShow(false)}></RoomsModal> */}
       {/* <PawnModal show={modalShow} onHide={() => setModalShow(false)} /> */}
       {/* <Victory show={modalShow} onHide={() => setModalShow(false)}></Victory> */}
       {/* <Level show={modalShow} onHide={() => setModalShow(false)}></Level> */}
-      {/* <GameSelect
+      <GameSelect
         show={modalShow}
         onHide={() => setModalShow(false)}
-      ></GameSelect> */}
+      ></GameSelect>
       {/* <Scene game={game} /> */}
     </div>
   );

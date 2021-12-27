@@ -30,7 +30,15 @@
       text-align: center;
       font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
       color: #fbfae2;
-      -webkit-text-stroke: 0.05em #792a4d;
+      // -webkit-text-stroke: 0.05em #792a4d;
+      text-shadow: 1px 1px 0 #792a4d, -1px 1px 0 #792a4d, 1px -1px 0 #792a4d,
+        -1px -1px 0 #792a4d, 0px 1px 0 #792a4d, 0px -1px 0 #792a4d,
+        -1px 0px 0 #792a4d, 1px 0px 0 #792a4d, 2px 2px 0 #792a4d,
+        -2px 2px 0 #792a4d, 2px -2px 0 #792a4d, -2px -2px 0 #792a4d,
+        0px 2px 0 #792a4d, 0px -2px 0 #792a4d, -2px 0px 0 #792a4d,
+        2px 0px 0 #792a4d, 1px 2px 0 #792a4d, -1px 2px 0 #792a4d,
+        1px -2px 0 #792a4d, -1px -2px 0 #792a4d, 2px 1px 0 #792a4d,
+        -2px 1px 0 #792a4d, 2px -1px 0 #792a4d, -2px -1px 0 #792a4d;
     }
 
     .u-content {
@@ -73,7 +81,16 @@
                 height: 90%;
                 margin: auto;
                 color: #f9f8cb;
-                -webkit-text-stroke: 0.05em #0c6c6d;
+                // -webkit-text-stroke: 0.05em #0c6c6d;
+                text-shadow: 1px 1px 0 #0c6c6d, -1px 1px 0 #0c6c6d,
+                  1px -1px 0 #0c6c6d, -1px -1px 0 #0c6c6d, 0px 1px 0 #0c6c6d,
+                  0px -1px 0 #0c6c6d, -1px 0px 0 #0c6c6d, 1px 0px 0 #0c6c6d,
+                  2px 2px 0 #0c6c6d, -2px 2px 0 #0c6c6d, 2px -2px 0 #0c6c6d,
+                  -2px -2px 0 #0c6c6d, 0px 2px 0 #0c6c6d, 0px -2px 0 #0c6c6d,
+                  -2px 0px 0 #0c6c6d, 2px 0px 0 #0c6c6d, 1px 2px 0 #0c6c6d,
+                  -1px 2px 0 #0c6c6d, 1px -2px 0 #0c6c6d, -1px -2px 0 #0c6c6d,
+                  2px 1px 0 #0c6c6d, -2px 1px 0 #0c6c6d, 2px -1px 0 #0c6c6d,
+                  -2px -1px 0 #0c6c6d;
                 font-family: "HaettenschweilerRegular", fantasy, Courier,
                   monospace;
                 font-size: 2.5vw;
