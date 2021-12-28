@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./Victory.scss";
 import backImg from "../../../assets/img/back_bg.png";
 import markImg from "../../../assets/img/victory_mark.png";
-import item1Img from "../../../assets/img/victory_item1.png";
+import item1Img from "../../../assets/img/classic_header.png";
 import item2Img from "../../../assets/img/victory_item2.png";
 import { useNavigate } from "react-router-dom";
 

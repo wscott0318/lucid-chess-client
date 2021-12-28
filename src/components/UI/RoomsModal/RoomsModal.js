@@ -3,13 +3,13 @@ import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./RoomsModal.scss";
 
-import ICON_CLASSIC from "../../../assets/img/1v1_classic_header.png";
+import ICON_CLASSIC from "../../../assets/img/classic_header.png";
 import ICON_SILVER from "../../../assets/img/1v1_silver_header.png";
 import ICON_GOLD from "../../../assets/img/1v1_gold_header.png";
 import ICON_PLATINUM from "../../../assets/img/1v1_platinum_header.png";
 import ICON_DIAMOND from "../../../assets/img/1v1_diamond_header.png";
-import BG_CLASSIC from "../../../assets/img/1v1_classic_bg.png";
-import BG_SILVER from "../../../assets/img/1v1_silver_bg.png";
+import BG_CLASSIC from "../../../assets/img/classic_bg.png";
+import BG_SILVER from "../../../assets/img/silver_bg.png";
 import BG_GOLD from "../../../assets/img/1v1_gold_bg.png";
 import BG_PLATINUM from "../../../assets/img/1v1_platinum_bg.png";
 import BG_DIAMOND from "../../../assets/img/1v1_diamond_bg.png";

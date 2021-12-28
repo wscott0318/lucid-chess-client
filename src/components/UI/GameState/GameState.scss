@@ -6,9 +6,9 @@
   position: relative;
   width: 100vw;
   height: 100vh;
-  // background-image: url("../../../assets/img/background.jpg");
-  // background-repeat: no-repeat;
-  // background-size: 100% 100%;
+  background-image: url("../../../assets/img/background.jpg");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 
   * {
     color: #ffffff;
@@ -33,7 +33,7 @@
         left: 1vw;
         width: 100%;
         height: 3vw;
-        background-color: rgba($color: #000000, $alpha: 0.2);
+        background-color: rgba($color: #000000, $alpha: 0.4);
         border: 1px solid #9789bd;
         border-radius: 1.5vw;
       }
@@ -80,7 +80,7 @@
       align-items: center;
 
       .u-time {
-        background-color: rgba($color: #000000, $alpha: 0.2);
+        background-color: rgba($color: #000000, $alpha: 0.4);
         border: 1px solid #9789bd;
         width: 14vw;
         height: 2.8vw;
@@ -111,7 +111,7 @@
         right: 1vw;
         width: 100%;
         height: 3vw;
-        background-color: rgba($color: #000000, $alpha: 0.2);
+        background-color: rgba($color: #000000, $alpha: 0.4);
         border: 1px solid #9789bd;
         border-radius: 1.5vw;
       }
@@ -173,9 +173,15 @@
       cursor: pointer;
     }
 
+    .u-back:active {
+      width: 4.9vw;
+      height: 4.9vw;
+    }
+
     .u-footer-right {
       display: flex;
       justify-content: space-between;
+      width: 11vw;
 
       .u-undo {
         width: 5vw;
@@ -190,7 +196,6 @@
       }
 
       .u-setting {
-        margin-left: 1vw;
         width: 5vw;
         height: 5vw;
         background-image: url("../../../assets/img/scene_setting.png");
@@ -200,6 +205,12 @@
 
       .u-setting {
         cursor: pointer;
+      }
+
+      .u-undo:active,
+      .u-setting:active {
+        width: 4.9vw;
+        height: 4.9vw;
       }
     }
   }
