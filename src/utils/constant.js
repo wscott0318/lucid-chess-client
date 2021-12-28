@@ -1,7 +1,7 @@
 import { ang2Rad } from "./helper";
 
 export const cameraProps = {
-    fov: 45,
+    fov: 60,
     aspect: window.innerWidth / window.innerHeight,
     near: 0.1,
     far: 2000,
@@ -40,9 +40,9 @@ export const spotLightProps = {
     color: 0xcccccc,
     intensity: 0.9,
     position: {
-        x: 0,
-        y: 10,
-        z: 0,
+        x: -25,
+        y: 25,
+        z: 25,
     },
     castShadow: true,
     shadow: {

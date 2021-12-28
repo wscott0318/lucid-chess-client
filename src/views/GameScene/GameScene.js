@@ -72,6 +72,7 @@ export default class Scene extends Component {
         controls.update();
 
         const light2 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
+        light2.castShadow = true
         scene.add( light2 );
 
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
@@ -174,7 +175,12 @@ export default class Scene extends Component {
                     tileMesh.material = tileMesh.children[0].material
                     tileMesh.material.color = (i + j) % 2 ? new THREE.Color(lightTone) : new THREE.Color(darkTone);
                     tileMesh.position.set( j * tileSize - tileSize * 3.5 + 0.035, 0.5, -(i * tileSize - tileSize * 3.5));
-                    tileMesh.receiveShadow = true;
+
+                    tileMesh.children[0].traverse(n => { if ( n.isMesh ) {
+                        n.castShadow = true;
+                        n.receiveShadow = true;
+                        if(n.material.map) n.material.map.anisotropy = 16; 
+                    }});
 
                     scene.add(tileMesh);
 
