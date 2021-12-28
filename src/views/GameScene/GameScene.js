@@ -20,6 +20,7 @@ import Loading from "../../components/UI/Loading/Loading";
 import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
 import { CustomOutlinePass } from "./CustomOutlinePass.js";
+import GameState from "../../components/UI/GameState/GameState";
 
 import backPic from '../../assets/img/background.jpg';
 
@@ -51,11 +52,15 @@ export default class Scene extends Component {
 
         this.camera = camera;
 
+        this.camera.lookAt(orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z)
+
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true,
         });
-        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        const w_h = this.getWidthHeight(camera.aspect);
+        renderer.setSize(w_h.width, w_h.height);
         renderer.shadowMap.enabled = true;
 
         this.container.appendChild( renderer.domElement );
@@ -65,13 +70,13 @@ export default class Scene extends Component {
         scene.background = bgTexture;
 
         // TODO : Camera Orbit control
-        const controls = new OrbitControls( camera, this.container );
-        controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
-        controls.maxDistance = orbitControlProps.maxDistance;
-        controls.minDistance = orbitControlProps.minDistance;
-        controls.update();
-
+        // const controls = new OrbitControls( camera, this.container );
+        // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        // controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        // controls.maxDistance = orbitControlProps.maxDistance;
+        // controls.minDistance = orbitControlProps.minDistance;
+        // controls.update();
+        
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
         light.castShadow = spotLightProps.castShadow;
@@ -133,12 +138,10 @@ export default class Scene extends Component {
             'resize',
             throttle(
                 () => {
-                    const width = window.innerWidth;
-                    const height = window.innerHeight;
-                    camera.aspect = width / height;
+                    const w_h = this.getWidthHeight(camera.aspect);
                     camera.updateProjectionMatrix();
-                    renderer.setSize(width, height);
-                    setCanvasDimensions(renderer.domElement, width, height);
+                    renderer.setSize(w_h.width, w_h.height);
+                    setCanvasDimensions(renderer.domElement, w_h.width, w_h.height);
                 },
                 resizeUpdateInterval,
                 { trailing: true }
@@ -371,6 +374,7 @@ export default class Scene extends Component {
                 this.socket.on( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
                 this.socket.on( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
                 this.socket.on( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
+                this.socket.on( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
             } else {
                 this.setState({
                     showWaitingModal: false,
@@ -380,6 +384,26 @@ export default class Scene extends Component {
 
                 if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' ) {
                     aiMoveAction(this.props.aiLevel);
+                }
+
+                if( this.props.mode === gameModes['P2E'] ) {
+                    this.setState({
+                        myTurn: this.props.side === this.props.game.board.configuration.turn
+                    })
+
+                    const aiNames = [
+                        'AI MonKey',
+                        'Beginner',
+                        'Intermediate',
+                        'Advanced'
+                    ];
+
+                    this.setState({
+                        opponentName: aiNames[ this.props.aiLevel ]
+                    })
+
+                    
+                    this.startNewTimer();
                 }
             }
         })
@@ -398,8 +422,8 @@ export default class Scene extends Component {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
 
-            mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+            mouse.x = ((event.clientX - (window.innerWidth - renderer.domElement.clientWidth) / 2)  / renderer.domElement.clientWidth ) * 2 - 1;
+            mouse.y = - ((event.clientY - (window.innerHeight - renderer.domElement.clientHeight) / 2) / renderer.domElement.clientHeight) * 2 + 1;
         
             raycaster.setFromCamera( mouse, camera );
         
@@ -592,7 +616,16 @@ export default class Scene extends Component {
 
 
             this.props.game.move(from, to);
+
+            if( this.props.mode === gameModes['P2E'] ) {
+                this.setState({
+                    myTurn: this.props.side === this.props.game.board.configuration.turn
+                })
+
+                this.startNewTimer();
+            }
         }
+        this.performMove = performMove;
 
         // render every frame
         var animate = function () {
@@ -627,8 +660,8 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-            controls.update();
+            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            // controls.update();
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
@@ -740,8 +773,20 @@ export default class Scene extends Component {
         this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
         this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
         this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
+        this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
 
         this.socket.close();
+    }
+    getWidthHeight(aspect) {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        const preWidth = aspect * height;
+        if (preWidth > width) {
+            height = width / aspect;
+        } else {
+            width = preWidth;
+        }
+        return { width: width, height: height };
     }
     checkIfFinished() {
         const moves = this.props.game.moves();
@@ -818,6 +863,12 @@ export default class Scene extends Component {
             this.props.game.move( this.state.pawnTransProps.from, this.state.pawnTransProps.to );
             this.props.game.setPiece( this.state.pawnTransProps.to, pieceType );
     
+            this.setState({
+                myTurn: this.props.side === this.props.game.board.configuration.turn
+            })
+
+            this.startNewTimer();
+
             if( this.props.mode === gameModes['P2E'] ) {    // ai action after select the piece 
                 this.aiMoveAction(this.props.aiLevel);
             }
@@ -839,6 +890,33 @@ export default class Scene extends Component {
         this.selectedPiece.animateDirection = 1;
     }
 
+    startNewTimer() {
+        if( this.timeInterval )
+            clearInterval( this.timeInterval );
+        
+        this.setState({
+            remainingTime: 30
+        })
+
+        const self = this;
+        this.timeInterval = setInterval(() => {
+            const currentRemaining = self.state.remainingTime;
+
+            if( currentRemaining === 0) {
+                const result = aiMove(self.props.game.board.configuration, 0);
+
+                self.performMove(result);
+
+                self.aiMoveAction(self.props.aiLevel);
+                return;
+            }
+
+            self.setState({
+                remainingTime: currentRemaining - 1
+            })
+        }, 1000);
+    }
+
     /**************************************************** Socket Handlers ******************************************************/
     handleRoomCreated(params) {
         this.setState({
@@ -853,7 +931,15 @@ export default class Scene extends Component {
             showInviteModal: false,
         });
 
-        const { white, black } = params;
+        const { white, black, players } = params;
+
+        for( let i = 0; i < players.length; i++ ) {
+            if( players[i].socketId !== this.socket.id ) {
+                this.setState({
+                    opponentName: players[i].username
+                })
+            }
+        }
 
         if( this.socket.id === white ) {
             this.camera.position.z = cameraProps.position.z;
@@ -871,9 +957,15 @@ export default class Scene extends Component {
         this.currentPlayer = params.currentPlayer;
 
         if( this.currentPlayer === this.socket.id ) {
+            this.setState({
+                myTurn: true,
+            })
             this.side = this.currentTurn;
         } else {
             this.side = this.currentTurn === 'white' ? 'black' : 'white';
+            this.setState({
+                myTurn: false,
+            })
         }
 
         this.dangerKing = params.dangerKing;
@@ -994,8 +1086,10 @@ export default class Scene extends Component {
             this.movePiece( rook[0], targetIndex.rowIndex, targetIndex.colIndex );
         }
 
-        this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
-        this.selectedPiece = null;
+        if( this.selectedPiece ) {
+            this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+            this.selectedPiece = null;
+        }
         this.possibleMoves = null;
     }
 
@@ -1005,6 +1099,13 @@ export default class Scene extends Component {
         this.possibleMoves = null;
     }
 
+    handleRemainingTime(params) {
+        const { remainingTime } = params;
+        this.setState({
+            remainingTime: remainingTime
+        })
+    }
+
     /***************************************************************************************************************************/
 
     render() {
@@ -1012,6 +1113,12 @@ export default class Scene extends Component {
             <div>
                 <div ref={ref => (this.container = ref)}>
                 </div>
+
+                <GameState 
+                    opponentName={ this.state && this.state.opponentName } 
+                    myTurn={ this.state && this.state.myTurn } 
+                    remainingTime={ this.state && this.state.remainingTime }
+                />
                 
                 {/* Pawn transform modal when pawn reaches the endpoint */}
                 <PawnModal show={ this.state && this.state.showPieceSelectModal } pawnTransform={ this.pawnTransform.bind(this) } />
