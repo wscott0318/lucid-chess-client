@@ -16,4 +16,5 @@ export const socketEvents = {
     'SC_PawnTransform': 0xff1007,
     'SC_PerformMove': 0xff1008,
     'SC_UnSelectPiece': 0xff0009,
+    'SC_RemainingTime': 0xff0010,
 }
