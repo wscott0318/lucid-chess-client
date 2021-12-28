@@ -55,7 +55,9 @@ export default class Scene extends Component {
             alpha: true,
             antialias: true,
         });
-        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        const w_h = this.getWidthHeight(camera.aspect);
+        renderer.setSize(w_h.width, w_h.height);
         renderer.shadowMap.enabled = true;
 
         this.container.appendChild( renderer.domElement );
@@ -102,12 +104,10 @@ export default class Scene extends Component {
             'resize',
             throttle(
                 () => {
-                    const width = window.innerWidth;
-                    const height = window.innerHeight;
-                    camera.aspect = width / height;
+                    const w_h = this.getWidthHeight(camera.aspect);
                     camera.updateProjectionMatrix();
-                    renderer.setSize(width, height);
-                    setCanvasDimensions(renderer.domElement, width, height);
+                    renderer.setSize(w_h.width, w_h.height);
+                    setCanvasDimensions(renderer.domElement, w_h.width, w_h.height);
                 },
                 resizeUpdateInterval,
                 { trailing: true }
@@ -379,8 +379,8 @@ export default class Scene extends Component {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
 
-            mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+            mouse.x = ((event.clientX - (window.innerWidth - renderer.domElement.clientWidth) / 2)  / renderer.domElement.clientWidth ) * 2 - 1;
+            mouse.y = - ((event.clientY - (window.innerHeight - renderer.domElement.clientHeight) / 2) / renderer.domElement.clientHeight) * 2 + 1;
         
             raycaster.setFromCamera( mouse, camera );
         
@@ -733,6 +733,17 @@ export default class Scene extends Component {
         this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
 
         this.socket.close();
+    }
+    getWidthHeight(aspect) {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        const preWidth = aspect * height;
+        if (preWidth > width) {
+            height = width / aspect;
+        } else {
+            width = preWidth;
+        }
+        return { width: width, height: height };
     }
     checkIfFinished() {
         const moves = this.props.game.moves();

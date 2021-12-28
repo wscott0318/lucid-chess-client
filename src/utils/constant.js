@@ -2,7 +2,8 @@ import { ang2Rad } from "./helper";
 
 export const cameraProps = {
     fov: 45,
-    aspect: window.innerWidth / window.innerHeight,
+    // aspect: window.innerWidth / window.innerHeight,
+    aspect: 16 / 9,
     near: 0.1,
     far: 2000,
     position: {
