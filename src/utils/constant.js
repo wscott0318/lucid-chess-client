@@ -38,9 +38,27 @@ export const hemiLightProps = {
 
 export const spotLightProps = {
     color: 0xcccccc,
-    intensity: 0.9,
+    intensity: 0.6,
     position: {
         x: -25,
+        y: 25,
+        z: 25,
+    },
+    castShadow: true,
+    shadow: {
+        bias: -0.0001,
+        mapSize: {
+            width: 1024 * 4,
+            height: 1024 * 4,
+        }
+    }
+}
+
+export const spotLightProps2 = {
+    color: 0xcccccc,
+    intensity: 0.6,
+    position: {
+        x: 25,
         y: 25,
         z: 25,
     },
