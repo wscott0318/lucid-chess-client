@@ -1,0 +1,206 @@
+// * {
+//   border: 1px solid red;
+// }
+
+.GameState {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  // background-image: url("../../../assets/img/background.jpg");
+  // background-repeat: no-repeat;
+  // background-size: 100% 100%;
+
+  * {
+    color: #ffffff;
+    -webkit-text-stroke: 0.05em #100205;
+  }
+
+  .u-header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 4vw;
+
+    .u-you-container {
+      position: relative;
+      width: 16vw;
+
+      .u-black {
+        position: absolute;
+        top: 1vw;
+        left: 1vw;
+        width: 100%;
+        height: 3vw;
+        background-color: rgba($color: #000000, $alpha: 0.2);
+        border: 1px solid #9789bd;
+        border-radius: 1.5vw;
+      }
+
+      .u-info {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        .u-info-img {
+          width: 8vw;
+          height: 8vw;
+          background-image: url("../../../assets/img/scene_user.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+        }
+
+        .u-info-name {
+          padding: 0.1vw;
+          display: grid;
+          text-align: center;
+          align-items: center;
+          font-family: "Times New Roman";
+          font-size: 1.5vw;
+          font-weight: bold;
+        }
+      }
+
+      .u-left-banner {
+        position: absolute;
+        top: 1vw;
+        right: -2vw;
+        width: 3vw;
+        height: 3vw;
+        background-image: url("../../../assets/img/left_banner.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+    }
+
+    .u-time-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .u-time {
+        background-color: rgba($color: #000000, $alpha: 0.2);
+        border: 1px solid #9789bd;
+        width: 14vw;
+        height: 2.8vw;
+        border-radius: 1.4vw;
+        text-align: center;
+        align-items: center;
+        font-family: "ErasBoldItc";
+        font-size: 2vw;
+      }
+
+      .u-clock {
+        width: 5vw;
+        height: 5vw;
+        margin: 0 1vw;
+        background-image: url("../../../assets/img/scene_clock.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+    }
+
+    .u-opponent-container {
+      position: relative;
+      width: 16vw;
+
+      .u-black {
+        position: absolute;
+        top: 1vw;
+        right: 1vw;
+        width: 100%;
+        height: 3vw;
+        background-color: rgba($color: #000000, $alpha: 0.2);
+        border: 1px solid #9789bd;
+        border-radius: 1.5vw;
+      }
+
+      .u-info {
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        .u-info-img {
+          width: 8vw;
+          height: 8vw;
+          background-image: url("../../../assets/img/scene_user.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+        }
+
+        .u-info-name {
+          padding: 0.1vw;
+          display: grid;
+          text-align: center;
+          align-items: center;
+          font-family: "Times New Roman";
+          font-size: 1.5vw;
+          font-weight: bold;
+        }
+      }
+
+      .u-right-banner {
+        position: absolute;
+        top: 1vw;
+        left: -2vw;
+        width: 3vw;
+        height: 3vw;
+        background-image: url("../../../assets/img/right_banner.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+    }
+  }
+
+  .u-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 4vw;
+
+    .u-back {
+      width: 5vw;
+      height: 5vw;
+      background-image: url("../../../assets/img/scene_back.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .u-back:hover {
+      cursor: pointer;
+    }
+
+    .u-footer-right {
+      display: flex;
+      justify-content: space-between;
+
+      .u-undo {
+        width: 5vw;
+        height: 5vw;
+        background-image: url("../../../assets/img/scene_undo.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .u-undo {
+        cursor: pointer;
+      }
+
+      .u-setting {
+        margin-left: 1vw;
+        width: 5vw;
+        height: 5vw;
+        background-image: url("../../../assets/img/scene_setting.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .u-setting {
+        cursor: pointer;
+      }
+    }
+  }
+}

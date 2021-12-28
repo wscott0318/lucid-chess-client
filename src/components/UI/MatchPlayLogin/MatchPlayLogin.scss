@@ -1,111 +1,111 @@
 .MatchPlayLogin {
-	background-image: url("../../../assets/img/modal_back.png");
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
+  background-image: url("../../../assets/img/modal_back.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  position: relative;
+  height: 100%;
+  display: grid;
+  align-items: center;
+
+  .u-container {
     position: relative;
-    height: 100%;
-	
-	.u-container {
-	  position: relative;
-	  width: 70vw;
-	  height: calc(70vw * 0.6);
-	  top: 5vw;
-	  margin: auto;
-	  background-image: url("../../../assets/img/level_back.png");
-	  background-repeat: no-repeat;
-	  background-size: 100% 100%;
-	  text-align: center;
-	  vertical-align: middle;
-  
-	  .u-ribbon {
-		position: absolute;
-		width: 60%;
-		height: 6vw;
-		left: 20%;
-		top: -2.5vw;
-		background-image: url("../../../assets/img/ribbon.png");
-		background-repeat: no-repeat;
-		background-size: 100% 100%;
-		font-size: 3.5vw;
-		text-align: center;
-		font-family: Haettenschweiler, fantasy, Courier, monospace;
-		color: #fbfae2;
-		-webkit-text-stroke: 0.05em #792a4d;
-	  }
-	  
-	  .u-content {
-		  position: absolute;
-		bottom: 0;
-		width: 100%;
-		height: calc(70vw * 0.6 - 3vw);
+    width: 70vw;
+    height: calc(70vw * 0.6);
+    top: 5vw;
+    margin: auto;
+    background-image: url("../../../assets/img/level_back.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+    vertical-align: middle;
 
-		.u-logo {
-		  position: absolute;
-		  margin: 1vw;
-		  width: 40%;
-		  height: 20vw;
-		  left: 30%;
-		  top: 0.5vw;
-		  background-image: url("../../../assets/img/logo.png");
-		  background-repeat: no-repeat;
-		  background-size: 100% 100%;
-  
-		}
-		
-		.u-input-wrap {
-			margin-top: 20vw;
-			padding: 1vw;
-			height: 7vw;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-	
-			.u-input {
-			  text-align: center;
-			  background: url(../../../assets/img/inputbox.png);
-			  background-repeat: no-repeat;
-			  background-size: 100% 100%;
-			  width: 40%;
-			  height: 5vw;
-			  border-width: 0;
-			  border-radius: 2.5vw;
-			  font-size: 2.5vw;
-			  color: white;
-			  padding-left: 0.5em;
-			  font-family: Haettenschweiler, fantasy, Courier, monospace;
-			}
-	
-			.u-input {
-			  outline: none;
-			  border: 0;
-			}
-		  }
+    .u-ribbon {
+      position: absolute;
+      width: 60%;
+      height: 6vw;
+      left: 20%;
+      top: -2.5vw;
+      background-image: url("../../../assets/img/ribbon.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      font-size: 3.5vw;
+      text-align: center;
+      font-family: Haettenschweiler, fantasy, Courier, monospace;
+      color: #fbfae2;
+      -webkit-text-stroke: 0.05em #792a4d;
+    }
 
-		.u-buttongroup{
-		  display: inline-grid;
-		  .u-button {
-			text-align: center;
-			align-items: center;
-			background-image: url("../../../assets/img/victory_button.png");
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-			width: 14vw;
-			height: 5vw;
-			border-radius: 100px;
-			color: #f9f8cb;
-			font-family: Haettenschweiler, fantasy, Courier, monospace;
-			font-size: 2.5vw;
-			background-color: transparent;
-			border-color: transparent;
-			text-shadow: -1px 1px 1px #0d6c6e, 1px 1px 1px #0d6c6e,
-			1px -1px 1px #0d6c6e, -1px -1px 1px #0d6c6e;
-		  }
-		  
-		  .u-button:active {
-			font-size: 2.4vw;
-		  }
-		}
-	  }
-	}
+    .u-content {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: calc(70vw * 0.6 - 3vw);
+
+      .u-logo {
+        position: absolute;
+        margin: 1vw;
+        width: 40%;
+        height: 20vw;
+        left: 30%;
+        top: 0.5vw;
+        background-image: url("../../../assets/img/logo.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .u-input-wrap {
+        margin-top: 20vw;
+        padding: 1vw;
+        height: 7vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .u-input {
+          text-align: center;
+          background: url(../../../assets/img/inputbox.png);
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          width: 40%;
+          height: 5vw;
+          border-width: 0;
+          border-radius: 2.5vw;
+          font-size: 2.5vw;
+          color: white;
+          padding-left: 0.5em;
+          font-family: Haettenschweiler, fantasy, Courier, monospace;
+        }
+
+        .u-input {
+          outline: none;
+          border: 0;
+        }
+      }
+
+      .u-buttongroup {
+        display: inline-grid;
+        .u-button {
+          text-align: center;
+          align-items: center;
+          background-image: url("../../../assets/img/victory_button.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          width: 14vw;
+          height: 5vw;
+          border-radius: 100px;
+          color: #f9f8cb;
+          font-family: Haettenschweiler, fantasy, Courier, monospace;
+          font-size: 2.5vw;
+          background-color: transparent;
+          border-color: transparent;
+          text-shadow: -1px 1px 1px #0d6c6e, 1px 1px 1px #0d6c6e,
+            1px -1px 1px #0d6c6e, -1px -1px 1px #0d6c6e;
+        }
+
+        .u-button:active {
+          font-size: 2.4vw;
+        }
+      }
+    }
   }
-  
+}

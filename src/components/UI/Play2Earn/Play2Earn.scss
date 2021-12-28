@@ -1,9 +1,11 @@
 .playToEarn {
-    background-image: url("../../../assets/img/modal_back.png");
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    position: relative;
-    height: 100%;
+  background-image: url("../../../assets/img/modal_back.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  position: relative;
+  height: 100%;
+  display: grid;
+  align-items: center;
 
   .u-container {
     position: relative;
@@ -48,9 +50,8 @@
         background-image: url("../../../assets/img/logo.png");
         background-repeat: no-repeat;
         background-size: 100% 100%;
-
       }
-      .u-buttongroup{
+      .u-buttongroup {
         display: inline-grid;
         margin-top: 19vw;
         .u-button {
@@ -69,9 +70,9 @@
           background-color: transparent;
           border-color: transparent;
           text-shadow: -1px 1px 1px #0d6c6e, 1px 1px 1px #0d6c6e,
-          1px -1px 1px #0d6c6e, -1px -1px 1px #0d6c6e;
+            1px -1px 1px #0d6c6e, -1px -1px 1px #0d6c6e;
         }
-        
+
         .u-button:active {
           font-size: 2.4vw;
         }

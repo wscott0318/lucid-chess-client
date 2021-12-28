@@ -1,4 +1,7 @@
 .Play2Earn {
+  display: grid;
+  align-items: center;
+
   .u-container {
     position: relative;
     width: 70vw;
@@ -70,7 +73,7 @@
           background-color: transparent;
           border-color: transparent;
           text-shadow: -1px 1px 1px #0d6c6e, 1px 1px 1px #0d6c6e,
-          1px -1px 1px #0d6c6e, -1px -1px 1px #0d6c6e;
+            1px -1px 1px #0d6c6e, -1px -1px 1px #0d6c6e;
         }
 
         .u-input {
@@ -93,27 +96,27 @@
         font-family: Arial;
       }
 
-        .u-button {
-          margin-top: 0vw;
-          text-align: center;
-          align-items: center;
-          background-image: url("../../../assets/img/victory_button.png");
-          background-repeat: no-repeat;
-          background-size: 100% 100%;
-          width: 14vw;
-          height: 5vw;
-          border-radius: 100px;
-          color: #f9f8cb;
-          font-family: Haettenschweiler, fantasy, Courier, monospace;
-          font-size: 2.5vw;
-          background-color: transparent;
-          border-color: transparent;
-          text-shadow: -1px 1px 1px #0d6c6e, 1px 1px 1px #0d6c6e,
+      .u-button {
+        margin-top: 0vw;
+        text-align: center;
+        align-items: center;
+        background-image: url("../../../assets/img/victory_button.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        width: 14vw;
+        height: 5vw;
+        border-radius: 100px;
+        color: #f9f8cb;
+        font-family: Haettenschweiler, fantasy, Courier, monospace;
+        font-size: 2.5vw;
+        background-color: transparent;
+        border-color: transparent;
+        text-shadow: -1px 1px 1px #0d6c6e, 1px 1px 1px #0d6c6e,
           1px -1px 1px #0d6c6e, -1px -1px 1px #0d6c6e;
-        }
-        .u-button:active {
-          font-size: 2.4vw;
-        }
       }
+      .u-button:active {
+        font-size: 2.4vw;
+      }
+    }
   }
 }

@@ -1,4 +1,7 @@
 .Popup {
+  display: grid;
+  align-items: center;
+
   .form {
     width: 47vw;
     height: calc(70vw * 0.5);

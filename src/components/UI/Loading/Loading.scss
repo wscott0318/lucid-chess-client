@@ -1,67 +1,69 @@
 .loading {
-    background-image: url("../../../assets/img/modal_back.png");
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  background-image: url("../../../assets/img/modal_back.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  align-items: center;
 
-	&__container {
-		position: absolute;
-		transform: translate3d(-50%, -50%, 0);
-		left: 50%;
-		top: 50%;
-	}
+  &__container {
+    position: absolute;
+    transform: translate3d(-50%, -50%, 0);
+    left: 50%;
+    top: 50%;
+  }
 
-	&__stars{
-		display: flex;
-		align-items: center;
-		justify-content: center;
+  &__stars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-		background: rgb(0,0,0,0.2);
-		border-radius: 20px;
-		padding: 20px;
+    background: rgb(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 20px;
 
-		img {
-			width: 120px;
-			padding: 0 5px;
-		}
-	}
+    img {
+      width: 120px;
+      padding: 0 5px;
+    }
+  }
 
-	&__title {
-		text-align: center;
+  &__title {
+    text-align: center;
 
-		font: normal normal bold 25px Equinox;
-		letter-spacing: 3px;
-		color: #F9F8CB;
-		font-size : 55px;
-		font-family : Haettenschweiler;
-		font-weight:500;
+    font: normal normal bold 25px Equinox;
+    letter-spacing: 3px;
+    color: #f9f8cb;
+    font-size: 55px;
+    font-family: Haettenschweiler;
+    font-weight: 500;
 
-		padding: 10px 0;
-	}
+    padding: 10px 0;
+  }
 }
 
 @media (max-width: 1440px) {
-	.loading {
-		&__stars{
-			border-radius: 1.39vw;
-			padding: 1.39vw;
-	
-			img {
-				width: 8.33vw;
-				padding: 0 0.35vw;
-			}
-		}
-	
-		&__title {
-			font-size: 1.74vw;
-			letter-spacing: 0.2vw;
-			font-size : 3.82vw;
-	
-			padding: 0.7vw 0;
-		}
-	}
+  .loading {
+    &__stars {
+      border-radius: 1.39vw;
+      padding: 1.39vw;
+
+      img {
+        width: 8.33vw;
+        padding: 0 0.35vw;
+      }
+    }
+
+    &__title {
+      font-size: 1.74vw;
+      letter-spacing: 0.2vw;
+      font-size: 3.82vw;
+
+      padding: 0.7vw 0;
+    }
+  }
 }
