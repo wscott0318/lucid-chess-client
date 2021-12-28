@@ -20,6 +20,8 @@ import Loading from "../../components/UI/Loading/Loading";
 import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
 
+import backPic from '../../assets/img/background.jpg';
+
 import { throttle } from 'lodash-es';
 
 export default class Scene extends Component {
@@ -57,15 +59,9 @@ export default class Scene extends Component {
 
         this.container.appendChild( renderer.domElement );
 
-        // TODO : setup skybox
-        const skyTexture = new THREE.TextureLoader().load('skybox/1.jpg');
-        const skyGeo = new THREE.SphereBufferGeometry(50, 100, 100);
-        const skyMaterial = new THREE.MeshBasicMaterial({
-            side: THREE.DoubleSide,
-            map: skyTexture,
-        });
-        const skyMesh = new THREE.Mesh( skyGeo, skyMaterial );
-        scene.add(skyMesh);
+        var bgTexture = new THREE.TextureLoader().load(backPic);
+        bgTexture.minFilter = THREE.LinearFilter;
+        scene.background = bgTexture;
 
         // TODO : Camera Orbit control
         const controls = new OrbitControls( camera, this.container );
@@ -75,52 +71,8 @@ export default class Scene extends Component {
         controls.minDistance = orbitControlProps.minDistance;
         controls.update();
 
-
-        // TODO : Scene Bloom Effect - Effect composer
-        const renderScene = new RenderPass( scene, camera );
-
-        const bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 0, 0, 0 );
-        bloomPass.threshold = bloomParams.bloomThreshold;
-        bloomPass.strength = bloomParams.bloomStrength;
-        bloomPass.radius = bloomParams.bloomRadius;
-
-
-        // TODO: Scene Outline Effect - Effect composer
-        const whiteTeamObjects = []
-        const blackTeamObjects = []
-        
-        const outlineParams = {
-            edgeStrength: 2,
-            edgeGlow: 1,
-            edgeThickness: 1.0,
-            pulsePeriod: 0,
-            usePatternTexture: false
-        };
-
-        const redOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
-        redOutlinePass.renderToScreen = true;
-        redOutlinePass.edgeStrength = outlineParams.edgeStrength;
-        redOutlinePass.edgeGlow = outlineParams.edgeGlow;
-        redOutlinePass.visibleEdgeColor.set(0xff0000);
-        redOutlinePass.hiddenEdgeColor.set(0xff0000);
-
-        const blueOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
-        blueOutlinePass.renderToScreen = true;
-        blueOutlinePass.edgeStrength = outlineParams.edgeStrength;
-        blueOutlinePass.edgeGlow = outlineParams.edgeGlow;
-        blueOutlinePass.visibleEdgeColor.set(0x0000ff);
-        blueOutlinePass.hiddenEdgeColor.set(0x0000ff);
-
-        const composer = new EffectComposer( renderer );
-        composer.addPass( renderScene );
-        composer.addPass( bloomPass );
-        // composer.addPass( redOutlinePass );
-        // composer.addPass( blueOutlinePass );
-
-
-        // TODO : light environment setup
-        var hemiLight = new THREE.HemisphereLight(hemiLightProps.skyColor, hemiLightProps.groundColor, hemiLightProps.intensity);
-        scene.add(hemiLight);
+        const light2 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
+        scene.add( light2 );
 
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
@@ -129,11 +81,6 @@ export default class Scene extends Component {
         light.shadow.mapSize.width = spotLightProps.shadow.mapSize.width;
         light.shadow.mapSize.height = spotLightProps.shadow.mapSize.height;
         scene.add( light );
-
-        // var fogColor = new THREE.Color(0xbbbbbb);
-        // scene.background = fogColor;
-        // scene.fog = new THREE.Fog(fogColor, 8, 30);
-
 
         /////////////////////////////////////////////////////////////////////////////////////////////////
         /***********************************************************************************************/
@@ -183,7 +130,7 @@ export default class Scene extends Component {
         
         // TODO : Load GLTF models
         Promise.all([
-            loader.loadAsync( 'models/board.glb' ),
+            loader.loadAsync( 'models/chess-board.glb' ),
             loader.loadAsync( 'models/piece/Golem.glb' ),
             loader.loadAsync( 'models/piece/Cerberus.glb' ),
             loader.loadAsync( 'models/piece/Keo502.glb' ),
@@ -192,87 +139,8 @@ export default class Scene extends Component {
             loader.loadAsync( 'models/piece/Kong.glb' ),
             loader.loadAsync( 'models/piece/Fox.glb' ),
             loader.loadAsync( 'models/piece/Lucifer.glb' ),
-            loader.loadAsync( 'models/env.glb' )
+            loader.loadAsync( 'models/chess-cell.glb' )
         ]).then((gltfArray) => {
-            // TODO : Add enviroment mountain
-            const mountainMesh = gltfArray[9].scene.clone();
-            mountainMesh.position.set( modelProps.mountain.position.x, modelProps.mountain.position.y, modelProps.mountain.position.z );
-            mountainMesh.scale.set( modelProps.mountain.scale, modelProps.mountain.scale, modelProps.mountain.scale );
-            mountainMesh.rotation.y = ang2Rad(modelProps.mountain.rotate.y);
-            scene.add(mountainMesh);
-
-            // mountainMesh.traverse(n => { 
-            //     if ( n.isMesh ) {
-            //         console.log(n.material.name)
-            //         n.castShadow = true;
-            //         n.receiveShadow = true;
-            //         if(n.material.map) n.material.map.anisotropy = 16;
-            //     }
-            // });
-
-            gltfArray[1].scene.traverse(n => {  //Golem
-                if ( n.isMesh ) {
-                    n.material.metalness = 0.5
-                    n.material.roughness = 0.3
-                    n.material.refractionRatio = 3
-                }
-            });
-
-            gltfArray[2].scene.traverse(n => { //Cerberus
-                if ( n.isMesh ) {
-                    n.material.metalness = 0.3
-                    n.material.roughness = 0.5
-                    n.material.refractionRatio = 1
-                }
-            });
-
-            gltfArray[3].scene.traverse(n => {  //Keo502
-                if ( n.isMesh ) {
-                    n.material.metalness = 0.5
-                    n.material.roughness = 0.1
-                    n.material.refractionRatio = 2
-                }
-            });
-
-            gltfArray[4].scene.traverse(n => { //Bahamut
-                if ( n.isMesh ) {
-                    n.material.metalness = 0.6
-                    n.material.roughness = 0.1
-                    n.material.refractionRatio = 3
-                }
-            });
-
-            gltfArray[5].scene.traverse(n => { //Medusa
-                if ( n.isMesh ) {
-                    n.material.metalness = 0.25
-                    n.material.roughness = 0.0
-                    n.material.refractionRatio = 3
-                }
-            });
-
-            gltfArray[6].scene.traverse(n => { //Kong
-                if ( n.isMesh ) {
-                    n.material.metalness = 0.3
-                    n.material.roughness = 1
-                    n.material.refractionRatio = 0
-                }
-            });
-
-            gltfArray[7].scene.traverse(n => { //Fox
-                if ( n.isMesh ) {
-                    n.material.metalness = 0.5
-                    n.material.roughness = 1
-                    n.material.refractionRatio = 0
-                }
-            });
-
-            gltfArray[8].scene.traverse(n => { //Lucifer
-                if ( n.isMesh ) {
-                    n.material.metalness = 1
-                    n.material.roughness = 1
-                    n.material.refractionRatio = 0
-                }
-            });
             
             // TODO : Add chess board to the scene
             var board = gltfArray[0].scene.clone();
@@ -294,21 +162,18 @@ export default class Scene extends Component {
             this.meshArray['king'] = gltfArray[6].scene.clone();
             this.meshArray['fox'] = gltfArray[7].scene.clone();
             this.meshArray['lucifer'] = gltfArray[8].scene.clone();
+            
 
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
                 this.boardGroundArray.push([]);
                 for( let j = 0; j < boardSize; j++ ) {
-                    const tileGeom = new THREE.BoxGeometry(tileSize, 0.1, tileSize);
-                    const material = new THREE.MeshStandardMaterial({
-                        color: (i + j) % 2 ? lightTone : darkTone,
-                        side: THREE.DoubleSide,
-                        roughness: 1,
-                        metalness: 0,
-                        refractionRatio: 0,
-                    });
-                    const tileMesh = new THREE.Mesh(tileGeom, material);
-                    tileMesh.position.set( j * tileSize - tileSize * 3.5, 0.5, -(i * tileSize - tileSize * 3.5));
+                    const tileMesh = gltfArray[9].scene.clone();
+                    tileMesh.scale.set( modelProps.cell.scale, modelProps.cell.scale, modelProps.cell.scale );
+                    tileMesh.children[0].material = tileMesh.children[0].material.clone()
+                    tileMesh.material = tileMesh.children[0].material
+                    tileMesh.material.color = (i + j) % 2 ? new THREE.Color(lightTone) : new THREE.Color(darkTone);
+                    tileMesh.position.set( j * tileSize - tileSize * 3.5 + 0.035, 0.5, -(i * tileSize - tileSize * 3.5));
                     tileMesh.receiveShadow = true;
 
                     scene.add(tileMesh);
@@ -383,9 +248,27 @@ export default class Scene extends Component {
 
                         //TODO: tag piece by name
                         if (piece === piece.toUpperCase()) {
-                            whiteTeamObjects.push(mesh)
+                            mesh.traverse(n => { //Fox
+                                if ( n.isMesh ) {
+                                    const material = new THREE.MeshStandardMaterial({
+                                        color: '#d29868',
+                                        roughness: 0.3,
+                                        metalness: 0.2,
+                                    });
+                                    n.material= material
+                                }
+                            });
                         } else {
-                            blackTeamObjects.push(mesh)
+                            mesh.traverse(n => { //Fox
+                                if ( n.isMesh ) {
+                                    const material = new THREE.MeshStandardMaterial({
+                                        color: '#0e191f',
+                                        roughness: 0.3,
+                                        metalness: 0.2,
+                                    });
+                                    n.material= material
+                                }
+                            });
                         }
 
                         mesh.children[0].traverse(n => { if ( n.isMesh ) {
@@ -403,9 +286,6 @@ export default class Scene extends Component {
                     }
                 }
             }
-
-            redOutlinePass.selectedObjects = whiteTeamObjects;
-            blueOutlinePass.selectedObjects = blackTeamObjects;
 
             renderer.domElement.addEventListener('mousedown', mouseDownAction);
 
