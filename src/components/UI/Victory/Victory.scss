@@ -1,0 +1,100 @@
+.Victory {
+  display: grid;
+  align-items: center;
+
+  .u-container {
+    width: 90vmin;
+    height: 90vmin;
+    margin: auto;
+    position: relative;
+
+    .u-background {
+      width: 100%;
+      height: 80%;
+      bottom: 0;
+      position: absolute;
+    }
+
+    .u-foreground {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+
+      .u-mark {
+        width: 100%;
+        height: 50%;
+      }
+
+      .u-list {
+        padding: 0 5%;
+        height: 35%;
+
+        .u-list-item {
+          padding: 0 10%;
+          margin: 3%;
+          height: 40%;
+          display: flex;
+          justify-content: space-between;
+          background-image: url("../../../assets/img/victory_container.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          align-items: center;
+
+          .u-item-image {
+            height: 90%;
+          }
+
+          .u-item-text {
+            font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+            color: #f7cf29;
+            font-size: 6vmin;
+            // -webkit-text-stroke: 0.07em #390b13;
+            text-shadow: 1px 1px 0 #390b13, -1px 1px 0 #390b13,
+              1px -1px 0 #390b13, -1px -1px 0 #390b13, 0px 1px 0 #390b13,
+              0px -1px 0 #390b13, -1px 0px 0 #390b13, 1px 0px 0 #390b13,
+              2px 2px 0 #390b13, -2px 2px 0 #390b13, 2px -2px 0 #390b13,
+              -2px -2px 0 #390b13, 0px 2px 0 #390b13, 0px -2px 0 #390b13,
+              -2px 0px 0 #390b13, 2px 0px 0 #390b13, 1px 2px 0 #390b13,
+              -1px 2px 0 #390b13, 1px -2px 0 #390b13, -1px -2px 0 #390b13,
+              2px 1px 0 #390b13, -2px 1px 0 #390b13, 2px -1px 0 #390b13,
+              -2px -1px 0 #390b13;
+            padding-right: 15%;
+          }
+        }
+      }
+
+      .u-button {
+        position: absolute;
+        left: calc(50% - 17vmin);
+        bottom: 4vmin;
+        text-align: center;
+        align-items: center;
+        background-image: url("../../../assets/img/victory_button.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        width: 34vmin;
+        height: 10%;
+        border-radius: 100px;
+        color: #f9f8cb;
+        font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+        font-size: 4vmin;
+        background-color: transparent;
+        border-color: transparent;
+        // -webkit-text-stroke: 0.07em #0c6c6d;
+        text-shadow: 1px 1px 0 #0c6c6d, -1px 1px 0 #0c6c6d, 1px -1px 0 #0c6c6d,
+          -1px -1px 0 #0c6c6d, 0px 1px 0 #0c6c6d, 0px -1px 0 #0c6c6d,
+          -1px 0px 0 #0c6c6d, 1px 0px 0 #0c6c6d, 2px 2px 0 #0c6c6d,
+          -2px 2px 0 #0c6c6d, 2px -2px 0 #0c6c6d, -2px -2px 0 #0c6c6d,
+          0px 2px 0 #0c6c6d, 0px -2px 0 #0c6c6d, -2px 0px 0 #0c6c6d,
+          2px 0px 0 #0c6c6d, 1px 2px 0 #0c6c6d, -1px 2px 0 #0c6c6d,
+          1px -2px 0 #0c6c6d, -1px -2px 0 #0c6c6d, 2px 1px 0 #0c6c6d,
+          -2px 1px 0 #0c6c6d, 2px -1px 0 #0c6c6d, -2px -1px 0 #0c6c6d;
+      }
+
+      .u-button:active {
+        font-size: 3.9vmin;
+      }
+    }
+  }
+}

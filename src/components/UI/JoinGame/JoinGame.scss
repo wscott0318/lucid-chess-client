@@ -1,0 +1,122 @@
+.JoinGame {
+  background-image: url("../../../assets/img/modal_back.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  position: relative;
+  height: 100%;
+  display: grid;
+  align-items: center;
+
+  .u-container {
+    position: relative;
+    width: 70vw;
+    height: calc(70vw * 0.6);
+    margin: auto;
+    top: 5vw;
+    background-image: url("../../../assets/img/level_back.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+
+    .u-ribbon {
+      position: absolute;
+      width: 60%;
+      height: 6vw;
+      left: 20%;
+      top: -2.5vw;
+      background-image: url("../../../assets/img/ribbon.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      font-size: 3.5vw;
+      text-align: center;
+      font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+      color: #fbfae2;
+      // -webkit-text-stroke: 0.05em #792a4d;
+      text-shadow: 1px 1px 0 #792a4d, -1px 1px 0 #792a4d, 1px -1px 0 #792a4d,
+        -1px -1px 0 #792a4d, 0px 1px 0 #792a4d, 0px -1px 0 #792a4d,
+        -1px 0px 0 #792a4d, 1px 0px 0 #792a4d, 2px 2px 0 #792a4d,
+        -2px 2px 0 #792a4d, 2px -2px 0 #792a4d, -2px -2px 0 #792a4d,
+        0px 2px 0 #792a4d, 0px -2px 0 #792a4d, -2px 0px 0 #792a4d,
+        2px 0px 0 #792a4d, 1px 2px 0 #792a4d, -1px 2px 0 #792a4d,
+        1px -2px 0 #792a4d, -1px -2px 0 #792a4d, 2px 1px 0 #792a4d,
+        -2px 1px 0 #792a4d, 2px -1px 0 #792a4d, -2px -1px 0 #792a4d;
+    }
+
+    .u-content {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: calc(70vw * 0.6 - 3vw);
+
+      .u-description {
+        background-color: rgba($color: #000000, $alpha: 0.2);
+        border-radius: 1vw;
+        width: 70%;
+        height: 7vw;
+        margin: 1vw auto;
+        display: grid;
+        align-items: center;
+        padding: 2vw;
+        font-size: 1.5vw;
+        color: #fdf9e8;
+        font-family: Arial;
+      }
+
+      .u-input-wrap {
+        padding: 1vw;
+        height: 7vw;
+
+        .u-input {
+          text-align: center;
+          background: url(../../../assets/img/inputbox.png);
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          width: 40%;
+          height: 5vw;
+          border-width: 0;
+          border-radius: 2.5vw;
+          font-size: 2.5vw;
+          color: #fdf9e8;
+          padding-left: 0.5em;
+          font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+          outline: none;
+          border: 0;
+        }
+
+        .u-input::placeholder {
+          color: #84617b;
+        }
+      }
+
+      .u-button {
+        margin-top: 1vw;
+        text-align: center;
+        align-items: center;
+        background-image: url("../../../assets/img/victory_button.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        width: 14vw;
+        height: 5vw;
+        border-radius: 100px;
+        color: #f9f8cb;
+        font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+        font-size: 2.5vw;
+        background-color: transparent;
+        border-color: transparent;
+        // -webkit-text-stroke: 0.05em #0c6c6d;
+        text-shadow: 1px 1px 0 #0c6c6d, -1px 1px 0 #0c6c6d, 1px -1px 0 #0c6c6d,
+          -1px -1px 0 #0c6c6d, 0px 1px 0 #0c6c6d, 0px -1px 0 #0c6c6d,
+          -1px 0px 0 #0c6c6d, 1px 0px 0 #0c6c6d, 2px 2px 0 #0c6c6d,
+          -2px 2px 0 #0c6c6d, 2px -2px 0 #0c6c6d, -2px -2px 0 #0c6c6d,
+          0px 2px 0 #0c6c6d, 0px -2px 0 #0c6c6d, -2px 0px 0 #0c6c6d,
+          2px 0px 0 #0c6c6d, 1px 2px 0 #0c6c6d, -1px 2px 0 #0c6c6d,
+          1px -2px 0 #0c6c6d, -1px -2px 0 #0c6c6d, 2px 1px 0 #0c6c6d,
+          -2px 1px 0 #0c6c6d, 2px -1px 0 #0c6c6d, -2px -1px 0 #0c6c6d;
+      }
+
+      .u-button:active {
+        font-size: 2.4vw;
+      }
+    }
+  }
+}

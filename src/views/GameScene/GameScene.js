@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -72,10 +72,6 @@ export default class Scene extends Component {
         controls.minDistance = orbitControlProps.minDistance;
         controls.update();
 
-        const light2 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
-        light2.castShadow = true
-        scene.add( light2 );
-
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
         light.castShadow = spotLightProps.castShadow;
@@ -83,30 +79,43 @@ export default class Scene extends Component {
         light.shadow.mapSize.width = spotLightProps.shadow.mapSize.width;
         light.shadow.mapSize.height = spotLightProps.shadow.mapSize.height;
         scene.add( light );
+
+        var light2 = new THREE.SpotLight( spotLightProps2.color, spotLightProps2.intensity );
+        light2.position.set( -spotLightProps2.position.x, spotLightProps2.position.y, spotLightProps2.position.z );
+        light2.castShadow = spotLightProps2.castShadow;
+        light2.shadow.bias = spotLightProps2.shadow.bias;
+        light2.shadow.mapSize.width = spotLightProps2.shadow.mapSize.width;
+        light2.shadow.mapSize.height = spotLightProps2.shadow.mapSize.height;
+        scene.add( light2 );
+
+        const light3 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
+        light3.castShadow = true
+        scene.add( light3 );
+
 /***************************outline **********************************/
-            const composer = new EffectComposer( renderer );
-            const renderScene = new RenderPass( scene, camera );
-            
-            composer.addPass( renderScene );
-            // composer.addPass( bloomPass );
+        const composer = new EffectComposer( renderer );
+        const renderScene = new RenderPass( scene, camera );
+        
+        composer.addPass( renderScene );
+        // composer.addPass( bloomPass );
 
-            const depthTexture = new THREE.DepthTexture();
-            const renderTarget = new THREE.WebGLRenderTarget(
-                window.innerWidth,
-            window.innerHeight
+        const depthTexture = new THREE.DepthTexture();
+        const renderTarget = new THREE.WebGLRenderTarget(
+            window.innerWidth,
+        window.innerHeight
+        );
+        // const composer = new EffectComposer(renderer, renderTarget);
+        const pass = new RenderPass(scene, camera);
+        composer.addPass(pass);
+
+        const redOut = new CustomOutlinePass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            this.scene,
+            this.camera
             );
-            // const composer = new EffectComposer(renderer, renderTarget);
-            const pass = new RenderPass(scene, camera);
-            composer.addPass(pass);
-
-            const redOut = new CustomOutlinePass(
-                new THREE.Vector2(window.innerWidth, window.innerHeight),
-                this.scene,
-                this.camera
-                );
-            composer.addPass(redOut);
-        /////////////////////////////////////////////////////////////////////////////////////////////////
-        /***********************************************************************************************/
+        composer.addPass(redOut);
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/***********************************************************************************************/
 
         // TODO : Windows Resize Handle
         var setCanvasDimensions = ( canvas, width, height, set2dTransform = false ) => {
@@ -277,7 +286,7 @@ export default class Scene extends Component {
                         //TODO: tag piece by name
                         if (piece === piece.toUpperCase()) {
                             mesh.traverse(n => { //Fox
-                                // n.applyOutline  = true; //set outline
+                                n.applyOutline  = true; //set outline
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#d29868',
@@ -716,7 +725,7 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            renderer.render(scene, camera);
+            // renderer.render(scene, camera);
             composer.render();
         };
         this.animate = animate;

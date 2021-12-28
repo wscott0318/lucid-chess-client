@@ -1,0 +1,29 @@
+@font-face {
+  font-family: "Haettenschweiler";
+  src: local("Haettenschweiler"),
+    url("./assets/fonts/Haettenschweiler.ttf") format("truetype"); /* Super Modern Browsers */
+}
+
+@font-face {
+  font-family: "HaettenschweilerRegular";
+  src: local("HaettenschweilerRegular"),
+    url("./assets/fonts/Haettenschweiler Regular.ttf") format("truetype"); /* Super Modern Browsers */
+}
+
+@font-face {
+  font-family: "ErasBoldItc";
+  src: local("ErasBoldItc"),
+    url("./assets/fonts/Eras Bold ITC.ttf") format("truetype"); /* Super Modern Browsers */
+}
+
+.App {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.fullScreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
