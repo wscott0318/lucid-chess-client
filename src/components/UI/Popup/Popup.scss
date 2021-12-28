@@ -6,14 +6,22 @@
     background-repeat: no-repeat;
     background-size: 100% 100%;
     position: relative;
+    transform: translate3d(-50%, -50%, 0);
+    left: 50%;
+    top: calc(70vw * 0.25);
+
     .content {
       text-align: left;
-      margin: 10vw 6vw 0;
       font-family: "HaettenschweilerRegular";
       letter-spacing: 0.01em;
       color: #f9f8cb;
       font-size: 2vw;
       vertical-align: middle;
+      padding: 0 10%;
+      position: relative;
+      transform: translateY(-50%);
+      top: 42%;
+      text-align: center;
     }
     .footer {
       position: absolute;
@@ -22,6 +30,11 @@
       width: 100%;
       padding: 0 3vw;
       justify-content: space-between;
+
+      &.center {
+        justify-content: center;
+      }
+
       .button-div {
         cursor: pointer;
         width: 12vw;

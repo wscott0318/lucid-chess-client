@@ -1,4 +1,3 @@
-import React, { Component } from "react";
 import { Modal, Image } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Victory.scss";
@@ -34,7 +33,7 @@ export const Victory = ({ show }) => {
                   <div className="u-item-text">7</div>
                 </div>
               </div>
-              <button className="u-button" onClick={ () => { alert(1); navigate('/')} }>Return Home</button>
+              <button className="u-button" onClick={ () => navigate('/') }>Return Home</button>
             </div>
           </div>
         </Modal.Body>

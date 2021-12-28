@@ -5,13 +5,12 @@ import "./GameSelect.scss";
 import mode1Img from "../../../assets/img/select_game_random.png";
 import mode2Img from "../../../assets/img/select_game_friend.png";
 import mode3Img from "../../../assets/img/select_game_computer.png";
-import { gameModes } from "../../../utils/constant";
 
 export const GameSelect = () => {
     const navigate = useNavigate();
 
 	const matchPlayAction = () => {
-		navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: false, username: 'defaultUser' }});
+		navigate('/matchPlay');
 	}
 
 	const friendPlayAction = () => {

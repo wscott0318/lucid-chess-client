@@ -1,6 +1,5 @@
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../ui_common.css";
 import "./PawnModal.scss";
 
 import ICON_KNIGHT from "../../../assets/img/pawn_knight_icon.png";
@@ -82,7 +81,7 @@ export const PawnModal = ({ show, pawnTransform }) => {
                                 <div className="pawn-card-symbol-image" style={{backgroundImage: `url(${item.symbol})`, width: item.width, height: item.height, top: item.top}}></div>
                                 <div className="pawn-card-content">
                                     <div className="pawn-card-content-header">
-                                        <img className="pawn-card-content-header-icon" src={item.icon}></img>
+                                        <img className="pawn-card-content-header-icon" src={item.icon} alt="pic"></img>
                                         <div className="pawn-card-content-header-title">{item.type}</div>
                                     </div>
                                     <div className="pawn-card-content-desc">{item.desc}</div>

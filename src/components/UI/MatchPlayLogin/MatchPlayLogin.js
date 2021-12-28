@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./CreateGame.scss";
-import { gameModes, userTypes } from "../../../utils/constant";
+import "./MatchPlayLogin.scss";
+import { gameModes } from "../../../utils/constant";
 import { useState } from "react";
 
-export const CreateGame = () => {
+export const MatchPlayLogin = () => {
 	const [name, setName] = useState('');
 	const navigate = useNavigate();
 
@@ -13,13 +13,13 @@ export const CreateGame = () => {
 		if( name === '' )
 			return;
 
-        navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['creator'] }});
+		navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: false, username: name }});
     }
 
     return (
-        <div className="CreateGame">
+        <div className="MatchPlayLogin">
 			<div className="u-container">
-				<div className="u-ribbon">Create game</div>
+				<div className="u-ribbon">Match matching game</div>
 				<div className="u-content">
 					<div className="u-logo"></div>
 
@@ -33,7 +33,7 @@ export const CreateGame = () => {
 					</div>
 
 					<div className="u-buttongroup">
-						<button className="u-button" onClick={createAction}>Create</button>
+						<button className="u-button" onClick={createAction}>Play</button>
 					</div>
 				</div>
 			</div>
@@ -41,4 +41,4 @@ export const CreateGame = () => {
     )
 }
 
-export default CreateGame;
+export default MatchPlayLogin;

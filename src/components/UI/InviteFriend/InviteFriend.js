@@ -1,46 +1,48 @@
-import React, { Component } from "react";
-import { Modal, Image } from "react-bootstrap";
+import React, { useRef } from "react";
+import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./InviteFriend.scss";
-// import joinGameImg from "../../assets/img/join_game.png";
 
-export default class InviteFriend extends Component {
-  render() {
-    console.log("test")
+export const InviteFriend = ({ show, hideAction, roomId }) => {
+	const inputRef = useRef(null);
+
+	const copyCodeToClipboard = () => {
+		const el = inputRef.current;
+		el.select();
+		document.execCommand('copy');
+	}
+
     return (
-      <Modal
-        className="Play2Earn"
-        {...this.props}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        {/* <Modal.Body> */}
-          <div className="u-container">
-            <div className="u-ribbon">Invite Your friend</div>
-            <div className="u-content">
-              <div className="u-input-wrap">
-                  <input
-                    className="u-input"
-                    type="text"
-                    placeholder="Secret key"
-                  ></input>
-                  <button className="u-copy-button"></button>
-              </div>
-                <div className="u-description">
-                  Share the secrect key above, so  your friend can join this game !
-                </div>
-                <button className="u-button">Got it</button>
-            </div>
-          </div>
-          {/* <Image
-            className="u-item-image"
-            src={joinGameImg}
-            width={500}
-            height={500}
-          ></Image> */}
-        {/* </Modal.Body> */}
-      </Modal>
-    );
-  }
+		<Modal
+			className="Play2Earn"
+			show={ show }
+			onHide={ hideAction }
+			size="lg"
+			aria-labelledby="contained-modal-title-vcenter"
+			centered
+		>
+			<div className="u-container">
+				<div className="u-ribbon">Invite Your friend</div>
+				<div className="u-content">
+				<div className="u-input-wrap">
+					<input
+						ref={ inputRef }
+						className="u-input"
+						type="text"
+						placeholder="Secret key"
+						readOnly
+						value={roomId}
+					></input>
+					<button className="u-copy-button" onClick={copyCodeToClipboard}></button>
+				</div>
+					<div className="u-description">
+						Share the secrect key above, so  your friend can join this game !
+					</div>
+					<button className="u-button" onClick={hideAction}>Got it</button>
+				</div>
+			</div>
+		</Modal>
+    )
 }
+
+export default InviteFriend;

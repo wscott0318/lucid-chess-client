@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../ui_common.css";
 import "./RoomsModal.scss";
 
 import ICON_CLASSIC from "../../../assets/img/1v1_classic_header.png";

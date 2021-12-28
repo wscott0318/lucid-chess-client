@@ -14,9 +14,11 @@ import { ang2Rad, getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition,
 import io from 'socket.io-client';
 import { socketServerPort } from "../../config";
 import { socketEvents } from "../../utils/packet";
-import Waiting from "../../components/GameScene/Waiting";
 import PawnModal from "../../components/UI/PawnModal/PawnModal";
 import Victory from "../../components/UI/Victory/Victory";
+import Loading from "../../components/UI/Loading/Loading";
+import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
+import Popup from "../../components/UI/Popup/Popup";
 
 import { throttle } from 'lodash-es';
 
@@ -675,26 +677,26 @@ export default class Scene extends Component {
         var animate = function () {
             if( self.moveFinished() ) {
                 if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
-                    if( self.side != self.currentTurn ) {
-                        this.setState({
+                    if( self.side !== self.currentTurn ) {
+                        self.setState({
                             showVictoryModal: true,
                             showLoseModal: false,
                         });
                     } else {
-                        this.setState({
+                        self.setState({
                             showVictoryModal: false,
                             showLoseModal: true,
                         });
                     }
                     return;
                 } else if( self.checkIfFinished() ) {
-                    if( self.props.side != self.props.game.board.configuration.turn ) {
-                        this.setState({
+                    if( self.props.side !== self.props.game.board.configuration.turn ) {
+                        self.setState({
                             showVictoryModal: true,
                             showLoseModal: false,
                         });
                     } else {
-                        this.setState({
+                        self.setState({
                             showVictoryModal: false,
                             showLoseModal: true,
                         });
@@ -802,8 +804,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            // renderer.render(scene, camera);
-            composer.render();
+            renderer.render(scene, camera);
+            // composer.render();
         };
         this.animate = animate;
     }
@@ -974,12 +976,23 @@ export default class Scene extends Component {
 
     handlePlayerLogOut(params) {
         const username = params.username;
-        alert(username + ' log out!');
+        
+        this.setState({
+            showLeaveNotificationModal: true,
+            showLeaveNotificationMessage: username + ' logged out!'
+        });
+
+        // this.isFinished = true;
     }
 
     handleForceExit(params) {
         // TODO : Redirect to the frist page or etc
-        alert(params.message);
+        this.setState({
+            showLeaveNotificationModal: true,
+            showLeaveNotificationMessage: params.message
+        });
+
+        // this.isFinished = true;
     }
 
     handlePawnTransform(params) {
@@ -1079,25 +1092,28 @@ export default class Scene extends Component {
                 <div ref={ref => (this.container = ref)}>
                 </div>
                 
+                {/* Pawn transform modal when pawn reaches the endpoint */}
                 <PawnModal show={ this.state && this.state.showPieceSelectModal } pawnTransform={ this.pawnTransform.bind(this) } />
 
+                {/* Victory modal */}
                 <Victory show={ this.state && this.state.showVictoryModal } />
 
+                {/* leave room notification popup */}
+                <Popup 
+                    show={ this.state && this.state.showLeaveNotificationModal } 
+                    type={'leaveNotification'} 
+                    message={ this.state && this.state.showLeaveNotificationMessage }
+                />
+
+                {/* loading screen */}
                 {
                     (this.state && this.state.showWaitingModal) ? (
-                        <Waiting title={ this.state.waitingModalTitle } />
+                        <Loading title={ this.state.waitingModalTitle } />
                     ) : null
                 }
 
-                {
-                    (this.state && this.state.showInviteModal) ? (
-                        <div style={{ position: 'fixed', zIndex: 100, top: 0, width: '100%', height: '100%', backgroundColor: '#3311277d', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                            <input readOnly value={ this.state.roomId }/>
-                            <button onClick={() => navigator.clipboard.writeText( this.state.roomId ) }>copy</button>
-                            <button onClick={() => this.setState({ showInviteModal: false })}>Got it</button>
-                        </div>
-                    ) : null
-                }
+                {/* Invite friend modal */}
+                <InviteFriend show={ this.state && this.state.showInviteModal } hideAction={() => this.setState({ showInviteModal: false })} roomId={ this.state && this.state.roomId } />
             </div>
         )
     }
