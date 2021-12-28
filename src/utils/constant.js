@@ -1,7 +1,7 @@
 import { ang2Rad } from "./helper";
 
 export const cameraProps = {
-    fov: 75,
+    fov: 45,
     aspect: window.innerWidth / window.innerHeight,
     near: 0.1,
     far: 2000,
@@ -19,7 +19,7 @@ export const orbitControlProps = {
         z: 0,
     },
     maxPolarAngle: ang2Rad(70),
-    maxDistance: 6.5,
+    maxDistance: 50,
     minDistance: 5,
 }
 
@@ -33,16 +33,16 @@ export const bloomParams = {
 export const hemiLightProps = {
     skyColor: 0xcccccc,
     groundColor: 0x000000,
-    intensity: 2,
+    intensity: 0.45,
 }
 
 export const spotLightProps = {
     color: 0xcccccc,
-    intensity: 2,
+    intensity: 0.9,
     position: {
-        x: -25,
-        y: 25,
-        z: 25,
+        x: 0,
+        y: 10,
+        z: 0,
     },
     castShadow: true,
     shadow: {
@@ -60,13 +60,13 @@ export const aiLevel = 3;   // 3: advanced Up to 3;
 
 export const alphaBet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
-export const tileSize = 1;
+export const tileSize = 1.02;
 
-export const lightTone = '#f7e58f';
-export const darkTone = '#111';
+export const lightTone = '#b18057';
+export const darkTone = '#0e202a';
 export const selectTone = '#d78b00';
-export const historyTone = '#d32da7';
-export const dangerTone = '#ff0000';
+export const historyTone = '#ff0000';
+export const dangerTone = '#d32da7';
 
 export const boardSize = 8;
 
@@ -89,9 +89,17 @@ export const modelProps = {
     'board': {
         scale: modelSize,
         position: {
-            x: 0.45,
-            y: 0,
-            z: -0.65,
+            x: 0,
+            y: 0.5,
+            z: 0,
+        }
+    },
+    'cell': {
+        scale: modelSize,
+        position: {
+            x: 0,
+            y: 0.5,
+            z: 0,
         }
     }
 }
