@@ -19,8 +19,11 @@ import Victory from "../../components/UI/Victory/Victory";
 import Loading from "../../components/UI/Loading/Loading";
 import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
+import GameStateHeader from "../../components/UI/GameState/GameStateHeader";
+import GameStateFooter from "../../components/UI/GameState/GameStateFooter";
 
 import { throttle } from 'lodash-es';
+import './GameScene.scss';
 
 export default class Scene extends Component {
     componentDidMount() {
@@ -34,6 +37,8 @@ export default class Scene extends Component {
 
         /**********************************  Scene Environment Setup  **********************************/
         /////////////////////////////////////////////////////////////////////////////////////////////////
+        // retrieve width and height according to camera's aspect
+
         // TODO : Create Three.js Scene, Camera, Renderer
         var scene = new THREE.Scene();
         this.scene = scene;
@@ -52,10 +57,11 @@ export default class Scene extends Component {
             alpha: true,
             antialias: true,
         });
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        const w_h = this.getWidthHeight(camera.aspect);
+        renderer.setSize(w_h.width, w_h.height);
         renderer.shadowMap.enabled = true;
 
-        this.container.appendChild( renderer.domElement );
+        this.container.appendChild(renderer.domElement);
 
         // TODO : setup skybox
         const skyTexture = new THREE.TextureLoader().load('skybox/1.jpg');
@@ -154,12 +160,10 @@ export default class Scene extends Component {
             'resize',
             throttle(
                 () => {
-                    const width = window.innerWidth;
-                    const height = window.innerHeight;
-                    camera.aspect = width / height;
+                    const w_h = this.getWidthHeight(camera.aspect);
                     camera.updateProjectionMatrix();
-                    renderer.setSize(width, height);
-                    setCanvasDimensions(renderer.domElement, width, height);
+                    renderer.setSize(w_h.width, w_h.height);
+                    setCanvasDimensions(renderer.domElement, w_h.width, w_h.height);
                 },
                 resizeUpdateInterval,
                 { trailing: true }
@@ -477,8 +481,8 @@ export default class Scene extends Component {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
 
-            mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+            mouse.x = ((event.clientX - (window.innerWidth - renderer.domElement.clientWidth) / 2)  / renderer.domElement.clientWidth ) * 2 - 1;
+            mouse.y = - ((event.clientY - (window.innerHeight - renderer.domElement.clientHeight) / 2) / renderer.domElement.clientHeight) * 2 + 1;
         
             raycaster.setFromCamera( mouse, camera );
         
@@ -822,6 +826,17 @@ export default class Scene extends Component {
 
         this.socket.close();
     }
+    getWidthHeight(aspect) {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        const preWidth = aspect * height;
+        if (preWidth > width) {
+            height = width / aspect;
+        } else {
+            width = preWidth;
+        }
+        return { width: width, height: height };
+    }
     checkIfFinished() {
         const moves = this.props.game.moves();
         let totalCount = 0;
@@ -1088,8 +1103,10 @@ export default class Scene extends Component {
 
     render() {
         return (
-            <div>
-                <div ref={ref => (this.container = ref)}>
+            <div className="GameScene">
+                <div className="game-canvas" ref={ref => (this.container = ref)}>
+                    <GameStateHeader></GameStateHeader>
+                    <GameStateFooter></GameStateFooter>
                 </div>
                 
                 {/* Pawn transform modal when pawn reaches the endpoint */}
