@@ -1,11 +1,16 @@
+@keyframes invenAnim {
+    0%   {transform: scale(1);}
+    50%   {transform: scale(1.3);}
+    100%   {transform: scale(1);}
+}
+
 .inventory {
     position: absolute;
-    bottom: 2vw;
-    transform: translate3d(-50%, 0, 0);
-    left: 50%;
+    transform: translate3d(0, -50%, 0);
+    top: 50%;
 
-    width: 50%;
-    height: 6vw;
+    width: 8vw;
+    height: 50%;
 
     background: #016da3de;
     border: 0.3vw solid #413348e0;
@@ -18,21 +23,23 @@
     justify-content: center;
 
     &.show {
-        bottom: 2vw;
+        left: -1vw;
     }
 
     &.hide {
-        bottom: -6vw;
+        left: -8vw;
     }
 
     &__wrapper {
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-direction: column;
+        transition: all 0.25s;
 
         .item {
             position: relative;
-            margin: 0 1.5vw;
+            margin: 1.5vw 0;
             width: 4.5vw;
 
             img {
@@ -45,6 +52,10 @@
 
             &.disable {
                 opacity: 0.2;
+            }
+
+            &.active {
+                animation: invenAnim .5s linear infinite;
             }
         }
     }

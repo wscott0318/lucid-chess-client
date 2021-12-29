@@ -6,7 +6,10 @@ import { gameModes } from "../../utils/constant";
 import { getRandomVal } from "../../utils/helper";
 
 const game = new Game();
+
+// game.board.configuration.turn = 'black';
 console.error(game);
+// console.log(game.moves());
 
 export const GameScene = () => {
     const location = useLocation();

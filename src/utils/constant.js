@@ -8,7 +8,7 @@ export const cameraProps = {
     far: 2000,
     position: {
         x: 0,
-        y: 6.5,
+        y: 9.5,
         z: 5,
     }
 }
@@ -137,7 +137,7 @@ export const userTypes = {
 
 export const resizeUpdateInterval = 500;
 
-export const items = {
+export const heroItems = {
     iceWall: 0,
     petrify: 1,
     jumpyShoe: 2,

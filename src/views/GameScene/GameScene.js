@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval, heroItems } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -23,6 +23,12 @@ import GameStateHeader from "../../components/UI/GameState/GameStateHeader";
 import GameStateFooter from "../../components/UI/GameState/GameStateFooter";
 
 import backPic from '../../assets/img/background.jpg';
+
+import iceWall from '../../assets/img/items/iceWall.png';
+import petrify from '../../assets/img/items/petrify.png';
+import jumpyShoe from '../../assets/img/items/jumpyShoe.png';
+import springPad from '../../assets/img/items/springPad.png';
+import thunderstorm from '../../assets/img/items/thunderstorm.png';
 
 import { throttle } from 'lodash-es';
 import Inventory from "../../components/UI/Inventory/Inventory";
@@ -200,7 +206,8 @@ export default class Scene extends Component {
             loader.loadAsync( 'models/piece/Kong.glb' ),
             loader.loadAsync( 'models/piece/Fox.glb' ),
             loader.loadAsync( 'models/piece/Lucifer.glb' ),
-            loader.loadAsync( 'models/chess-cell.glb' )
+            loader.loadAsync( 'models/chess-cell.glb' ),
+            loader.loadAsync( 'models/item/ice-wall.glb' )
         ]).then((gltfArray) => {
             
             // TODO : Add chess board to the scene
@@ -224,6 +231,11 @@ export default class Scene extends Component {
             this.meshArray['fox'] = gltfArray[7].scene.clone();
             this.meshArray['lucifer'] = gltfArray[8].scene.clone();
             
+            const iceMesh = gltfArray[10].scene.clone();
+            iceMesh.position.set(0, 1, 0);
+            iceMesh.scale.set(13, 13, 13);
+            iceMesh.rotation.y = Math.PI / 2;
+            this.meshArray['iceWall'] = iceMesh;
 
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
@@ -368,11 +380,11 @@ export default class Scene extends Component {
             }
 
             renderer.domElement.addEventListener('mousedown', mouseDownAction);
+            renderer.domElement.addEventListener('mousemove', mouseMoveAction);
 
             console.error('load finished!');
             if( this.props.mode === gameModes['P2P'] ) {
                 this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
-
                 
                 const data = {};
                 if( this.props.friendMatch ) {  // friend match
@@ -535,6 +547,53 @@ export default class Scene extends Component {
                 }
             }
         };
+
+        var mouseMoveAction = function ( event ) {
+            event.preventDefault();
+            if( self.state && self.state.currentItem !== undefined ) {
+                // detect the collider
+                var raycaster = new THREE.Raycaster();
+                var mouse = new THREE.Vector2();
+
+                mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+            
+                raycaster.setFromCamera( mouse, camera );
+
+                for( let i = 0; i < self.boardGroundArray.length; i++ ) {
+                    for( let j = 0; j < self.boardGroundArray[i].length; j++ ) {
+                        const intersect = raycaster.intersectObject( self.boardGroundArray[i][j].mesh );
+        
+                        if( intersect.length > 0 ) {
+                            if( self.state.currentItem === heroItems['iceWall'] ) {
+                                for( let t = -1; t <= 1; t++ ) {
+                                    const activeBoard = self.boardGroundArray[i][j + t];
+                                    if( !activeBoard ) {
+                                        self.currentMouseMeshes[t + 1].position.set(100, 100, 100);
+                                    } else {
+                                        const position = getMeshPosition( activeBoard.rowIndex, activeBoard.colIndex );
+                                        const pieceIndex = self.boardPiecesArray.findIndex((item) => item.rowIndex === activeBoard.rowIndex && item.colIndex === activeBoard.colIndex);
+
+                                        self.currentMouseMeshes[t + 1].children[0].material = self.currentMouseMeshes[t + 1].children[0].material.clone();
+                                        self.currentMouseMeshes[t + 1].material = self.currentMouseMeshes[t + 1].children[0].material;
+
+                                        if( pieceIndex === -1 ) {
+                                            self.currentMouseMeshes[t + 1].material.color = new THREE.Color('#50d760');
+                                        } else {
+                                            self.currentMouseMeshes[t + 1].material.color = new THREE.Color('#d75050');
+                                        }
+    
+                                        self.currentMouseMeshes[t + 1].position.set( position.x + 0.1 , 1, position.z + 0.11 - 0.5 );
+                                    }
+                                }
+                            }
+    
+                            return;
+                        }
+                    }
+                }
+            }
+        }
 
         var aiMoveAction = (level) => {
             const thinkingTime = 1; // AI thinking time
@@ -797,8 +856,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            // renderer.render(scene, camera);
-            composer.render();
+            renderer.render(scene, camera);
+            // composer.render();
         };
         this.animate = animate;
     }
@@ -945,6 +1004,20 @@ export default class Scene extends Component {
         }, 1000);
     }
 
+    selectItem(item) {
+        this.setState({ currentItem: item });
+
+        if( item === heroItems['iceWall'] ) {
+            this.currentMouseMeshes = [];
+            for( let i = 0; i < 3; i++ ) {
+                const mesh = this.meshArray['iceWall'].clone();
+                this.currentMouseMeshes.push( mesh );
+                mesh.position.set(1000, 1000, 1000);
+                this.scene.add( mesh );
+            }
+        }
+    }
+
     /**************************************************** Socket Handlers ******************************************************/
     handleRoomCreated(params) {
         this.setState({
@@ -1014,24 +1087,40 @@ export default class Scene extends Component {
                 newMesh.position = item.position;
                 newMesh.type = item.type;
 
-                const itemGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5,)
-                const itemMaterial = new THREE.MeshStandardMaterial({
-                    color: darkTone,
-                    side: THREE.DoubleSide,
-                    roughness: 1,
-                    metalness: 0,
-                    refractionRatio: 0,
-                });
-                const itemMesh = new THREE.Mesh( itemGeo, itemMaterial );
-
-                const itemIndex = getMatrixIndexFromFen( newMesh.position );
-                itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 1, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
-
-                this.scene.add(itemMesh);
-
-                newMesh.mesh = itemMesh;
-
-                this.itemMeshes.push( newMesh );
+                // if( newMesh.type !== heroItems['springPad'] || newMesh.type !== heroItems['thunderstorm'] ) {
+                    let texture;
+                    if( newMesh.type === heroItems['iceWall'] ) {
+                        texture = new THREE.TextureLoader().load(iceWall);
+                    } else if( newMesh.type === heroItems['petrify'] ) {
+                        texture = new THREE.TextureLoader().load(petrify);
+                    } else if( newMesh.type === heroItems['jumpyShoe'] ) {
+                        texture = new THREE.TextureLoader().load(jumpyShoe);
+                    } else if( newMesh.type === heroItems['springPad'] ) {
+                        texture = new THREE.TextureLoader().load(springPad);
+                    } else if( newMesh.type === heroItems['thunderstorm'] ) {
+                        texture = new THREE.TextureLoader().load(thunderstorm);
+                    }
+    
+                    const itemGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5,)
+                    const itemMaterial = new THREE.MeshStandardMaterial({
+                        // color: '#c0ff00',
+                        side: THREE.DoubleSide,
+                        roughness: 1,
+                        metalness: 0,
+                        refractionRatio: 0,
+                        map: texture
+                    });
+                    const itemMesh = new THREE.Mesh( itemGeo, itemMaterial );
+    
+                    const itemIndex = getMatrixIndexFromFen( newMesh.position );
+                    itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 1, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
+    
+                    this.scene.add(itemMesh);
+    
+                    newMesh.mesh = itemMesh;
+    
+                    this.itemMeshes.push( newMesh );
+                // }
             })
         }
 
@@ -1187,7 +1276,7 @@ export default class Scene extends Component {
                     opponentName={this.state && this.state.opponentName}
                     myTurn={this.state && this.state.myTurn}
                     remainingTime={this.state && this.state.remainingTime} />
-                <GameStateFooter></GameStateFooter>
+                <GameStateFooter showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) } />
             </div>
 
             {/* Pawn transform modal when pawn reaches the endpoint */}
@@ -1216,6 +1305,13 @@ export default class Scene extends Component {
               show={this.state && this.state.showInviteModal}
               hideAction={() => this.setState({ showInviteModal: false })}
               roomId={this.state && this.state.roomId}
+            />
+
+            <Inventory 
+                show={ this.state && this.state.showInventory } 
+                items={ this.state && this.state.myItems }
+                myTurn={this.state && this.state.myTurn}
+                selectItem={ this.selectItem.bind(this) }
             />
           </div>
         );
