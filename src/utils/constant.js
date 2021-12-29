@@ -136,3 +136,11 @@ export const userTypes = {
 }
 
 export const resizeUpdateInterval = 500;
+
+export const items = {
+    iceWall: 0,
+    petrify: 1,
+    jumpyShoe: 2,
+    springPad: 3,
+    thunderstorm: 4
+};
