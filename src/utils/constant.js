@@ -9,14 +9,14 @@ export const cameraProps = {
     position: {
         x: 0,
         y: 8,
-        z: -3,
+        z: -6,
     }
 }
 
 export const orbitControlProps = {
     target: {
         x: 0,
-        y: -0.3,
+        y: 0,
         z: 0,
     },
     maxPolarAngle: ang2Rad(70),

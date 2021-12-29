@@ -53,10 +53,6 @@ export default class Scene extends Component {
 
         window.camera = camera
 
-        camera.lookAt(orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z)
-        console.log(orbitControlProps.target, camera)
-
-
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true,
