@@ -1,28 +1,28 @@
 import { ang2Rad } from "./helper";
 
 export const cameraProps = {
-  fov: 75,
-  // aspect: window.innerWidth / window.innerHeight,
-  aspect: 16 / 9,
-  near: 0.1,
-  far: 2000,
-  position: {
-    x: 0,
-    y: 8,
-    z: 5,
-  },
-};
+    fov: 60,
+    // aspect: window.innerWidth / window.innerHeight,
+    aspect: 16 / 9,
+    near: 0.1,
+    far: 2000,
+    position: {
+        x: 0,
+        y: 7,
+        z: 6,
+    }
+}
 
 export const orbitControlProps = {
-  target: {
-    x: 0,
-    y: 0.5,
-    z: 0,
-  },
-  maxPolarAngle: ang2Rad(70),
-  maxDistance: 9.5,
-  minDistance: 7,
-};
+    target: {
+        x: 0,
+        y: 0,
+        z: -0.5,
+    },
+    maxPolarAngle: ang2Rad(70),
+    maxDistance: 50,
+    minDistance: 5,
+}
 
 export const bloomParams = {
   exposure: 1,
@@ -54,6 +54,24 @@ export const spotLightProps = {
     },
   },
 };
+
+export const spotLightProps2 = {
+    color: 0xcccccc,
+    intensity: 0.6,
+    position: {
+        x: 25,
+        y: 25,
+        z: 25,
+    },
+    castShadow: true,
+    shadow: {
+        bias: -0.0001,
+        mapSize: {
+            width: 1024 * 4,
+            height: 1024 * 4,
+        }
+    }
+}
 
 export const pieceMoveSpeed = 10;
 

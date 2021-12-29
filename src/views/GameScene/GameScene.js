@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -53,6 +53,8 @@ export default class Scene extends Component {
 
         this.camera = camera;
 
+        this.camera.lookAt(orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z)
+
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true,
@@ -69,16 +71,12 @@ export default class Scene extends Component {
         scene.background = bgTexture;
 
         // TODO : Camera Orbit control
-        const controls = new OrbitControls( camera, this.container );
-        controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
-        controls.maxDistance = orbitControlProps.maxDistance;
-        controls.minDistance = orbitControlProps.minDistance;
-        controls.update();
-
-        const light2 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
-        light2.castShadow = true
-        scene.add( light2 );
+        // const controls = new OrbitControls( camera, this.container );
+        // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        // controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        // controls.maxDistance = orbitControlProps.maxDistance;
+        // controls.minDistance = orbitControlProps.minDistance;
+        // controls.update();
 
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
@@ -88,8 +86,69 @@ export default class Scene extends Component {
         light.shadow.mapSize.height = spotLightProps.shadow.mapSize.height;
         scene.add( light );
 
-        /////////////////////////////////////////////////////////////////////////////////////////////////
-        /***********************************************************************************************/
+        var light2 = new THREE.SpotLight( spotLightProps2.color, spotLightProps2.intensity );
+        light2.position.set( -spotLightProps2.position.x, spotLightProps2.position.y, spotLightProps2.position.z );
+        light2.castShadow = spotLightProps2.castShadow;
+        light2.shadow.bias = spotLightProps2.shadow.bias;
+        light2.shadow.mapSize.width = spotLightProps2.shadow.mapSize.width;
+        light2.shadow.mapSize.height = spotLightProps2.shadow.mapSize.height;
+        scene.add( light2 );
+
+        const light3 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
+        scene.add( light3 );
+
+/***************************outline **********************************/
+        const composer = new EffectComposer( renderer );
+        const renderScene = new RenderPass( scene, camera );
+        
+        composer.addPass( renderScene );
+
+        // const redOut = new CustomOutlinePass(
+        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
+        //     this.scene,
+        //     this.camera,
+        //     0
+        // );
+        // const blueOut = new CustomOutlinePass(
+        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
+        //     this.scene,
+        //     this.camera,
+        //     1
+        // );
+        // composer.addPass(redOut);
+        // composer.addPass(blueOut);
+
+        // TODO: Scene Outline Effect - Effect composer
+        const whiteTeamObjects = []
+        const blackTeamObjects = []
+        
+        const outlineParams = {
+            edgeStrength: 3,
+            edgeGlow: 0,
+            edgeThickness: 1,
+            pulsePeriod: 0,
+            usePatternTexture: false
+        };
+
+        const redOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
+        redOutlinePass.renderToScreen = true;
+        redOutlinePass.edgeStrength = outlineParams.edgeStrength;
+        redOutlinePass.edgeGlow = outlineParams.edgeGlow;
+        redOutlinePass.visibleEdgeColor.set(0xcccccc);
+        redOutlinePass.hiddenEdgeColor.set(0x000000);
+
+        const blueOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
+        blueOutlinePass.renderToScreen = true;
+        blueOutlinePass.edgeStrength = outlineParams.edgeStrength;
+        blueOutlinePass.edgeGlow = outlineParams.edgeGlow;
+        blueOutlinePass.visibleEdgeColor.set(0xff0000);
+        blueOutlinePass.hiddenEdgeColor.set(0x000000);
+
+        composer.addPass( redOutlinePass );
+        composer.addPass( blueOutlinePass );
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/***********************************************************************************************/
 
         // TODO : Windows Resize Handle
         var setCanvasDimensions = ( canvas, width, height, set2dTransform = false ) => {
@@ -255,9 +314,16 @@ export default class Scene extends Component {
                         mesh.scale.set(modelSize, modelSize, modelSize);
                         scene.add(mesh);
 
+                        if (piece === piece.toUpperCase()) {
+                            whiteTeamObjects.push(mesh)
+                        } else {
+                            blackTeamObjects.push(mesh)
+                        }
                         //TODO: tag piece by name
                         if (piece === piece.toUpperCase()) {
                             mesh.traverse(n => { //Fox
+                                // n.applyOutline  = true; //set outline
+                                // n.applyOutlineType = 0;
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#d29868',
@@ -267,8 +333,12 @@ export default class Scene extends Component {
                                     n.material= material
                                 }
                             });
+                            // mesh.traverse(node => node.applyOutline = true);
+
                         } else {
                             mesh.traverse(n => { //Fox
+                                // n.applyOutline  = true; //set outline
+                                // n.applyOutlineType = 1;
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#0e191f',
@@ -279,6 +349,9 @@ export default class Scene extends Component {
                                 }
                             });
                         }
+
+                        redOutlinePass.selectedObjects = whiteTeamObjects;
+                        blueOutlinePass.selectedObjects = blackTeamObjects;
 
                         mesh.children[0].traverse(n => { if ( n.isMesh ) {
                             n.castShadow = true;
@@ -625,8 +698,8 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-            controls.update();
+            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            // controls.update();
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
@@ -723,8 +796,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            renderer.render(scene, camera);
-            // composer.render();
+            // renderer.render(scene, camera);
+            composer.render();
         };
         this.animate = animate;
     }
