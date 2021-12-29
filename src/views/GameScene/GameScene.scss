@@ -1,0 +1,16 @@
+.GameScene {
+  position: relative;
+  display: grid;
+  align-items: center;
+  text-align: center;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("../../assets/img/modal_back.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+
+  .game-canvas {
+    position: relative;
+    margin: auto;
+  }
+}

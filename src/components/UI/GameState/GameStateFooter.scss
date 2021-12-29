@@ -1,0 +1,76 @@
+.GameStateFooter {
+  position: absolute;
+  width: 100%;
+  height: 10vw;
+  bottom: 0;
+  // background-image: url("../../../assets/img/scene_volcano.png");
+  // background-repeat: no-repeat;
+  // background-size: 100% 100%;
+
+  * {
+    color: #ffffff;
+    -webkit-text-stroke: 0.05em #100205;
+  }
+
+  .u-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 4vw 1vw 4vw;
+
+    .u-back {
+      width: 5vw;
+      height: 5vw;
+      background-image: url("../../../assets/img/scene_back.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .u-back:hover {
+      cursor: pointer;
+    }
+
+    .u-back:active {
+      width: 4.9vw;
+      height: 4.9vw;
+    }
+
+    .u-footer-right {
+      display: flex;
+      justify-content: space-between;
+      width: 11vw;
+
+      .u-undo {
+        width: 5vw;
+        height: 5vw;
+        background-image: url("../../../assets/img/scene_undo.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .u-undo {
+        cursor: pointer;
+      }
+
+      .u-setting {
+        width: 5vw;
+        height: 5vw;
+        background-image: url("../../../assets/img/scene_setting.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .u-setting {
+        cursor: pointer;
+      }
+
+      .u-undo:active,
+      .u-setting:active {
+        width: 4.9vw;
+        height: 4.9vw;
+      }
+    }
+  }
+}

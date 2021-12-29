@@ -1,14 +1,7 @@
-// * {
-//   border: 1px solid red;
-// }
-
-.GameState {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  // background-image: url("../../../assets/img/background.jpg");
-  // background-repeat: no-repeat;
-  // background-size: 100% 100%;
+.GameStateHeader {
+  position: absolute;
+  width: 100%;
+  top: 0;
 
   * {
     color: #ffffff;
@@ -21,7 +14,7 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 4vw;
+    padding: 4vw 4vw 0 4vw;
 
     .u-you-container {
       position: relative;
@@ -33,7 +26,7 @@
         left: 1vw;
         width: 100%;
         height: 3vw;
-        background-color: rgba($color: #000000, $alpha: 0.2);
+        background-color: rgba($color: #000000, $alpha: 0.4);
         border: 1px solid #9789bd;
         border-radius: 1.5vw;
       }
@@ -71,6 +64,14 @@
         background-image: url("../../../assets/img/left_banner.png");
         background-repeat: no-repeat;
         background-size: 100% 100%;
+
+        &.hide {
+          display: none;
+        }
+
+        &.show {
+          display: block;
+        }
       }
     }
 
@@ -80,7 +81,7 @@
       align-items: center;
 
       .u-time {
-        background-color: rgba($color: #000000, $alpha: 0.2);
+        background-color: rgba($color: #000000, $alpha: 0.4);
         border: 1px solid #9789bd;
         width: 14vw;
         height: 2.8vw;
@@ -111,7 +112,7 @@
         right: 1vw;
         width: 100%;
         height: 3vw;
-        background-color: rgba($color: #000000, $alpha: 0.2);
+        background-color: rgba($color: #000000, $alpha: 0.4);
         border: 1px solid #9789bd;
         border-radius: 1.5vw;
       }
@@ -149,57 +150,14 @@
         background-image: url("../../../assets/img/right_banner.png");
         background-repeat: no-repeat;
         background-size: 100% 100%;
-      }
-    }
-  }
 
-  .u-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 4vw;
+        &.hide {
+          display: none;
+        }
 
-    .u-back {
-      width: 5vw;
-      height: 5vw;
-      background-image: url("../../../assets/img/scene_back.png");
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
-    }
-
-    .u-back:hover {
-      cursor: pointer;
-    }
-
-    .u-footer-right {
-      display: flex;
-      justify-content: space-between;
-
-      .u-undo {
-        width: 5vw;
-        height: 5vw;
-        background-image: url("../../../assets/img/scene_undo.png");
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
-      }
-
-      .u-undo {
-        cursor: pointer;
-      }
-
-      .u-setting {
-        margin-left: 1vw;
-        width: 5vw;
-        height: 5vw;
-        background-image: url("../../../assets/img/scene_setting.png");
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
-      }
-
-      .u-setting {
-        cursor: pointer;
+        &.show {
+          display: block;
+        }
       }
     }
   }
