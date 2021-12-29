@@ -51,10 +51,6 @@ export default class Scene extends Component {
         if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' )
             camera.position.z = -cameraProps.position.z;
 
-        this.camera = camera;
-
-        this.camera.lookAt(orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z)
-
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true,
@@ -700,6 +696,9 @@ export default class Scene extends Component {
             // TODO : Camera Target Update
             // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
             // controls.update();
+
+            camera.lookAt(orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z)
+
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {

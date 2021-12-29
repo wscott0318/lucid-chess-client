@@ -8,8 +8,8 @@ export const cameraProps = {
     far: 2000,
     position: {
         x: 0,
-        y: 7,
-        z: 6,
+        y: 6.5,
+        z: 5,
     }
 }
 
