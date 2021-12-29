@@ -332,7 +332,7 @@ export default class Scene extends Component {
                                         metalness: 0.2,
                                         side: THREE.DoubleSide,
                                     });
-                                    // n.material= material
+                                    n.material= material
                                 }
                             });
 
@@ -345,7 +345,7 @@ export default class Scene extends Component {
                                         metalness: 0.2,
                                         side: THREE.DoubleSide,
                                     });
-                                    // n.material= material
+                                    n.material= material
                                 }
                             });
                         }
