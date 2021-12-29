@@ -52,6 +52,7 @@ export default class Scene extends Component {
             camera.position.z = -cameraProps.position.z;
 
         window.camera = camera
+        this.camera = camera
 
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -304,6 +305,8 @@ export default class Scene extends Component {
                             case 'k':
                                 mesh = gltfArray[8].scene.clone();
                             break;
+                            default:
+                                mesh = gltfArray[1].scene.clone();
                         }
 
                         const modelPosition = getMeshPosition(i, j);
@@ -319,9 +322,7 @@ export default class Scene extends Component {
                         }
                         //TODO: tag piece by name
                         if (piece === piece.toUpperCase()) {
-                            mesh.traverse(n => { //Fox
-                                // n.applyOutline  = true; //set outline
-                                // n.applyOutlineType = 0;
+                            mesh.traverse(n => {
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#d29868',
@@ -331,12 +332,9 @@ export default class Scene extends Component {
                                     n.material= material
                                 }
                             });
-                            // mesh.traverse(node => node.applyOutline = true);
 
                         } else {
-                            mesh.traverse(n => { //Fox
-                                // n.applyOutline  = true; //set outline
-                                // n.applyOutlineType = 1;
+                            mesh.traverse(n => {
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#0e191f',
@@ -976,7 +974,6 @@ export default class Scene extends Component {
                 })
             }
         }
-
         if( this.socket.id === white ) {
             this.camera.position.z = cameraProps.position.z;
         } else if( this.socket.id === black ) {
