@@ -19,7 +19,6 @@ import Victory from "../../components/UI/Victory/Victory";
 import Loading from "../../components/UI/Loading/Loading";
 import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
-import { CustomOutlinePass } from "./CustomOutlinePass.js";
 import GameState from "../../components/UI/GameState/GameState";
 
 import backPic from '../../assets/img/background.jpg';
@@ -76,7 +75,7 @@ export default class Scene extends Component {
         // controls.maxDistance = orbitControlProps.maxDistance;
         // controls.minDistance = orbitControlProps.minDistance;
         // controls.update();
-        
+
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
         light.castShadow = spotLightProps.castShadow;
@@ -94,7 +93,6 @@ export default class Scene extends Component {
         scene.add( light2 );
 
         const light3 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
-        light3.castShadow = true
         scene.add( light3 );
 
 /***************************outline **********************************/
@@ -102,23 +100,51 @@ export default class Scene extends Component {
         const renderScene = new RenderPass( scene, camera );
         
         composer.addPass( renderScene );
-        // composer.addPass( bloomPass );
 
-        const depthTexture = new THREE.DepthTexture();
-        const renderTarget = new THREE.WebGLRenderTarget(
-            window.innerWidth,
-        window.innerHeight
-        );
-        // const composer = new EffectComposer(renderer, renderTarget);
-        const pass = new RenderPass(scene, camera);
-        composer.addPass(pass);
+        // const redOut = new CustomOutlinePass(
+        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
+        //     this.scene,
+        //     this.camera,
+        //     0
+        // );
+        // const blueOut = new CustomOutlinePass(
+        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
+        //     this.scene,
+        //     this.camera,
+        //     1
+        // );
+        // composer.addPass(redOut);
+        // composer.addPass(blueOut);
 
-        const redOut = new CustomOutlinePass(
-            new THREE.Vector2(window.innerWidth, window.innerHeight),
-            this.scene,
-            this.camera
-            );
-        composer.addPass(redOut);
+        // TODO: Scene Outline Effect - Effect composer
+        const whiteTeamObjects = []
+        const blackTeamObjects = []
+        
+        const outlineParams = {
+            edgeStrength: 3,
+            edgeGlow: 0,
+            edgeThickness: 1,
+            pulsePeriod: 0,
+            usePatternTexture: false
+        };
+
+        const redOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
+        redOutlinePass.renderToScreen = true;
+        redOutlinePass.edgeStrength = outlineParams.edgeStrength;
+        redOutlinePass.edgeGlow = outlineParams.edgeGlow;
+        redOutlinePass.visibleEdgeColor.set(0xcccccc);
+        redOutlinePass.hiddenEdgeColor.set(0xcccccc);
+
+        const blueOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
+        blueOutlinePass.renderToScreen = true;
+        blueOutlinePass.edgeStrength = outlineParams.edgeStrength;
+        blueOutlinePass.edgeGlow = outlineParams.edgeGlow;
+        blueOutlinePass.visibleEdgeColor.set(0xff0000);
+        blueOutlinePass.hiddenEdgeColor.set(0xff0000);
+
+        composer.addPass( redOutlinePass );
+        composer.addPass( blueOutlinePass );
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /***********************************************************************************************/
 
@@ -286,10 +312,16 @@ export default class Scene extends Component {
                         mesh.scale.set(modelSize, modelSize, modelSize);
                         scene.add(mesh);
 
+                        if (piece === piece.toUpperCase()) {
+                            whiteTeamObjects.push(mesh)
+                        } else {
+                            blackTeamObjects.push(mesh)
+                        }
                         //TODO: tag piece by name
                         if (piece === piece.toUpperCase()) {
                             mesh.traverse(n => { //Fox
-                                n.applyOutline  = true; //set outline
+                                // n.applyOutline  = true; //set outline
+                                // n.applyOutlineType = 0;
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#d29868',
@@ -303,7 +335,8 @@ export default class Scene extends Component {
 
                         } else {
                             mesh.traverse(n => { //Fox
-                                n.applyOutline  = true; //set outline
+                                // n.applyOutline  = true; //set outline
+                                // n.applyOutlineType = 1;
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#0e191f',
@@ -314,6 +347,9 @@ export default class Scene extends Component {
                                 }
                             });
                         }
+
+                        redOutlinePass.selectedObjects = whiteTeamObjects;
+                        blueOutlinePass.selectedObjects = blackTeamObjects;
 
                         mesh.children[0].traverse(n => { if ( n.isMesh ) {
                             n.castShadow = true;

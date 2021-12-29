@@ -4,8 +4,9 @@ import { Pass } from "three/examples/jsm/postprocessing/Pass.js";
 // Follows the structure of
 // 		https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/OutlinePass.js
 class CustomOutlinePass extends Pass {
-	constructor(resolution, scene, camera) {
+	constructor(resolution, scene, camera, applyOutlineType) {
 		super();
+		this.applyOutlineType = applyOutlineType;
 		this.renderScene = scene;
 		this.renderCamera = camera;
 		this.resolution = new THREE.Vector2(resolution.x, resolution.y);
@@ -61,8 +62,9 @@ class CustomOutlinePass extends Pass {
 
 	// Helper functions for hiding/showing objects based on whether they should have outlines applied 
 	setOutlineObjectsVisibile(bVisible) {
+		const self = this;
 		this.renderScene.traverse( function( node ) {
-		    if (node.applyOutline == true && node.type == 'Mesh') {
+		    if (node.applyOutline == true && node.applyOutlineType == self.applyOutlineType && node.type == 'Mesh') {
 
 		    	if (!bVisible) {
 		    		node.oldVisibleValue = node.visible;
@@ -82,8 +84,9 @@ class CustomOutlinePass extends Pass {
 	}
 
 	setNonOutlineObjectsVisible(bVisible) {
+		const self = this;
 		this.renderScene.traverse( function( node ) {
-		    if (node.applyOutline != true && node.type == 'Mesh') {
+		    if (node.type == 'Mesh' && (node.applyOutline != true || node.applyOutlineType != self.applyOutlineType)) {
 
 		    	if (!bVisible) {
 		    		node.oldVisibleValue = node.visible;
@@ -287,9 +290,9 @@ class CustomOutlinePass extends Pass {
 				depthBuffer: {},
 				normalBuffer: {},
 				nonOutlinesDepthBuffer: {},
-				outlineColor: { value: new THREE.Color(0xffffff) },
+				outlineColor: { value: this.applyOutlineType === 0 ? new THREE.Color(0x00ffff) : new THREE.Color(0xff0000) },
 				//4 scalar values packed in one uniform: depth multiplier, depth bias, and same for normals.
-				multiplierParameters: { value: new THREE.Vector4(1, 1, 1, 0.3) },
+				multiplierParameters: { value:new THREE.Vector4(1, 1, 1, 0.0001) },
 				cameraNear: { value: this.renderCamera.near },
 				cameraFar: { value: this.renderCamera.far },
 				screenSize: {
