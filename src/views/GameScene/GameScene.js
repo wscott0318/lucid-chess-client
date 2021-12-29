@@ -133,14 +133,14 @@ export default class Scene extends Component {
         redOutlinePass.edgeStrength = outlineParams.edgeStrength;
         redOutlinePass.edgeGlow = outlineParams.edgeGlow;
         redOutlinePass.visibleEdgeColor.set(0xcccccc);
-        redOutlinePass.hiddenEdgeColor.set(0xcccccc);
+        redOutlinePass.hiddenEdgeColor.set(0x000000);
 
         const blueOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
         blueOutlinePass.renderToScreen = true;
         blueOutlinePass.edgeStrength = outlineParams.edgeStrength;
         blueOutlinePass.edgeGlow = outlineParams.edgeGlow;
         blueOutlinePass.visibleEdgeColor.set(0xff0000);
-        blueOutlinePass.hiddenEdgeColor.set(0xff0000);
+        blueOutlinePass.hiddenEdgeColor.set(0x000000);
 
         composer.addPass( redOutlinePass );
         composer.addPass( blueOutlinePass );
