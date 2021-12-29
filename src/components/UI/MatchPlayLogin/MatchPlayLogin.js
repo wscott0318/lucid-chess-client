@@ -13,7 +13,9 @@ export const MatchPlayLogin = () => {
 		if( name === '' )
 			return;
 
-		navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: false, username: name }});
+		// navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: false, username: name }});
+		navigate('/friendPlay/rooms', { state: { username: name, friendMatch: false }});
+
     }
 
     return (

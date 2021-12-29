@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 import { Modal } from "react-bootstrap";
+import { useNavigate, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./RoomsModal.scss";
+import "./RoomsScreen.scss";
+
+import { gameModes, userTypes } from "../../../utils/constant";
 
 import ICON_CLASSIC from "../../../assets/img/1v1_classic_header.png";
 import ICON_SILVER from "../../../assets/img/1v1_silver_header.png";
@@ -52,19 +55,18 @@ const ROOMS = [
     }
 ];
 
-export default class RoomsModal extends Component {
-  constructor(props) {
-      super(props);
+const RoomsScreen = (props) => {
+  const navigate = useNavigate();
+  const { state } = useLocation();
+
+  const onClickRoom = (roomName) => {
+      if(state.friendMatch) navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: state.username, userType: userTypes['creator'], roomName: roomName }});
+	  else navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: false, username: state.username, roomName: roomName }});
   }
 
-  render() {
     return (
-      <Modal
+      <div
         className="rooms"
-        {...this.props}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
       >
         <div className="rooms-container">
             <div className="rooms-container-header">1 VS 1 MODE</div>
@@ -73,7 +75,7 @@ export default class RoomsModal extends Component {
                 <div className="rooms-container-content-rooms">
                     {
                         ROOMS.map((room, index) => (
-                            <div className="rooms-container-content-room" style={{backgroundImage: `url(${room.bg})`}}>
+                            <div className="rooms-container-content-room" key={index} style={{backgroundImage: `url(${room.bg})`}} onClick={() => onClickRoom(room.name)}>
                                 <div className="rooms-container-content-room-icon" style={{backgroundImage: `url(${room.icon})`}}></div>
                                 <div className="rooms-container-content-room-texts">
                                     <div className="rooms-container-content-room-name">{room.name}</div>
@@ -86,7 +88,8 @@ export default class RoomsModal extends Component {
                 </div>
             </div>
         </div>
-      </Modal>
+      </div>
     );
-  }
 }
+
+export default RoomsScreen;

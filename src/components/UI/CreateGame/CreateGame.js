@@ -13,7 +13,8 @@ export const CreateGame = () => {
 		if( name === '' )
 			return;
 
-        navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['creator'] }});
+        // navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['creator'] }});
+		navigate('/friendPlay/rooms', { state: { username: name, friendMatch: true }});
     }
 
     return (

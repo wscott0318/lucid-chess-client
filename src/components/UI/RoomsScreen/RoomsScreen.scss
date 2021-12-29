@@ -1,5 +1,11 @@
 .rooms {
-  display: grid;
+  background-image: url("../../../assets/img/modal_back.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  position: relative;
+  height: 100%;
+  display: flex;
+  justify-content: center;
   align-items: center;
 
   &-container {
@@ -72,6 +78,7 @@
         background-size: 100% 100%;
         display: flex;
         justify-content: center;
+        cursor: pointer;
         &-icon {
           position: absolute;
           background-size: 100% 100%;
