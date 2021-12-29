@@ -28,6 +28,12 @@ import { throttle } from 'lodash-es';
 import Inventory from "../../components/UI/Inventory/Inventory";
 import "./GameScene.scss";
 
+import {
+  connectWallet,
+  getCurrentWalletConnected,
+} from "../../utils/interact.js";
+import {chainId, llgContractAddress, llgRewardContractAddress} from '../../utils/address';
+
 export default class Scene extends Component {
     componentDidMount() {
         // TODO : component state implementation
@@ -36,8 +42,20 @@ export default class Scene extends Component {
             showWaitingModal: true,
             waitingModalTitle: "Loading...",
             showInviteModal: false,
+            wallet: '',
+            status: '',
         });
 
+        // getCurrentWalletConnected((address, status) => {
+        //     this.setState({
+        //         wallet: address,
+        //         status,
+        //     })
+        // })
+
+        this.addWalletListener();
+        
+        this.connectWalletPressed();
         /**********************************  Scene Environment Setup  **********************************/
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // TODO : Create Three.js Scene, Camera, Renderer
@@ -370,6 +388,7 @@ export default class Scene extends Component {
             renderer.domElement.addEventListener('mousedown', mouseDownAction);
 
             console.error('load finished!');
+
             if( this.props.mode === gameModes['P2P'] ) {
                 this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
 
@@ -816,6 +835,55 @@ export default class Scene extends Component {
 
         this.socket.close();
     }
+
+
+    /************************************************************************************* */
+    addWalletListener = () => {
+        if (window.ethereum) {
+            window.ethereum.on("accountsChanged", (accounts) => {
+                if (accounts.length > 0) {
+                    this.setState({
+                        wallet: accounts[0],
+                        status: "Wallet connected",
+                    });
+                } else {
+                    this.setState({
+                        wallet: "",
+                        status: "🦊 Connect to Metamask.",
+                    });
+                }
+            });
+            window.ethereum.on("chainChanged", (chain) => {
+                this.connectWalletPressed()
+                if (chain !== chainId) {
+                }
+            });
+        } else {
+            this.setState({
+                status: (
+                    <p>
+                    {" "}
+                    🦊{" "}
+                    {/* <a target="_blank" href={`https://metamask.io/download.html`}> */}
+                        You must install Metamask, a virtual Ethereum wallet, in your
+                        browser.(https://metamask.io/download.html)
+                    {/* </a> */}
+                    </p>
+                )
+            })
+        }
+    }
+
+    connectWalletPressed = async () => {
+        const walletResponse = await connectWallet();
+        this.setState({
+            status: walletResponse.status,
+            wallet: walletResponse.address,
+        })
+    }
+
+    /************************************************************************************* */
+
     checkIfFinished() {
         const moves = this.props.game.moves();
         let totalCount = 0;
@@ -951,6 +1019,7 @@ export default class Scene extends Component {
             roomId: params.roomId,
             showInviteModal: true,
         });
+        // this.connectWalletPressed();
     }
 
     handleGameStarted(params) {
