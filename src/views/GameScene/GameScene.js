@@ -3,7 +3,11 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
 import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
@@ -15,12 +19,14 @@ import Victory from "../../components/UI/Victory/Victory";
 import Loading from "../../components/UI/Loading/Loading";
 import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
-import GameState from "../../components/UI/GameState/GameState";
+import GameStateHeader from "../../components/UI/GameState/GameStateHeader";
+import GameStateFooter from "../../components/UI/GameState/GameStateFooter";
 
 import backPic from '../../assets/img/background.jpg';
 
 import { throttle } from 'lodash-es';
 import Inventory from "../../components/UI/Inventory/Inventory";
+import "./GameScene.scss";
 
 export default class Scene extends Component {
     componentDidMount() {
@@ -42,11 +48,10 @@ export default class Scene extends Component {
         camera.position.x = cameraProps.position.x;
         camera.position.y = cameraProps.position.y;
         camera.position.z = cameraProps.position.z;
+        this.camera = camera;
 
         if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' )
             camera.position.z = -cameraProps.position.z;
-
-        this.camera = camera;
 
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -62,15 +67,12 @@ export default class Scene extends Component {
         scene.background = bgTexture;
 
         // TODO : Camera Orbit control
-        const controls = new OrbitControls( camera, this.container );
-        controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
-        controls.maxDistance = orbitControlProps.maxDistance;
-        controls.minDistance = orbitControlProps.minDistance;
-        controls.update();
-
-        const light2 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
-        scene.add( light2 );
+        // const controls = new OrbitControls( camera, this.container );
+        // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        // controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        // controls.maxDistance = orbitControlProps.maxDistance;
+        // controls.minDistance = orbitControlProps.minDistance;
+        // controls.update();
 
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
@@ -80,8 +82,69 @@ export default class Scene extends Component {
         light.shadow.mapSize.height = spotLightProps.shadow.mapSize.height;
         scene.add( light );
 
-        /////////////////////////////////////////////////////////////////////////////////////////////////
-        /***********************************************************************************************/
+        var light2 = new THREE.SpotLight( spotLightProps2.color, spotLightProps2.intensity );
+        light2.position.set( -spotLightProps2.position.x, spotLightProps2.position.y, spotLightProps2.position.z );
+        light2.castShadow = spotLightProps2.castShadow;
+        light2.shadow.bias = spotLightProps2.shadow.bias;
+        light2.shadow.mapSize.width = spotLightProps2.shadow.mapSize.width;
+        light2.shadow.mapSize.height = spotLightProps2.shadow.mapSize.height;
+        scene.add( light2 );
+
+        const light3 = new THREE.AmbientLight( 0xeeeeee ); // soft white light
+        scene.add( light3 );
+
+/***************************outline **********************************/
+        const composer = new EffectComposer( renderer );
+        const renderScene = new RenderPass( scene, camera );
+        
+        composer.addPass( renderScene );
+
+        // const redOut = new CustomOutlinePass(
+        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
+        //     this.scene,
+        //     this.camera,
+        //     0
+        // );
+        // const blueOut = new CustomOutlinePass(
+        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
+        //     this.scene,
+        //     this.camera,
+        //     1
+        // );
+        // composer.addPass(redOut);
+        // composer.addPass(blueOut);
+
+        // TODO: Scene Outline Effect - Effect composer
+        const whiteTeamObjects = []
+        const blackTeamObjects = []
+        
+        const outlineParams = {
+            edgeStrength: 3,
+            edgeGlow: 0,
+            edgeThickness: 1,
+            pulsePeriod: 0,
+            usePatternTexture: false
+        };
+
+        const redOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
+        redOutlinePass.renderToScreen = true;
+        redOutlinePass.edgeStrength = outlineParams.edgeStrength;
+        redOutlinePass.edgeGlow = outlineParams.edgeGlow;
+        redOutlinePass.visibleEdgeColor.set(0xcccccc);
+        redOutlinePass.hiddenEdgeColor.set(0x000000);
+
+        const blueOutlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, []);
+        blueOutlinePass.renderToScreen = true;
+        blueOutlinePass.edgeStrength = outlineParams.edgeStrength;
+        blueOutlinePass.edgeGlow = outlineParams.edgeGlow;
+        blueOutlinePass.visibleEdgeColor.set(0xff0000);
+        blueOutlinePass.hiddenEdgeColor.set(0x000000);
+
+        composer.addPass( redOutlinePass );
+        composer.addPass( blueOutlinePass );
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/***********************************************************************************************/
 
         // TODO : Windows Resize Handle
         var setCanvasDimensions = ( canvas, width, height, set2dTransform = false ) => {
@@ -172,7 +235,12 @@ export default class Scene extends Component {
                     tileMesh.material = tileMesh.children[0].material
                     tileMesh.material.color = (i + j) % 2 ? new THREE.Color(lightTone) : new THREE.Color(darkTone);
                     tileMesh.position.set( j * tileSize - tileSize * 3.5 + 0.035, 0.5, -(i * tileSize - tileSize * 3.5));
-                    tileMesh.receiveShadow = true;
+
+                    tileMesh.children[0].traverse(n => { if ( n.isMesh ) {
+                        n.castShadow = true;
+                        n.receiveShadow = true;
+                        if(n.material.map) n.material.map.anisotropy = 16; 
+                    }});
 
                     scene.add(tileMesh);
 
@@ -244,9 +312,16 @@ export default class Scene extends Component {
                         mesh.scale.set(modelSize, modelSize, modelSize);
                         scene.add(mesh);
 
+                        if (piece === piece.toUpperCase()) {
+                            whiteTeamObjects.push(mesh)
+                        } else {
+                            blackTeamObjects.push(mesh)
+                        }
                         //TODO: tag piece by name
                         if (piece === piece.toUpperCase()) {
                             mesh.traverse(n => { //Fox
+                                // n.applyOutline  = true; //set outline
+                                // n.applyOutlineType = 0;
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#d29868',
@@ -256,8 +331,12 @@ export default class Scene extends Component {
                                     n.material= material
                                 }
                             });
+                            // mesh.traverse(node => node.applyOutline = true);
+
                         } else {
                             mesh.traverse(n => { //Fox
+                                // n.applyOutline  = true; //set outline
+                                // n.applyOutlineType = 1;
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#0e191f',
@@ -268,6 +347,9 @@ export default class Scene extends Component {
                                 }
                             });
                         }
+
+                        redOutlinePass.selectedObjects = whiteTeamObjects;
+                        blueOutlinePass.selectedObjects = blackTeamObjects;
 
                         mesh.children[0].traverse(n => { if ( n.isMesh ) {
                             n.castShadow = true;
@@ -614,8 +696,11 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-            controls.update();
+            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            // controls.update();
+
+            camera.lookAt(orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z)
+
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
@@ -712,8 +797,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            renderer.render(scene, camera);
-            // composer.render();
+            // renderer.render(scene, camera);
+            composer.render();
         };
         this.animate = animate;
     }
@@ -1096,42 +1181,43 @@ export default class Scene extends Component {
 
     render() {
         return (
-            <div>
-                <div ref={ref => (this.container = ref)}>
-                </div>
-
-                <GameState 
-                    opponentName={ this.state && this.state.opponentName } 
-                    myTurn={ this.state && this.state.myTurn } 
-                    remainingTime={ this.state && this.state.remainingTime }
-                    showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) }
-                />
-                
-                {/* Pawn transform modal when pawn reaches the endpoint */}
-                <PawnModal show={ this.state && this.state.showPieceSelectModal } pawnTransform={ this.pawnTransform.bind(this) } />
-
-                {/* Victory modal */}
-                <Victory show={ this.state && this.state.showVictoryModal } />
-
-                {/* leave room notification popup */}
-                <Popup 
-                    show={ this.state && this.state.showLeaveNotificationModal } 
-                    type={'leaveNotification'} 
-                    message={ this.state && this.state.showLeaveNotificationMessage }
-                />
-
-                {/* loading screen */}
-                {
-                    (this.state && this.state.showWaitingModal) ? (
-                        <Loading title={ this.state.waitingModalTitle } />
-                    ) : null
-                }
-
-                {/* Invite friend modal */}
-                <InviteFriend show={ this.state && this.state.showInviteModal } hideAction={() => this.setState({ showInviteModal: false })} roomId={ this.state && this.state.roomId } />
-
-                <Inventory show={ this.state && this.state.showInventory } items={ this.state && this.state.myItems } />
+          <div className="GameScene">
+            <div className="game-canvas" ref={(ref) => (this.container = ref)}>
+                <GameStateHeader
+                    opponentName={this.state && this.state.opponentName}
+                    myTurn={this.state && this.state.myTurn}
+                    remainingTime={this.state && this.state.remainingTime} />
+                <GameStateFooter></GameStateFooter>
             </div>
-        )
+
+            {/* Pawn transform modal when pawn reaches the endpoint */}
+            <PawnModal
+              show={this.state && this.state.showPieceSelectModal}
+              pawnTransform={this.pawnTransform.bind(this)}
+            />
+
+            {/* Victory modal */}
+            <Victory show={this.state && this.state.showVictoryModal} />
+
+            {/* leave room notification popup */}
+            <Popup
+              show={this.state && this.state.showLeaveNotificationModal}
+              type={"leaveNotification"}
+              message={this.state && this.state.showLeaveNotificationMessage}
+            />
+
+            {/* loading screen */}
+            {this.state && this.state.showWaitingModal ? (
+              <Loading title={this.state.waitingModalTitle} />
+            ) : null}
+
+            {/* Invite friend modal */}
+            <InviteFriend
+              show={this.state && this.state.showInviteModal}
+              hideAction={() => this.setState({ showInviteModal: false })}
+              roomId={this.state && this.state.roomId}
+            />
+          </div>
+        );
     }
 }
