@@ -68,14 +68,21 @@
         display: block;
       }
     }
+  }
 
-    .u-left-time {
-      position: absolute;
-      top: 5vw;
-      left: 8.2vw;
+  .u-time-container {
+    position: absolute;
+		top: 1vw;
+		transform: translate3d(-50%, 0, 0);
+		left: 50%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .u-time {
       background-color: rgba($color: #000000, $alpha: 0.4);
       border: 1px solid #9789bd;
-      width: 9vw;
+      width: 14vw;
       height: 2.8vw;
       border-radius: 1.4vw;
       text-align: center;
@@ -83,16 +90,6 @@
       font-family: "ErasBoldItc";
       font-size: 2vw;
     }
-  }
-
-  .u-time-container {
-    position: absolute;
-    top: 1vw;
-    transform: translate3d(-50%, 0, 0);
-    left: 50%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 
     .u-clock {
       width: 5vw;
@@ -162,21 +159,6 @@
       &.show {
         display: block;
       }
-    }
-
-    .u-right-time {
-      position: absolute;
-      top: 5vw;
-      right: 8.2vw;
-      background-color: rgba($color: #000000, $alpha: 0.4);
-      border: 1px solid #9789bd;
-      width: 9vw;
-      height: 2.8vw;
-      border-radius: 1.4vw;
-      text-align: center;
-      align-items: center;
-      font-family: "ErasBoldItc";
-      font-size: 2vw;
     }
   }
 }
