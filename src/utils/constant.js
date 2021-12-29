@@ -2,8 +2,7 @@ import { ang2Rad } from "./helper";
 
 export const cameraProps = {
     fov: 45,
-    // aspect: window.innerWidth / window.innerHeight,
-    aspect: 16 / 9,
+    aspect: window.innerWidth / window.innerHeight,
     near: 0.1,
     far: 2000,
     position: {
@@ -118,3 +117,11 @@ export const userTypes = {
 }
 
 export const resizeUpdateInterval = 500;
+
+export const items = {
+    iceWall: 0,
+    petrify: 1,
+    jumpyShoe: 2,
+    springPad: 3,
+    thunderstorm: 4
+};

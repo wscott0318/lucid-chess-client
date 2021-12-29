@@ -3,13 +3,9 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, spotLightProps, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval } from "../../utils/constant";
 import { aiMove } from 'js-chess-engine';
-import { ang2Rad, getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
+import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
 import io from 'socket.io-client';
 import { socketServerPort } from "../../config";
@@ -24,6 +20,7 @@ import GameState from "../../components/UI/GameState/GameState";
 import backPic from '../../assets/img/background.jpg';
 
 import { throttle } from 'lodash-es';
+import Inventory from "../../components/UI/Inventory/Inventory";
 
 export default class Scene extends Component {
     componentDidMount() {
@@ -55,9 +52,7 @@ export default class Scene extends Component {
             alpha: true,
             antialias: true,
         });
-
-        const w_h = this.getWidthHeight(camera.aspect);
-        renderer.setSize(w_h.width, w_h.height);
+        renderer.setSize( window.innerWidth, window.innerHeight );
         renderer.shadowMap.enabled = true;
 
         this.container.appendChild( renderer.domElement );
@@ -104,10 +99,12 @@ export default class Scene extends Component {
             'resize',
             throttle(
                 () => {
-                    const w_h = this.getWidthHeight(camera.aspect);
+                    const width = window.innerWidth;
+                    const height = window.innerHeight;
+                    camera.aspect = width / height;
                     camera.updateProjectionMatrix();
-                    renderer.setSize(w_h.width, w_h.height);
-                    setCanvasDimensions(renderer.domElement, w_h.width, w_h.height);
+                    renderer.setSize(width, height);
+                    setCanvasDimensions(renderer.domElement, width, height);
                 },
                 resizeUpdateInterval,
                 { trailing: true }
@@ -379,8 +376,8 @@ export default class Scene extends Component {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
 
-            mouse.x = ((event.clientX - (window.innerWidth - renderer.domElement.clientWidth) / 2)  / renderer.domElement.clientWidth ) * 2 - 1;
-            mouse.y = - ((event.clientY - (window.innerHeight - renderer.domElement.clientHeight) / 2) / renderer.domElement.clientHeight) * 2 + 1;
+            mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
         
             raycaster.setFromCamera( mouse, camera );
         
@@ -734,17 +731,6 @@ export default class Scene extends Component {
 
         this.socket.close();
     }
-    getWidthHeight(aspect) {
-        let width = window.innerWidth;
-        let height = window.innerHeight;
-        const preWidth = aspect * height;
-        if (preWidth > width) {
-            height = width / aspect;
-        } else {
-            width = preWidth;
-        }
-        return { width: width, height: height };
-    }
     checkIfFinished() {
         const moves = this.props.game.moves();
         let totalCount = 0;
@@ -928,6 +914,49 @@ export default class Scene extends Component {
         this.dangerKing = params.dangerKing;
         this.lastMoveHistory = params.lastMoveHistory;
 
+        if( params.randomItems ) {
+            if( this.itemMeshes ) {
+                for( let i = 0; i < this.itemMeshes.length; i++ ) {
+                    this.scene.remove( this.itemMeshes[i].mesh );
+                }
+            }
+
+            this.randomItems = params.randomItems;
+
+            this.itemMeshes = [];
+            this.randomItems.forEach((item) => {
+                const newMesh = {};
+                newMesh.position = item.position;
+                newMesh.type = item.type;
+
+                const itemGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5,)
+                const itemMaterial = new THREE.MeshStandardMaterial({
+                    color: darkTone,
+                    side: THREE.DoubleSide,
+                    roughness: 1,
+                    metalness: 0,
+                    refractionRatio: 0,
+                });
+                const itemMesh = new THREE.Mesh( itemGeo, itemMaterial );
+
+                const itemIndex = getMatrixIndexFromFen( newMesh.position );
+                itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 1, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
+
+                this.scene.add(itemMesh);
+
+                newMesh.mesh = itemMesh;
+
+                this.itemMeshes.push( newMesh );
+            })
+        }
+
+        if( params.userItems ) {
+            const myItems = params.userItems[ this.socket.id ];
+            this.setState({
+                myItems: myItems
+            });
+        }
+
         console.error(params);
     }
 
@@ -1075,6 +1104,7 @@ export default class Scene extends Component {
                     opponentName={ this.state && this.state.opponentName } 
                     myTurn={ this.state && this.state.myTurn } 
                     remainingTime={ this.state && this.state.remainingTime }
+                    showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) }
                 />
                 
                 {/* Pawn transform modal when pawn reaches the endpoint */}
@@ -1099,6 +1129,8 @@ export default class Scene extends Component {
 
                 {/* Invite friend modal */}
                 <InviteFriend show={ this.state && this.state.showInviteModal } hideAction={() => this.setState({ showInviteModal: false })} roomId={ this.state && this.state.roomId } />
+
+                <Inventory show={ this.state && this.state.showInventory } items={ this.state && this.state.myItems } />
             </div>
         )
     }

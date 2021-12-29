@@ -1,6 +1,6 @@
 import "./GameState.scss";
 
-export const GameState = ({ opponentName, myTurn, remainingTime }) => {
+export const GameState = ({ opponentName, myTurn, remainingTime, showInventoryAction }) => {
 	const formatTime = (time) => {
 		if( !time ) {
 			return '-- : --';
@@ -38,7 +38,7 @@ export const GameState = ({ opponentName, myTurn, remainingTime }) => {
 				<div className={`u-right-banner ${ !myTurn ? 'show' : 'hide' }`}></div>
 			</div>
 
-			<div className="u-back"></div>
+			<div className="u-back" onClick={ showInventoryAction }></div>
 
 			<div className="u-footer-right">
 				<div className="u-undo"></div>

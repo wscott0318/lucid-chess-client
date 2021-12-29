@@ -6,6 +6,7 @@ import { gameModes } from "../../utils/constant";
 import { getRandomVal } from "../../utils/helper";
 
 const game = new Game();
+console.error(game);
 
 export const GameScene = () => {
     const location = useLocation();
