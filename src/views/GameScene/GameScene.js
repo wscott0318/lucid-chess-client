@@ -59,6 +59,9 @@ export default class Scene extends Component {
         if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' )
             camera.position.z = -cameraProps.position.z;
 
+        window.camera = camera
+        this.camera = camera
+
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true,
@@ -73,12 +76,12 @@ export default class Scene extends Component {
         scene.background = bgTexture;
 
         // TODO : Camera Orbit control
-        // const controls = new OrbitControls( camera, this.container );
-        // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-        // controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
-        // controls.maxDistance = orbitControlProps.maxDistance;
-        // controls.minDistance = orbitControlProps.minDistance;
-        // controls.update();
+        const controls = new OrbitControls( camera, this.container );
+        controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        controls.maxDistance = orbitControlProps.maxDistance;
+        controls.minDistance = orbitControlProps.minDistance;
+        controls.update();
 
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
@@ -316,6 +319,8 @@ export default class Scene extends Component {
                             case 'k':
                                 mesh = gltfArray[8].scene.clone();
                             break;
+                            default:
+                                mesh = gltfArray[1].scene.clone();
                         }
 
                         const modelPosition = getMeshPosition(i, j);
@@ -331,29 +336,26 @@ export default class Scene extends Component {
                         }
                         //TODO: tag piece by name
                         if (piece === piece.toUpperCase()) {
-                            mesh.traverse(n => { //Fox
-                                // n.applyOutline  = true; //set outline
-                                // n.applyOutlineType = 0;
+                            mesh.traverse(n => {
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#d29868',
                                         roughness: 0.3,
                                         metalness: 0.2,
+                                        side: THREE.DoubleSide,
                                     });
                                     n.material= material
                                 }
                             });
-                            // mesh.traverse(node => node.applyOutline = true);
 
                         } else {
-                            mesh.traverse(n => { //Fox
-                                // n.applyOutline  = true; //set outline
-                                // n.applyOutlineType = 1;
+                            mesh.traverse(n => {
                                 if ( n.isMesh ) {
                                     const material = new THREE.MeshStandardMaterial({
                                         color: '#0e191f',
                                         roughness: 0.3,
                                         metalness: 0.2,
+                                        side: THREE.DoubleSide,
                                     });
                                     n.material= material
                                 }
@@ -755,11 +757,8 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-            // controls.update();
-
-            camera.lookAt(orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z)
-
+            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            controls.update();
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
@@ -1041,10 +1040,9 @@ export default class Scene extends Component {
                 })
             }
         }
-
-        if( this.socket.id === white ) {
+        if( this.socket.id === black ) {
             this.camera.position.z = cameraProps.position.z;
-        } else if( this.socket.id === black ) {
+        } else if( this.socket.id === white ) {
             this.camera.position.z = -cameraProps.position.z;
         }
 
