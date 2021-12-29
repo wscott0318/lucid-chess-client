@@ -330,8 +330,9 @@ export default class Scene extends Component {
                                         color: '#d29868',
                                         roughness: 0.3,
                                         metalness: 0.2,
+                                        side: THREE.DoubleSide,
                                     });
-                                    n.material= material
+                                    // n.material= material
                                 }
                             });
 
@@ -342,8 +343,9 @@ export default class Scene extends Component {
                                         color: '#0e191f',
                                         roughness: 0.3,
                                         metalness: 0.2,
+                                        side: THREE.DoubleSide,
                                     });
-                                    n.material= material
+                                    // n.material= material
                                 }
                             });
                         }
@@ -965,9 +967,9 @@ export default class Scene extends Component {
                 })
             }
         }
-        if( this.socket.id === white ) {
+        if( this.socket.id === black ) {
             this.camera.position.z = cameraProps.position.z;
-        } else if( this.socket.id === black ) {
+        } else if( this.socket.id === white ) {
             this.camera.position.z = -cameraProps.position.z;
         }
 
