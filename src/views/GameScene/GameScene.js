@@ -79,12 +79,12 @@ export default class Scene extends Component {
         scene.background = bgTexture;
 
         // TODO : Camera Orbit control
-        const controls = new OrbitControls( camera, this.container );
-        controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
-        controls.maxDistance = orbitControlProps.maxDistance;
-        controls.minDistance = orbitControlProps.minDistance;
-        controls.update();
+        // const controls = new OrbitControls( camera, this.container );
+        // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        // controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        // controls.maxDistance = orbitControlProps.maxDistance;
+        // controls.minDistance = orbitControlProps.minDistance;
+        // controls.update();
 
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
@@ -768,10 +768,11 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-            controls.update();
+            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            // controls.update();
 
             // camera.lookAt( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            camera.lookAt( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
