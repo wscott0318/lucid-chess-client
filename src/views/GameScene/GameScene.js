@@ -767,7 +767,7 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
 
-                        this.getWinningRewards();
+                        self.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
