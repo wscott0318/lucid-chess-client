@@ -1,0 +1,121 @@
+.ranking {
+  position: absolute;
+  text-align: center;
+  width: 100vw;
+  height: 100vh;
+  font-family: "HaettenschweilerRegular";
+  background-image: url("../../../assets/img/modal_back.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #fbfae2;
+  * {
+    margin: auto;
+  }
+  &-title {
+    width: 40vw;
+    height: 8vw;
+    text-align: center;
+    background-image: url("../../../assets/img/ribbon.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    margin: 1vw auto;
+    font-size: 4.5vw;
+    -webkit-text-stroke: 0.05em #792a4d;
+  }
+  &-table {
+    margin: 1vw auto;
+    width: 60vw;
+    height: calc(100vh - 17vw);
+    overflow: hidden;
+    border-radius: 1vw;
+    border: 0.2vw solid #110919;
+    background-color: rgba($color: #311437, $alpha: 0.39);
+    &-head {
+      background-color: rgba($color: #3c183c, $alpha: 0.62);
+      border: 1px solid #0e0616;
+      border-radius: 1vw;
+      color: #ecbc6a;
+      -webkit-text-stroke: #0c6c6d;
+      font-size: 2vw;
+      border-radius: 1vw;
+      display: flex;
+      height: 3vw;
+      &-rank {
+        width: 15vw;
+      }
+      &-name {
+        width: 17vw;
+      }
+      &-won {
+        width: 17vw;
+      }
+      &-earn {
+        width: 9vw;
+      }
+    }
+    &-body {
+      margin: 0.4vw 3vw;
+      border: 0.1vw solid #a8728b;
+      border-radius: 1vw;
+      background-color: rgba($color: #321830, $alpha: 0.59);
+      height: calc(100% - 4vw);
+      font-size: 1.5vw;
+      color: #f8edc3;
+      font-family: Arial;
+      overflow: auto;
+      &::-webkit-scrollbar {
+        width: 0.4vw;
+      }
+      &::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        border-radius: 0.2vw;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba($color: black, $alpha: 0.4);
+        outline: 1px solid rgba($color: black, $alpha: 0.4);
+        border-radius: 0.2vw;
+      }
+      &-row {
+        display: flex;
+        border-bottom: 0.1vw solid #ad8494;
+        * {
+          display: grid;
+          align-items: center;
+        }
+        &-rank {
+          width: 12vw;
+          &-img {
+            height: 3vw;
+          }
+        }
+        &-name {
+          padding: 0.5vw 0;
+          width: 17vw;
+        }
+        &-won {
+          width: 17vw;
+        }
+        &-earn {
+          width: 6vw;
+        }
+      }
+    }
+  }
+  &-btn_choose {
+    width: 25vw;
+    height: 5vw;
+    display: grid;
+    align-items: center;
+    text-align: center;
+    background-image: url("../../../assets/img/victory_button.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    margin: 1vw auto;
+    font-size: 3vw;
+    -webkit-text-stroke: 0.05em #0c6c6d;
+    cursor: pointer;
+    &:active {
+      font-size: 2.99vw;
+    }
+  }
+}
