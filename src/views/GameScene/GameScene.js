@@ -893,21 +893,48 @@ export default class Scene extends Component {
         return isFinished;
     }
     getTargetMesh(type) {
+        let mesh;
         if( type === 'N' || type === 'n' ) {
-            return this.meshArray['knight'].clone();
+            mesh = this.meshArray['knight'].clone();
         }
         if( type === 'B' || type === 'b' ) {
-            return this.meshArray['bishop'].clone();
+            mesh = this.meshArray['bishop'].clone();
         }
         if( type === 'R' || type === 'r' ) {
-            return this.meshArray['rook'].clone();
+            mesh = this.meshArray['rook'].clone();
         }
         if( type === 'Q' ) {
-            return this.meshArray['queen'].clone();
+            mesh = this.meshArray['queen'].clone();
         }
         if( type === 'q' ) {
-            return this.meshArray['fox'].clone();
+            mesh = this.meshArray['fox'].clone();
         }
+        if (type === type.toUpperCase()) {
+            mesh.traverse(n => {
+                if ( n.isMesh ) {
+                    const material = new THREE.MeshStandardMaterial({
+                        color: '#d29868',
+                        roughness: 0.3,
+                        metalness: 0.2,
+                        side: THREE.DoubleSide,
+                    });
+                    n.material= material
+                }
+            });
+        } else {
+            mesh.traverse(n => {
+                if ( n.isMesh ) {
+                    const material = new THREE.MeshStandardMaterial({
+                        color: '#0e191f',
+                        roughness: 0.3,
+                        metalness: 0.2,
+                        side: THREE.DoubleSide,
+                    });
+                    n.material= material
+                }
+            });
+        }
+        return mesh
     }
     pawnTransform( type ) {
         if( !type || type === '' )
