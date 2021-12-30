@@ -6,9 +6,7 @@ import jumpyShoe from '../../../assets/img/items/jumpyShoe.png';
 import { heroItems } from '../../../utils/constant';
 import { useState } from 'react';
 
-export const Inventory = ({ show, items, myTurn, selectItem }) => {
-    const [currentItem, setCurrentItem] = useState();
-
+export const Inventory = ({ show, items, myTurn, selectItem, currentItem }) => {
     const isEnable = (type) => {
         if( !items )
             return false;
@@ -23,8 +21,6 @@ export const Inventory = ({ show, items, myTurn, selectItem }) => {
     const itemSelectAction = (item) => {
         if( !myTurn )
             return;
-
-        setCurrentItem(item);
 
         selectItem(item);
     }

@@ -314,11 +314,11 @@ export default class Scene extends Component {
                                 mesh = gltfArray[7].scene.clone();
                             break;
                             case 'K':
-                                mesh = gltfArray[6].scene.clone();
+                                mesh = gltfArray[8].scene.clone();
                                 mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'k':
-                                mesh = gltfArray[8].scene.clone();
+                                mesh = gltfArray[6].scene.clone();
                             break;
                             default:
                                 mesh = gltfArray[1].scene.clone();
@@ -426,6 +426,7 @@ export default class Scene extends Component {
                 this.socket.on( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
                 this.socket.on( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
                 this.socket.on( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
+                this.socket.on( socketEvents['SC_ActivateItem'], this.handleActivateItem.bind(this) );
             } else {
                 this.setState({
                     showWaitingModal: false,
@@ -477,6 +478,39 @@ export default class Scene extends Component {
             mouse.y = - ((event.clientY - (window.innerHeight - renderer.domElement.clientHeight) / 2) / renderer.domElement.clientHeight) * 2 + 1;
         
             raycaster.setFromCamera( mouse, camera );
+
+            if( self.state.currentItem ) {
+                for( let i = 0; i < self.boardGroundArray.length; i++ ) {
+                    for( let j = 0; j < self.boardGroundArray.length; j++ ) {
+                        const intersect = raycaster.intersectObject( self.boardGroundArray[i][j].mesh );
+                        if( intersect.length > 0 ) {    // select on the board cell
+                            const effectArray = [];
+
+                            if( self.state.currentItem === heroItems['iceWall'] ) {
+                                for( let t = -1; t <= 1; t++ ) {
+                                    if( self.boardGroundArray[i][j + t] ) {
+                                        effectArray.push( getFenFromMatrixIndex( self.boardGroundArray[i][j + t].rowIndex, self.boardGroundArray[i][j + t].colIndex ) );
+                                    }
+                                }
+                            }
+
+                            const data = {
+                                effectArray,
+                                type: self.state.currentItem
+                            }
+                            self.socket.emit(socketEvents['CS_ActivateItem'], data);
+                        }
+                    }
+                }
+
+                self.setState({ currentItem: null });
+                if( self.currentMouseMeshes ) {
+                    self.currentMouseMeshes.forEach((item) => {
+                        scene.remove(item);
+                    });
+                }
+                return;
+            }
         
             // only can select own chess pieces
             const myPiecesArray = self.boardPiecesArray.filter(item => {
@@ -586,7 +620,7 @@ export default class Scene extends Component {
                                             self.currentMouseMeshes[t + 1].material.color = new THREE.Color('#d75050');
                                         }
     
-                                        self.currentMouseMeshes[t + 1].position.set( position.x + 0.1 , 1, position.z + 0.11 - 0.5 );
+                                        self.currentMouseMeshes[t + 1].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
                                     }
                                 }
                             }
@@ -1038,8 +1072,15 @@ export default class Scene extends Component {
     selectItem(item) {
         this.setState({ currentItem: item });
 
+        // initialize mouse move meshes
+        if( this.currentMouseMeshes ) {
+            this.currentMouseMeshes.forEach((item) => {
+                this.scene.remove(item);
+            });
+        }
+        this.currentMouseMeshes = [];
+
         if( item === heroItems['iceWall'] ) {
-            this.currentMouseMeshes = [];
             for( let i = 0; i < 3; i++ ) {
                 const mesh = this.meshArray['iceWall'].clone();
                 this.currentMouseMeshes.push( mesh );
@@ -1047,6 +1088,26 @@ export default class Scene extends Component {
                 this.scene.add( mesh );
             }
         }
+    }
+
+    setObstacles( obstacleArray ) {
+        if( this.obstacleMeshes ) {
+            this.obstacleMeshes.forEach((mesh) => {
+                this.scene.remove(mesh);
+            })
+        }
+
+        this.obstacleMeshes = [];
+
+        obstacleArray.forEach(( obstacle ) => {
+            if( obstacle.type === heroItems['iceWall'] ) {
+                const mesh = this.meshArray['iceWall'].clone();
+                const position = getMeshPosition( getMatrixIndexFromFen( obstacle.position )['rowIndex'], getMatrixIndexFromFen( obstacle.position )['colIndex'] );
+                mesh.position.set(position.x + 0.1 , 1, position.z + 0.06 - 0.5);
+                this.scene.add(mesh);
+                this.obstacleMeshes.push( mesh );
+            }
+        })
     }
 
     /**************************************************** Socket Handlers ******************************************************/
@@ -1161,10 +1222,23 @@ export default class Scene extends Component {
             });
         }
 
+        if( params.obstacleArray ) {
+            this.setObstacles( params.obstacleArray )
+        }
+
+        this.setState({ currentItem: null });
+        if( this.currentMouseMeshes ) {
+            this.currentMouseMeshes.forEach((item) => {
+                this.scene.remove(item);
+            });
+        }
+
         console.error(params);
     }
 
     handleSelectPiece(params) {
+        console.log(params);
+
         const { fen, possibleMoves } = params;
 
         const matrixIndex = getMatrixIndexFromFen(fen);
@@ -1296,6 +1370,17 @@ export default class Scene extends Component {
         })
     }
 
+    handleActivateItem(params) {
+        const { obstacleArray, userItems } = params;
+
+        const myItems = userItems[ this.socket.id ];
+        this.setState({
+            myItems: myItems
+        });
+
+        this.setObstacles( obstacleArray );
+    }
+
     /***************************************************************************************************************************/
 
     render() {
@@ -1317,6 +1402,13 @@ export default class Scene extends Component {
 
             {/* Victory modal */}
             <Victory show={this.state && this.state.showVictoryModal} />
+
+            {/* Lost Modal */}
+            <Popup
+              show={this.state && this.state.showLoseModal}
+              type={"leaveNotification"}
+              message={"You are lost"}
+            />
 
             {/* leave room notification popup */}
             <Popup
@@ -1342,6 +1434,7 @@ export default class Scene extends Component {
                 items={ this.state && this.state.myItems }
                 myTurn={this.state && this.state.myTurn}
                 selectItem={ this.selectItem.bind(this) }
+                currentItem= { this.state && this.state.currentItem }
             />
           </div>
         );
