@@ -34,6 +34,8 @@ import { throttle } from 'lodash-es';
 import Inventory from "../../components/UI/Inventory/Inventory";
 import "./GameScene.scss";
 
+import Confirm from "../../components/UI/Confirm/Confirm";
+
 export default class Scene extends Component {
     componentDidMount() {
         // TODO : component state implementation
@@ -42,6 +44,7 @@ export default class Scene extends Component {
             showWaitingModal: true,
             waitingModalTitle: "Loading...",
             showInviteModal: false,
+            showConfirmModal: false,
         });
 
         /**********************************  Scene Environment Setup  **********************************/
@@ -58,9 +61,6 @@ export default class Scene extends Component {
 
         if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' )
             camera.position.z = -cameraProps.position.z;
-
-        window.camera = camera
-        this.camera = camera
 
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -861,18 +861,19 @@ export default class Scene extends Component {
         this.animate = animate;
     }
     componentWillUnmount() {
-        this.socket.off( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
-        this.socket.off( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
-        this.socket.off( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
-        this.socket.off( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
-        this.socket.off( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
-        this.socket.off( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
-        this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
-        this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
-        this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
-        this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
-
-        this.socket.close();
+        if (this.socket) {
+            this.socket.off( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
+            this.socket.off( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
+            this.socket.off( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
+            this.socket.off( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
+            this.socket.off( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
+            this.socket.off( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
+            this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
+            this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
+            this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
+            this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
+            this.socket.close();
+        }
     }
     checkIfFinished() {
         const moves = this.props.game.moves();
@@ -1008,7 +1009,7 @@ export default class Scene extends Component {
             clearInterval( this.timeInterval );
         
         this.setState({
-            remainingTime: 30
+            remainingTime: 3
         })
 
         const self = this;
@@ -1297,11 +1298,14 @@ export default class Scene extends Component {
         return (
           <div className="GameScene">
             <div className="game-canvas" ref={(ref) => (this.container = ref)}>
-                <GameStateHeader
-                    opponentName={this.state && this.state.opponentName}
-                    myTurn={this.state && this.state.myTurn}
-                    remainingTime={this.state && this.state.remainingTime} />
-                <GameStateFooter showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) } />
+              <GameStateHeader
+                opponentName={this.state && this.state.opponentName}
+                myTurn={this.state && this.state.myTurn}
+                remainingTime={this.state && this.state.remainingTime}
+              />
+              <GameStateFooter
+                quitAction={() => this.setState({ showConfirmModal: true })}
+              ></GameStateFooter>
             </div>
 
             {/* Pawn transform modal when pawn reaches the endpoint */}
@@ -1332,12 +1336,12 @@ export default class Scene extends Component {
               roomId={this.state && this.state.roomId}
             />
 
-            <Inventory 
-                show={ this.state && this.state.showInventory } 
-                items={ this.state && this.state.myItems }
-                myTurn={this.state && this.state.myTurn}
-                selectItem={ this.selectItem.bind(this) }
-            />
+            <Confirm
+              show={this.state && this.state.showConfirmModal}
+              msg={"Do you really want to go back?"}
+              path={"/"}
+              hideAction={() => this.setState({ showConfirmModal: false })}
+            ></Confirm>
           </div>
         );
     }
