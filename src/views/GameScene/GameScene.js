@@ -241,6 +241,8 @@ export default class Scene extends Component {
             iceMesh.rotation.y = Math.PI / 2;
             this.meshArray['iceWall'] = iceMesh;
 
+            this.meshArray['petrify'] = iceMesh.clone();
+
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
                 this.boardGroundArray.push([]);
@@ -494,6 +496,10 @@ export default class Scene extends Component {
                                 }
                             }
 
+                            if( self.state.currentItem === heroItems['petrify'] ) {
+                                effectArray.push( getFenFromMatrixIndex( self.boardGroundArray[i][j].rowIndex, self.boardGroundArray[i][j].colIndex ) );
+                            }
+
                             const data = {
                                 effectArray,
                                 type: self.state.currentItem
@@ -508,6 +514,8 @@ export default class Scene extends Component {
                     self.currentMouseMeshes.forEach((item) => {
                         scene.remove(item);
                     });
+
+                    self.currentMouseMeshes = [];
                 }
                 return;
             }
@@ -623,6 +631,30 @@ export default class Scene extends Component {
                                         self.currentMouseMeshes[t + 1].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
                                     }
                                 }
+                            }
+
+                            if( self.state.currentItem === heroItems['petrify'] ) {
+                                const activeBoard = self.boardGroundArray[i][j];
+                                const position = getMeshPosition( activeBoard.rowIndex, activeBoard.colIndex );
+                                const pieceIndex = self.boardPiecesArray.findIndex((item) => 
+                                    item.rowIndex === activeBoard.rowIndex 
+                                    && item.colIndex === activeBoard.colIndex 
+                                    && item.pieceType !== 'Q' 
+                                    && item.pieceType !== 'q'
+                                    && item.pieceType !== 'K'
+                                    && item.pieceType !== 'k'
+                                );
+                                
+                                self.currentMouseMeshes[0].children[0].material = self.currentMouseMeshes[0].children[0].material.clone();
+                                self.currentMouseMeshes[0].material = self.currentMouseMeshes[0].children[0].material;
+
+                                if( pieceIndex === -1 ) {
+                                    self.currentMouseMeshes[0].material.color = new THREE.Color('#d75050');
+                                } else {
+                                    self.currentMouseMeshes[0].material.color = new THREE.Color('#50d760');
+                                }
+
+                                self.currentMouseMeshes[0].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
                             }
     
                             return;
@@ -1114,6 +1146,11 @@ export default class Scene extends Component {
                 mesh.position.set(1000, 1000, 1000);
                 this.scene.add( mesh );
             }
+        } else if( item === heroItems['petrify'] ) {
+            const mesh = this.meshArray['petrify'].clone();
+            this.currentMouseMeshes.push(mesh);
+            mesh.position.set(1000, 1000, 1000);
+            this.scene.add( mesh );
         }
     }
 
@@ -1129,6 +1166,13 @@ export default class Scene extends Component {
         obstacleArray.forEach(( obstacle ) => {
             if( obstacle.type === heroItems['iceWall'] ) {
                 const mesh = this.meshArray['iceWall'].clone();
+                const position = getMeshPosition( getMatrixIndexFromFen( obstacle.position )['rowIndex'], getMatrixIndexFromFen( obstacle.position )['colIndex'] );
+                mesh.position.set(position.x + 0.1 , 1, position.z + 0.06 - 0.5);
+                this.scene.add(mesh);
+                this.obstacleMeshes.push( mesh );
+            }
+            if( obstacle.type === heroItems['petrify'] ) {
+                const mesh = this.meshArray['petrify'].clone();
                 const position = getMeshPosition( getMatrixIndexFromFen( obstacle.position )['rowIndex'], getMatrixIndexFromFen( obstacle.position )['colIndex'] );
                 mesh.position.set(position.x + 0.1 , 1, position.z + 0.06 - 0.5);
                 this.scene.add(mesh);
@@ -1260,12 +1304,15 @@ export default class Scene extends Component {
             });
         }
 
+        if( this.selectedPiece ) {
+            this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+            this.selectedPiece = null;
+        }
+        this.possibleMoves = [];
         console.error(params);
     }
 
     handleSelectPiece(params) {
-        console.log(params);
-
         const { fen, possibleMoves } = params;
 
         const matrixIndex = getMatrixIndexFromFen(fen);
@@ -1381,13 +1428,13 @@ export default class Scene extends Component {
             this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
             this.selectedPiece = null;
         }
-        this.possibleMoves = null;
+        this.possibleMoves = [];
     }
 
     handleUnSelectPiece() {
         this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
         this.selectedPiece = null;
-        this.possibleMoves = null;
+        this.possibleMoves = [];
     }
 
     handleRemainingTime(params) {
