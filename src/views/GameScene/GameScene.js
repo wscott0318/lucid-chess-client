@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval, heroItems } from "../../utils/constant";
+import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval, heroItems, timeLimit } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -59,14 +59,17 @@ export default class Scene extends Component {
         camera.position.z = cameraProps.position.z;
         this.camera = camera;
 
-        if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' )
+        if( this.props.mode === gameModes['P2E'] && this.props.side === 'white' )
             camera.position.z = -cameraProps.position.z;
 
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true,
         });
-        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        const w_h = this.getWidthHeight(camera.aspect);
+        renderer.setSize(w_h.width, w_h.height);
+
         renderer.shadowMap.enabled = true;
 
         this.container.appendChild( renderer.domElement );
@@ -171,12 +174,10 @@ export default class Scene extends Component {
             'resize',
             throttle(
                 () => {
-                    const width = window.innerWidth;
-                    const height = window.innerHeight;
-                    camera.aspect = width / height;
+                    const w_h = this.getWidthHeight(camera.aspect);
                     camera.updateProjectionMatrix();
-                    renderer.setSize(width, height);
-                    setCanvasDimensions(renderer.domElement, width, height);
+                    renderer.setSize(w_h.width, w_h.height);
+                    setCanvasDimensions(renderer.domElement, w_h.width, w_h.height);
                 },
                 resizeUpdateInterval,
                 { trailing: true }
@@ -472,8 +473,8 @@ export default class Scene extends Component {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
 
-            mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+            mouse.x = ((event.clientX - (window.innerWidth - renderer.domElement.clientWidth) / 2)  / renderer.domElement.clientWidth ) * 2 - 1;
+            mouse.y = - ((event.clientY - (window.innerHeight - renderer.domElement.clientHeight) / 2) / renderer.domElement.clientHeight) * 2 + 1;
         
             raycaster.setFromCamera( mouse, camera );
         
@@ -557,8 +558,8 @@ export default class Scene extends Component {
                 var raycaster = new THREE.Raycaster();
                 var mouse = new THREE.Vector2();
 
-                mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-                mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+                mouse.x = ((event.clientX - (window.innerWidth - renderer.domElement.clientWidth) / 2)  / renderer.domElement.clientWidth ) * 2 - 1;
+                mouse.y = - ((event.clientY - (window.innerHeight - renderer.domElement.clientHeight) / 2) / renderer.domElement.clientHeight) * 2 + 1;
             
                 raycaster.setFromCamera( mouse, camera );
 
@@ -601,6 +602,9 @@ export default class Scene extends Component {
             const thinkingTime = 1; // AI thinking time
 
             setTimeout(() => {
+                if( this.checkIfFinished() )
+                    return;
+
                 const result = aiMove(this.props.game.board.configuration, level);
 
                 performMove(result);
@@ -701,12 +705,16 @@ export default class Scene extends Component {
 
                     scene.add( this.boardPiecesArray[fromIndex].mesh );
                 } else {
+                    if( this.timeInterval )
+                        clearInterval( this.timeInterval );
+
                     this.setState({ showPieceSelectModal: true });
                     this.setState({ pawnTransProps: {
                         fromIndex,
                         from,
                         to
                     } })
+
                     return;
                 }
             }
@@ -752,6 +760,9 @@ export default class Scene extends Component {
                             showLoseModal: true,
                         });
                     }
+
+                    if( self.timeInterval )
+                        clearInterval( self.timeInterval );
                     return;
                 }
             }
@@ -759,6 +770,8 @@ export default class Scene extends Component {
             // TODO : Camera Target Update
             controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
             controls.update();
+
+            // camera.lookAt( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
@@ -861,19 +874,32 @@ export default class Scene extends Component {
         this.animate = animate;
     }
     componentWillUnmount() {
-        if (this.socket) {
-            this.socket.off( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
-            this.socket.off( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
-            this.socket.off( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
-            this.socket.off( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
-            this.socket.off( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
-            this.socket.off( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
-            this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
-            this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
-            this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
-            this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
-            this.socket.close();
+        if( !this.socket )
+            return;
+
+        this.socket.off( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
+        this.socket.off( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
+        this.socket.off( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
+        this.socket.off( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
+        this.socket.off( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
+        this.socket.off( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
+        this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
+        this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
+        this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
+        this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
+
+        this.socket.close();
+    }
+    getWidthHeight(aspect) {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        const preWidth = aspect * height;
+        if (preWidth > width) {
+            height = width / aspect;
+        } else {
+            width = preWidth;
         }
+        return { width: width, height: height };
     }
     checkIfFinished() {
         const moves = this.props.game.moves();
@@ -1009,18 +1035,23 @@ export default class Scene extends Component {
             clearInterval( this.timeInterval );
         
         this.setState({
-            remainingTime: 3
+            remainingTime: timeLimit
         })
 
         const self = this;
         this.timeInterval = setInterval(() => {
             const currentRemaining = self.state.remainingTime;
 
-            if( currentRemaining === 0) {
+            if( currentRemaining === 0 && !this.checkIfFinished() && !this.state.pawnTransProps) {
+
                 const result = aiMove(self.props.game.board.configuration, 0);
 
                 self.performMove(result);
 
+                if( this.selectedPiece ) {
+                    this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+                    this.selectedPiece = null;
+                }
                 self.aiMoveAction(self.props.aiLevel);
                 return;
             }

@@ -144,3 +144,5 @@ export const heroItems = {
     springPad: 3,
     thunderstorm: 4
 };
+
+export const timeLimit = 30;

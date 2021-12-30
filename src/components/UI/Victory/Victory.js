@@ -33,7 +33,7 @@ export const Victory = ({ show }) => {
                   <div className="u-item-text">7</div>
                 </div>
               </div>
-              <button className="u-button" onClick={ () => navigate('/') }>Return Home</button>
+              <button className="u-button" onClick={ () => window.location = '/' }>Return Home</button>
             </div>
           </div>
         </Modal.Body>
