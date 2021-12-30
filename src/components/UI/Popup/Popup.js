@@ -1,11 +1,8 @@
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Popup.scss";
-import { useNavigate } from "react-router-dom";
 
 export const Popup = ({ show, type, message }) => {
-	const navigate = useNavigate();
-
     return (
 		<Modal
 			className="Popup"
@@ -21,7 +18,7 @@ export const Popup = ({ show, type, message }) => {
 				<div className={`footer ${ type === 'leaveNotification' ? 'center' : '' }`}>
 					{
 						type === 'leaveNotification' ? 
-							<div className="button-div" onClick={() => window.location = '/'}>Return Home</div> : null
+							<div className="button-div" onClick={() => window.location = '/'}>Return</div> : null
 					}
 				</div>
 			</div>
