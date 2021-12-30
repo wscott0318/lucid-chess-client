@@ -21,7 +21,7 @@ export const Popup = ({ show, type, message }) => {
 				<div className={`footer ${ type === 'leaveNotification' ? 'center' : '' }`}>
 					{
 						type === 'leaveNotification' ? 
-							<div className="button-div" onClick={() => navigate('/')}>Return Home</div> : null
+							<div className="button-div" onClick={() => window.location = '/'}>Return Home</div> : null
 					}
 				</div>
 			</div>

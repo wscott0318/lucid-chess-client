@@ -1,7 +1,7 @@
 .GameStateFooter {
   position: absolute;
   width: 100%;
-  height: 10vw;
+  height: 0;
   bottom: 0;
   // background-image: url("../../../assets/img/scene_volcano.png");
   // background-repeat: no-repeat;
@@ -12,62 +12,58 @@
     -webkit-text-stroke: 0.05em #100205;
   }
 
-  .u-footer {
+  .u-back {
+    transform: rotate(90deg);
     position: absolute;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 4vw 1vw 4vw;
+    left: 2vw;
+    bottom: 1vw;
+    width: 5vw;
+    height: 5vw;
+    background-image: url("../../../assets/img/scene_back.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
 
-    .u-back {
-      width: 5vw;
-      height: 5vw;
-      background-image: url("../../../assets/img/scene_back.png");
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
-    }
-
-    .u-back:hover {
+    &:hover {
       cursor: pointer;
     }
 
-    .u-back:active {
+    &:active {
       width: 4.9vw;
       height: 4.9vw;
     }
+  }
 
-    .u-footer-right {
-      display: flex;
-      justify-content: space-between;
-      width: 11vw;
+  .u-footer-right {
+    position: absolute;
+    right: 2vw;
+    bottom: 1vw;
+    display: flex;
+    justify-content: space-between;
+    width: 11vw;
 
-      .u-undo {
-        width: 5vw;
-        height: 5vw;
-        background-image: url("../../../assets/img/scene_undo.png");
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
+    .u-undo {
+      width: 5vw;
+      height: 5vw;
+      background-image: url("../../../assets/img/scene_undo.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      cursor: pointer;
+
+      &:active {
+        width: 4.9vw;
+        height: 4.9vw;
       }
+    }
 
-      .u-undo {
-        cursor: pointer;
-      }
+    .u-setting {
+      width: 5vw;
+      height: 5vw;
+      background-image: url("../../../assets/img/scene_setting.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      cursor: pointer;
 
-      .u-setting {
-        width: 5vw;
-        height: 5vw;
-        background-image: url("../../../assets/img/scene_setting.png");
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
-      }
-
-      .u-setting {
-        cursor: pointer;
-      }
-
-      .u-undo:active,
-      .u-setting:active {
+      &:active {
         width: 4.9vw;
         height: 4.9vw;
       }

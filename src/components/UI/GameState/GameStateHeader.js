@@ -17,34 +17,32 @@ export const GameStateHeader = ({ opponentName, myTurn, remainingTime }) => {
 
   return (
     <div className="GameStateHeader">
-      <div className="u-header">
-        <div className="u-you-container">
-          <div className="u-black"></div>
-          <div className="u-info">
-            <div className="u-info-img"></div>
-            <div className="u-info-name">You</div>
-          </div>
-          <div className={`u-left-banner ${myTurn ? "show" : "hide"}`}></div>
+      <div className="u-you-container">
+        <div className="u-black"></div>
+        <div className="u-info">
+          <div className="u-info-img"></div>
+          <div className="u-info-name">You</div>
         </div>
+        <div className={`u-left-banner ${myTurn ? "show" : "hide"}`}></div>
+      </div>
 
-        <div className="u-time-container">
-          <div className={`u-time`}>
-            {myTurn ? formatTime(remainingTime) : "-- : --"}
-          </div>
-          <div className="u-clock"></div>
-          <div className={`u-time`}>
-            {!myTurn ? formatTime(remainingTime) : "-- : --"}
-          </div>
+      <div className="u-time-container">
+        <div className={`u-time`}>
+          {myTurn ? formatTime(remainingTime) : "-- : --"}
         </div>
+        <div className="u-clock"></div>
+        <div className={`u-time`}>
+          {!myTurn ? formatTime(remainingTime) : "-- : --"}
+        </div>
+      </div>
 
-        <div className="u-opponent-container">
-          <div className="u-black"></div>
-          <div className="u-info">
-            <div className="u-info-img"></div>
-            <div className="u-info-name">{opponentName}</div>
-          </div>
-          <div className={`u-right-banner ${!myTurn ? "show" : "hide"}`}></div>
+      <div className="u-opponent-container">
+        <div className="u-black"></div>
+        <div className="u-info">
+          <div className="u-info-img"></div>
+          <div className="u-info-name">{opponentName}</div>
         </div>
+        <div className={`u-right-banner ${!myTurn ? "show" : "hide"}`}></div>
       </div>
     </div>
   );
