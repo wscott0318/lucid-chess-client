@@ -40,11 +40,11 @@
 
       .button-div {
         cursor: pointer;
-        width: 12vw;
         margin: 0 1.5vw;
+        padding: 0 1.5vw;
         background-image: url("../../../assets/img/blue_button_bg.png");
         background-repeat: no-repeat;
-        background-size: cover;
+        background-size: 100% 100%;
         height: 3.5vw;
         text-align: center;
         color: #f9f8cb;

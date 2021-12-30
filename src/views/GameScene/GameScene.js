@@ -27,6 +27,8 @@ import backPic from '../../assets/img/background.jpg';
 import { throttle } from 'lodash-es';
 import "./GameScene.scss";
 
+import Confirm from "../../components/UI/Confirm/Confirm";
+
 export default class Scene extends Component {
     componentDidMount() {
         // TODO : component state implementation
@@ -35,6 +37,7 @@ export default class Scene extends Component {
             showWaitingModal: true,
             waitingModalTitle: "Loading...",
             showInviteModal: false,
+            showConfirmModal: false,
         });
 
         /**********************************  Scene Environment Setup  **********************************/
@@ -51,7 +54,8 @@ export default class Scene extends Component {
         if( this.props.mode === gameModes['P2E'] && this.props.side === 'black' )
             camera.position.z = -cameraProps.position.z;
 
-        window.camera = camera
+        camera.lookAt(0, 0, 0);
+        this.camera = camera;
 
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -69,12 +73,12 @@ export default class Scene extends Component {
         scene.background = bgTexture;
 
         // TODO : Camera Orbit control
-        const controls = new OrbitControls( camera, this.container );
-        controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
-        controls.maxDistance = orbitControlProps.maxDistance;
-        controls.minDistance = orbitControlProps.minDistance;
-        controls.update();
+        // const controls = new OrbitControls( camera, this.container );
+        // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        // controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        // controls.maxDistance = orbitControlProps.maxDistance;
+        // controls.minDistance = orbitControlProps.minDistance;
+        // controls.update();
 
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
@@ -696,8 +700,8 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-            controls.update();
+            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            // controls.update();
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
@@ -800,18 +804,19 @@ export default class Scene extends Component {
         this.animate = animate;
     }
     componentWillUnmount() {
-        this.socket.off( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
-        this.socket.off( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
-        this.socket.off( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
-        this.socket.off( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
-        this.socket.off( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
-        this.socket.off( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
-        this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
-        this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
-        this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
-        this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
-
-        this.socket.close();
+        if (this.socket) {
+            this.socket.off( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
+            this.socket.off( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
+            this.socket.off( socketEvents['SC_ChangeTurn'], this.handleChangeTurn.bind(this) );
+            this.socket.off( socketEvents['SC_PlayerLogOut'], this.handlePlayerLogOut.bind(this) );
+            this.socket.off( socketEvents['SC_ForceExit'], this.handleForceExit.bind(this) );
+            this.socket.off( socketEvents['SC_SelectPiece'], this.handleSelectPiece.bind(this) );
+            this.socket.off( socketEvents['SC_PawnTransform'], this.handlePawnTransform.bind(this) );
+            this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
+            this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
+            this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
+            this.socket.close();
+        }
     }
     getWidthHeight(aspect) {
         let width = window.innerWidth;
@@ -931,7 +936,7 @@ export default class Scene extends Component {
             clearInterval( this.timeInterval );
         
         this.setState({
-            remainingTime: 30
+            remainingTime: 3
         })
 
         const self = this;
@@ -1148,11 +1153,14 @@ export default class Scene extends Component {
         return (
           <div className="GameScene">
             <div className="game-canvas" ref={(ref) => (this.container = ref)}>
-                <GameStateHeader
-                    opponentName={this.state && this.state.opponentName}
-                    myTurn={this.state && this.state.myTurn}
-                    remainingTime={this.state && this.state.remainingTime} />
-                <GameStateFooter></GameStateFooter>
+              <GameStateHeader
+                opponentName={this.state && this.state.opponentName}
+                myTurn={this.state && this.state.myTurn}
+                remainingTime={this.state && this.state.remainingTime}
+              />
+              <GameStateFooter
+                quitAction={() => this.setState({ showConfirmModal: true })}
+              ></GameStateFooter>
             </div>
 
             {/* Pawn transform modal when pawn reaches the endpoint */}
@@ -1182,6 +1190,13 @@ export default class Scene extends Component {
               hideAction={() => this.setState({ showInviteModal: false })}
               roomId={this.state && this.state.roomId}
             />
+
+            <Confirm
+              show={this.state && this.state.showConfirmModal}
+              msg={"Do you really want to go back?"}
+              path={"/"}
+              hideAction={() => this.setState({ showConfirmModal: false })}
+            ></Confirm>
           </div>
         );
     }
