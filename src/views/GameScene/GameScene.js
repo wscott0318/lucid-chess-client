@@ -1328,15 +1328,16 @@ export default class Scene extends Component {
     render() {
         return (
           <div className="GameScene">
-            <div className="game-canvas" ref={(ref) => (this.container = ref)}>
-              <GameStateHeader
-                opponentName={this.state && this.state.opponentName}
-                myTurn={this.state && this.state.myTurn}
-                remainingTime={this.state && this.state.remainingTime}
-              />
-              <GameStateFooter
-                quitAction={() => this.setState({ showConfirmModal: true })}
-              ></GameStateFooter>
+            <div className="game-container">
+                <div className="game-canvas" ref={(ref) => (this.container = ref)}></div>
+                <GameStateHeader
+                    opponentName={this.state && this.state.opponentName}
+                    myTurn={this.state && this.state.myTurn}
+                    remainingTime={this.state && this.state.remainingTime}
+                />
+                <GameStateFooter
+                    quitAction={() => this.setState({ showConfirmModal: true })}
+                ></GameStateFooter>
             </div>
 
             {/* Pawn transform modal when pawn reaches the endpoint */}
