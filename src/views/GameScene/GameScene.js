@@ -34,6 +34,12 @@ import {
 } from "../../utils/interact.js";
 import {chainId, llgContractAddress, llgRewardContractAddress} from '../../utils/address';
 
+import {getContractWithSigner, getContractWithoutSigner} from '../../utils/interact';
+import { ethers } from 'ethers'
+
+const llgContractABI = require("../../utils/llg-contract-abi.json");
+const llgRewardContractABI = require("../../utils/llg-reward-contract-abi.json");
+
 export default class Scene extends Component {
     componentDidMount() {
         // TODO : component state implementation
@@ -691,6 +697,8 @@ export default class Scene extends Component {
                             showVictoryModal: true,
                             showLoseModal: false,
                         });
+
+                        this.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -704,6 +712,8 @@ export default class Scene extends Component {
                             showVictoryModal: true,
                             showLoseModal: false,
                         });
+
+                        // this.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -882,6 +892,40 @@ export default class Scene extends Component {
         })
     }
 
+    makeDeposit = async () => {
+        const llgContract = getContractWithSigner(llgContractAddress, llgContractABI);
+
+        let amount = 50;
+        let spender = llgRewardContractAddress;
+
+        let tx = await llgContract.approve(ethers.utils.getAddress(spender), ethers.BigNumber.from(amount * 1000000000), {
+            value: 0,
+            from: this.state.wallet,
+        })
+
+        let res = await tx.wait()
+        if (res.transactionHash) {
+            const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+            let tx2 = await llgRewardContract.depositForRoom(ethers.BigNumber.from(1), ethers.utils.getAddress(this.state.wallet), ethers.BigNumber.from(amount), {
+                value: 0,
+                from: this.state.wallet,
+            })
+
+            let res2 = await tx2.wait()
+        }
+    }
+
+    getWinningRewards = async () => {
+        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(1), ethers.BigNumber.from(123), ethers.utils.getAddress(this.state.wallet), {
+            value: 0,
+            from: this.state.wallet,
+        })
+
+        let res2 = await tx2.wait()
+
+    }
+
     /************************************************************************************* */
 
     checkIfFinished() {
@@ -1020,6 +1064,7 @@ export default class Scene extends Component {
             showInviteModal: true,
         });
         // this.connectWalletPressed();
+        this.makeDeposit();
     }
 
     handleGameStarted(params) {
