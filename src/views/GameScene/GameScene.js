@@ -1420,9 +1420,10 @@ export default class Scene extends Component {
                     myTurn={this.state && this.state.myTurn}
                     remainingTime={this.state && this.state.remainingTime}
                 />
-                <GameStateFooter
+                <GameStateFooter 
+                    showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) } 
                     quitAction={() => this.setState({ showConfirmModal: true })}
-                ></GameStateFooter>
+                />
             </div>
 
             {/* Pawn transform modal when pawn reaches the endpoint */}

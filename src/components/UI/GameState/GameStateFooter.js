@@ -1,10 +1,10 @@
 import "./GameStateFooter.scss";
 
-export const GameStateFooter = ({quitAction}) => {
+export const GameStateFooter = ({quitAction, showInventoryAction}) => {
 
   return (
     <div className="GameStateFooter">
-      <div className="u-back"></div>
+      <div className="u-back" onClick={ showInventoryAction }></div>
       <div className="u-footer-right">
         <div className="u-undo" onClick={quitAction}></div>
         <div className="u-setting"></div>
