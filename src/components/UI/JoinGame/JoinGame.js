@@ -14,7 +14,7 @@ export const JoinGame = () => {
 		if( name === '' || secretKey === '' )
 			return;
 
-        navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['joiner'], roomId: secretKey }});
+        navigate('/connect', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['joiner'], roomId: secretKey }});
     }
 
     return (

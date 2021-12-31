@@ -19,11 +19,11 @@ const arrInfo = {
 };
 
 export const Connect = () => {
-	const location = useLocation();
-	console.log(location);
+  const location = useLocation();
   const [stage, setStage] = useState("connect");
 
   const nextStage = () => {
+    console.log(stage);
     switch (stage) {
       case "connect":
         setStage("join");
