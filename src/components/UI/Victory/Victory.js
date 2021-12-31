@@ -5,11 +5,8 @@ import backImg from "../../../assets/img/back_bg.png";
 import markImg from "../../../assets/img/victory_mark.png";
 import item1Img from "../../../assets/img/victory_item1.png";
 import item2Img from "../../../assets/img/victory_item2.png";
-import { useNavigate } from "react-router-dom";
 
 export const Victory = ({ show }) => {
-	const navigate = useNavigate();
-
     return (
       <Modal
         className="Victory"

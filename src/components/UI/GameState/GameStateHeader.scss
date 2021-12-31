@@ -31,12 +31,25 @@
       top: 0;
       left: 0;
 
-      .u-info-img {
+      .u-info-img-back {
         width: 8vw;
         height: 8vw;
-        background-image: url("../../../assets/img/scene_user.png");
+        background-image: url("../../../assets/img/scene_user_bg.png");
         background-repeat: no-repeat;
         background-size: 100% 100%;
+        display: grid;
+        align-items: center;
+        text-align: center;
+
+        .u-info-img {
+          width: 6.4vw;
+          height: 6.4vw;
+          background-image: url("../../../assets/img/scene_user.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          border-radius: 3.2vw;
+          margin: auto;
+        }
       }
 
       .u-info-name {
@@ -72,9 +85,9 @@
 
   .u-time-container {
     position: absolute;
-		top: 1vw;
-		transform: translate3d(-50%, 0, 0);
-		left: 50%;
+    top: 1vw;
+    transform: translate3d(-50%, 0, 0);
+    left: 50%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -123,12 +136,25 @@
       top: 0;
       right: 0;
 
-      .u-info-img {
+      .u-info-img-back {
         width: 8vw;
         height: 8vw;
-        background-image: url("../../../assets/img/scene_user.png");
+        background-image: url("../../../assets/img/scene_user_bg.png");
         background-repeat: no-repeat;
         background-size: 100% 100%;
+        display: grid;
+        align-items: center;
+        text-align: center;
+
+        .u-info-img {
+          width: 6.4vw;
+          height: 6.4vw;
+          background-image: url("../../../assets/img/scene_user.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          border-radius: 3.2vw;
+          margin: auto;
+        }
       }
 
       .u-info-name {

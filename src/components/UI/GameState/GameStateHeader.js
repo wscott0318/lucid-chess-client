@@ -20,7 +20,9 @@ export const GameStateHeader = ({ opponentName, myTurn, remainingTime }) => {
       <div className="u-you-container">
         <div className="u-black"></div>
         <div className="u-info">
-          <div className="u-info-img"></div>
+          <div className="u-info-img-back">
+            <div className="u-info-img"></div>
+          </div>
           <div className="u-info-name">You</div>
         </div>
         <div className={`u-left-banner ${myTurn ? "show" : "hide"}`}></div>
@@ -39,7 +41,9 @@ export const GameStateHeader = ({ opponentName, myTurn, remainingTime }) => {
       <div className="u-opponent-container">
         <div className="u-black"></div>
         <div className="u-info">
-          <div className="u-info-img"></div>
+          <div className="u-info-img-back">
+            <div className="u-info-img"></div>
+          </div>
           <div className="u-info-name">{opponentName}</div>
         </div>
         <div className={`u-right-banner ${!myTurn ? "show" : "hide"}`}></div>

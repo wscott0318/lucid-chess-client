@@ -138,11 +138,11 @@ export const userTypes = {
 export const resizeUpdateInterval = 500;
 
 export const heroItems = {
-    iceWall: 0,
-    petrify: 1,
-    jumpyShoe: 2,
-    springPad: 3,
-    thunderstorm: 4
+    iceWall: 1,
+    petrify: 2,
+    jumpyShoe: 3,
+    springPad: 4,
+    thunderstorm: 5
 };
 
 export const timeLimit = 30;

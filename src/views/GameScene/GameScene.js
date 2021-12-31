@@ -21,6 +21,7 @@ import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
 import GameStateHeader from "../../components/UI/GameState/GameStateHeader";
 import GameStateFooter from "../../components/UI/GameState/GameStateFooter";
+import Confirm from "../../components/UI/Confirm/Confirm";
 
 import backPic from '../../assets/img/background.jpg';
 
@@ -46,6 +47,7 @@ import { ethers } from 'ethers'
 const llgContractABI = require("../../utils/llg-contract-abi.json");
 const llgRewardContractABI = require("../../utils/llg-reward-contract-abi.json");
 
+
 export default class Scene extends Component {
     componentDidMount() {
         // TODO : component state implementation
@@ -56,6 +58,7 @@ export default class Scene extends Component {
             showInviteModal: false,
             wallet: '',
             status: '',
+            showConfirmModal: false,
         });
 
         // getCurrentWalletConnected((address, status) => {
@@ -83,9 +86,6 @@ export default class Scene extends Component {
         if( this.props.mode === gameModes['P2E'] && this.props.side === 'white' )
             camera.position.z = -cameraProps.position.z;
 
-        window.camera = camera
-        this.camera = camera
-
         var renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true,
@@ -103,12 +103,12 @@ export default class Scene extends Component {
         scene.background = bgTexture;
 
         // TODO : Camera Orbit control
-        // const controls = new OrbitControls( camera, this.container );
-        // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-        // controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
-        // controls.maxDistance = orbitControlProps.maxDistance;
-        // controls.minDistance = orbitControlProps.minDistance;
-        // controls.update();
+        const controls = new OrbitControls( camera, this.container );
+        controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+        controls.maxPolarAngle = orbitControlProps.maxPolarAngle;
+        controls.maxDistance = orbitControlProps.maxDistance;
+        controls.minDistance = orbitControlProps.minDistance;
+        controls.update();
 
         var light = new THREE.SpotLight( spotLightProps.color, spotLightProps.intensity );
         light.position.set( -spotLightProps.position.x, spotLightProps.position.y, spotLightProps.position.z );
@@ -265,6 +265,8 @@ export default class Scene extends Component {
             iceMesh.rotation.y = Math.PI / 2;
             this.meshArray['iceWall'] = iceMesh;
 
+            this.meshArray['petrify'] = iceMesh.clone();
+
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
                 this.boardGroundArray.push([]);
@@ -338,11 +340,11 @@ export default class Scene extends Component {
                                 mesh = gltfArray[7].scene.clone();
                             break;
                             case 'K':
-                                mesh = gltfArray[6].scene.clone();
+                                mesh = gltfArray[8].scene.clone();
                                 mesh.rotateOnAxis(axis, Math.PI);
                             break;
                             case 'k':
-                                mesh = gltfArray[8].scene.clone();
+                                mesh = gltfArray[6].scene.clone();
                             break;
                             default:
                                 mesh = gltfArray[1].scene.clone();
@@ -454,6 +456,7 @@ export default class Scene extends Component {
                 this.socket.on( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
                 this.socket.on( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
                 this.socket.on( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
+                this.socket.on( socketEvents['SC_ActivateItem'], this.handleActivateItem.bind(this) );
             } else {
                 this.setState({
                     showWaitingModal: false,
@@ -489,7 +492,7 @@ export default class Scene extends Component {
 
         const self = this;
         var mouseDownAction = function (event) {
-            event.preventDefault();
+            // event.preventDefault();
 
             if( self.props.mode === gameModes['P2P'] && self.currentPlayer !== self.socket.id ) {
                 return;
@@ -505,6 +508,45 @@ export default class Scene extends Component {
             mouse.y = - ((event.clientY - (window.innerHeight - renderer.domElement.clientHeight) / 2) / renderer.domElement.clientHeight) * 2 + 1;
         
             raycaster.setFromCamera( mouse, camera );
+
+            if( self.state.currentItem ) {
+                for( let i = 0; i < self.boardGroundArray.length; i++ ) {
+                    for( let j = 0; j < self.boardGroundArray.length; j++ ) {
+                        const intersect = raycaster.intersectObject( self.boardGroundArray[i][j].mesh );
+                        if( intersect.length > 0 ) {    // select on the board cell
+                            const effectArray = [];
+
+                            if( self.state.currentItem === heroItems['iceWall'] ) {
+                                for( let t = -1; t <= 1; t++ ) {
+                                    if( self.boardGroundArray[i][j + t] ) {
+                                        effectArray.push( getFenFromMatrixIndex( self.boardGroundArray[i][j + t].rowIndex, self.boardGroundArray[i][j + t].colIndex ) );
+                                    }
+                                }
+                            }
+
+                            if( self.state.currentItem === heroItems['petrify'] ) {
+                                effectArray.push( getFenFromMatrixIndex( self.boardGroundArray[i][j].rowIndex, self.boardGroundArray[i][j].colIndex ) );
+                            }
+
+                            const data = {
+                                effectArray,
+                                type: self.state.currentItem
+                            }
+                            self.socket.emit(socketEvents['CS_ActivateItem'], data);
+                        }
+                    }
+                }
+
+                self.setState({ currentItem: null });
+                if( self.currentMouseMeshes ) {
+                    self.currentMouseMeshes.forEach((item) => {
+                        scene.remove(item);
+                    });
+
+                    self.currentMouseMeshes = [];
+                }
+                return;
+            }
         
             // only can select own chess pieces
             const myPiecesArray = self.boardPiecesArray.filter(item => {
@@ -614,9 +656,33 @@ export default class Scene extends Component {
                                             self.currentMouseMeshes[t + 1].material.color = new THREE.Color('#d75050');
                                         }
     
-                                        self.currentMouseMeshes[t + 1].position.set( position.x + 0.1 , 1, position.z + 0.11 - 0.5 );
+                                        self.currentMouseMeshes[t + 1].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
                                     }
                                 }
+                            }
+
+                            if( self.state.currentItem === heroItems['petrify'] ) {
+                                const activeBoard = self.boardGroundArray[i][j];
+                                const position = getMeshPosition( activeBoard.rowIndex, activeBoard.colIndex );
+                                const pieceIndex = self.boardPiecesArray.findIndex((item) => 
+                                    item.rowIndex === activeBoard.rowIndex 
+                                    && item.colIndex === activeBoard.colIndex 
+                                    && item.pieceType !== 'Q' 
+                                    && item.pieceType !== 'q'
+                                    && item.pieceType !== 'K'
+                                    && item.pieceType !== 'k'
+                                );
+                                
+                                self.currentMouseMeshes[0].children[0].material = self.currentMouseMeshes[0].children[0].material.clone();
+                                self.currentMouseMeshes[0].material = self.currentMouseMeshes[0].children[0].material;
+
+                                if( pieceIndex === -1 ) {
+                                    self.currentMouseMeshes[0].material.color = new THREE.Color('#d75050');
+                                } else {
+                                    self.currentMouseMeshes[0].material.color = new THREE.Color('#50d760');
+                                }
+
+                                self.currentMouseMeshes[0].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
                             }
     
                             return;
@@ -800,10 +866,10 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
-            // controls.update();
+            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            controls.update();
 
-            camera.lookAt( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            //camera.lookAt( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
 
             // TODO : Selected Piece Animation
             if( self.selectedPiece ) {
@@ -1058,21 +1124,48 @@ export default class Scene extends Component {
         return isFinished;
     }
     getTargetMesh(type) {
+        let mesh;
         if( type === 'N' || type === 'n' ) {
-            return this.meshArray['knight'].clone();
+            mesh = this.meshArray['knight'].clone();
         }
         if( type === 'B' || type === 'b' ) {
-            return this.meshArray['bishop'].clone();
+            mesh = this.meshArray['bishop'].clone();
         }
         if( type === 'R' || type === 'r' ) {
-            return this.meshArray['rook'].clone();
+            mesh = this.meshArray['rook'].clone();
         }
         if( type === 'Q' ) {
-            return this.meshArray['queen'].clone();
+            mesh = this.meshArray['queen'].clone();
         }
         if( type === 'q' ) {
-            return this.meshArray['fox'].clone();
+            mesh = this.meshArray['fox'].clone();
         }
+        if (type === type.toUpperCase()) {
+            mesh.traverse(n => {
+                if ( n.isMesh ) {
+                    const material = new THREE.MeshStandardMaterial({
+                        color: '#d29868',
+                        roughness: 0.3,
+                        metalness: 0.2,
+                        side: THREE.DoubleSide,
+                    });
+                    n.material= material
+                }
+            });
+        } else {
+            mesh.traverse(n => {
+                if ( n.isMesh ) {
+                    const material = new THREE.MeshStandardMaterial({
+                        color: '#0e191f',
+                        roughness: 0.3,
+                        metalness: 0.2,
+                        side: THREE.DoubleSide,
+                    });
+                    n.material= material
+                }
+            });
+        }
+        return mesh
     }
     pawnTransform( type ) {
         if( !type || type === '' )
@@ -1176,15 +1269,54 @@ export default class Scene extends Component {
     selectItem(item) {
         this.setState({ currentItem: item });
 
+        // initialize mouse move meshes
+        if( this.currentMouseMeshes ) {
+            this.currentMouseMeshes.forEach((item) => {
+                this.scene.remove(item);
+            });
+        }
+        this.currentMouseMeshes = [];
+
         if( item === heroItems['iceWall'] ) {
-            this.currentMouseMeshes = [];
             for( let i = 0; i < 3; i++ ) {
                 const mesh = this.meshArray['iceWall'].clone();
                 this.currentMouseMeshes.push( mesh );
                 mesh.position.set(1000, 1000, 1000);
                 this.scene.add( mesh );
             }
+        } else if( item === heroItems['petrify'] ) {
+            const mesh = this.meshArray['petrify'].clone();
+            this.currentMouseMeshes.push(mesh);
+            mesh.position.set(1000, 1000, 1000);
+            this.scene.add( mesh );
         }
+    }
+
+    setObstacles( obstacleArray ) {
+        if( this.obstacleMeshes ) {
+            this.obstacleMeshes.forEach((mesh) => {
+                this.scene.remove(mesh);
+            })
+        }
+
+        this.obstacleMeshes = [];
+
+        obstacleArray.forEach(( obstacle ) => {
+            if( obstacle.type === heroItems['iceWall'] ) {
+                const mesh = this.meshArray['iceWall'].clone();
+                const position = getMeshPosition( getMatrixIndexFromFen( obstacle.position )['rowIndex'], getMatrixIndexFromFen( obstacle.position )['colIndex'] );
+                mesh.position.set(position.x + 0.1 , 1, position.z + 0.06 - 0.5);
+                this.scene.add(mesh);
+                this.obstacleMeshes.push( mesh );
+            }
+            if( obstacle.type === heroItems['petrify'] ) {
+                const mesh = this.meshArray['petrify'].clone();
+                const position = getMeshPosition( getMatrixIndexFromFen( obstacle.position )['rowIndex'], getMatrixIndexFromFen( obstacle.position )['colIndex'] );
+                mesh.position.set(position.x + 0.1 , 1, position.z + 0.06 - 0.5);
+                this.scene.add(mesh);
+                this.obstacleMeshes.push( mesh );
+            }
+        })
     }
 
     /**************************************************** Socket Handlers ******************************************************/
@@ -1301,6 +1433,22 @@ export default class Scene extends Component {
             });
         }
 
+        if( params.obstacleArray ) {
+            this.setObstacles( params.obstacleArray )
+        }
+
+        this.setState({ currentItem: null });
+        if( this.currentMouseMeshes ) {
+            this.currentMouseMeshes.forEach((item) => {
+                this.scene.remove(item);
+            });
+        }
+
+        if( this.selectedPiece ) {
+            this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+            this.selectedPiece = null;
+        }
+        this.possibleMoves = [];
         console.error(params);
     }
 
@@ -1420,13 +1568,13 @@ export default class Scene extends Component {
             this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
             this.selectedPiece = null;
         }
-        this.possibleMoves = null;
+        this.possibleMoves = [];
     }
 
     handleUnSelectPiece() {
         this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
         this.selectedPiece = null;
-        this.possibleMoves = null;
+        this.possibleMoves = [];
     }
 
     handleRemainingTime(params) {
@@ -1436,17 +1584,33 @@ export default class Scene extends Component {
         })
     }
 
+    handleActivateItem(params) {
+        const { obstacleArray, userItems } = params;
+
+        const myItems = userItems[ this.socket.id ];
+        this.setState({
+            myItems: myItems
+        });
+
+        this.setObstacles( obstacleArray );
+    }
+
     /***************************************************************************************************************************/
 
     render() {
         return (
           <div className="GameScene">
-            <div className="game-canvas" ref={(ref) => (this.container = ref)}>
+            <div className="game-container">
+                <div className="game-canvas" ref={(ref) => (this.container = ref)}></div>
                 <GameStateHeader
                     opponentName={this.state && this.state.opponentName}
                     myTurn={this.state && this.state.myTurn}
-                    remainingTime={this.state && this.state.remainingTime} />
-                <GameStateFooter showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) } />
+                    remainingTime={this.state && this.state.remainingTime}
+                />
+                <GameStateFooter 
+                    showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) } 
+                    quitAction={() => this.setState({ showConfirmModal: true })}
+                />
             </div>
 
             {/* Pawn transform modal when pawn reaches the endpoint */}
@@ -1457,6 +1621,13 @@ export default class Scene extends Component {
 
             {/* Victory modal */}
             <Victory show={this.state && this.state.showVictoryModal} />
+
+            {/* Lost Modal */}
+            <Popup
+              show={this.state && this.state.showLoseModal}
+              type={"leaveNotification"}
+              message={"You are lost"}
+            />
 
             {/* leave room notification popup */}
             <Popup
@@ -1477,11 +1648,18 @@ export default class Scene extends Component {
               roomId={this.state && this.state.roomId}
             />
 
+            <Confirm
+              show={this.state && this.state.showConfirmModal}
+              msg={"Do you really want to go back?"}
+              path={"/"}
+              hideAction={() => this.setState({ showConfirmModal: false })}
+            ></Confirm>
             <Inventory 
                 show={ this.state && this.state.showInventory } 
                 items={ this.state && this.state.myItems }
                 myTurn={this.state && this.state.myTurn}
                 selectItem={ this.selectItem.bind(this) }
+                currentItem= { this.state && this.state.currentItem }
             />
           </div>
         );
