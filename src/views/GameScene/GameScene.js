@@ -415,6 +415,9 @@ export default class Scene extends Component {
                 this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
                 
                 const data = {};
+
+                data.roomName = this.props.roomName;
+
                 if( this.props.friendMatch ) {  // friend match
                     if( this.props.userType === userTypes['creator'] ) {
                         // create Room
@@ -965,10 +968,29 @@ export default class Scene extends Component {
         })
     }
 
-    makeDeposit = async () => {
+    makeDeposit = async (roomId) => {
         const llgContract = getContractWithSigner(llgContractAddress, llgContractABI);
 
         let amount = 50;
+        switch(this.props.roomName) {
+            case "Classic Room":
+                amount = 0;
+                break;
+            case "Silver Room":
+                amount = 50;
+                break;
+            case "Gold Room":
+                amount = 100;
+                break;
+            case "Platinum Room":
+                amount = 200;
+                break;
+            case "Diamond Room":
+                amount = 500;
+                break;
+            default:
+        }
+        
         let spender = llgRewardContractAddress;
 
         let tx = await llgContract.approve(ethers.utils.getAddress(spender), ethers.BigNumber.from(amount * 1000000000), {
@@ -979,12 +1001,16 @@ export default class Scene extends Component {
         let res = await tx.wait()
         if (res.transactionHash) {
             const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-            let tx2 = await llgRewardContract.depositForRoom(ethers.BigNumber.from(1), ethers.utils.getAddress(this.state.wallet), ethers.BigNumber.from(amount), {
+            let tx2 = await llgRewardContract.depositForRoom(ethers.BigNumber.from(roomId), ethers.utils.getAddress(this.state.wallet), ethers.BigNumber.from(amount), {
                 value: 0,
                 from: this.state.wallet,
             })
 
-            let res2 = await tx2.wait()
+            let res2 = await tx2.wait();
+
+            if (res2.transactionHash) {
+
+            }
         }
     }
 
@@ -1168,7 +1194,7 @@ export default class Scene extends Component {
             showInviteModal: true,
         });
         // this.connectWalletPressed();
-        this.makeDeposit();
+        this.makeDeposit(params.roomId);
     }
 
     handleGameStarted(params) {
