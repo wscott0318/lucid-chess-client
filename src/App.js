@@ -18,7 +18,7 @@ function App() {
           <Route path="/friendPlay/*" element={<FriendPlay />} />
           <Route path="/machinePlay" element={<Level />} />
           <Route path="/gameScene" element={<GameScene />} />
-          <Route path="/connect" element={<Connect show={true} />} />
+          <Route path="/connect" element={<Connect />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -1,32 +1,29 @@
+import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Connect.scss";
 
 const arrInfo = {
-  'connect': {
+  connect: {
     text: "Your need ...",
     button: "Connect Wallet",
   },
-  'join': {
+  join: {
     text: "Your need1 ...",
     button: "Connect Wallet1",
   },
-  'deposit': {
+  deposit: {
     text: "Your need2 ...",
     button: "Connect Wallet2",
   },
 };
 
-export const Connect = ({ stageProp }) => {
-  const [stage, setStage] = useState(stageProp);
-
-  useEffect(() => {
-		if (!stage) setStage("connect");
-  }, []);
-
+export const Connect = () => {
+	const location = useLocation();
+	console.log(location);
+  const [stage, setStage] = useState("connect");
 
   const nextStage = () => {
-    console.log(stage);
     switch (stage) {
       case "connect":
         setStage("join");
@@ -46,8 +43,8 @@ export const Connect = ({ stageProp }) => {
         <div className="u-content">
           <div className="u-content-container">
             <div className="u-text">Text</div>
-						<div className="u-button" onClick={() => nextStage()}>
-							Button
+            <div className="u-button" onClick={() => nextStage()}>
+              Button
             </div>
           </div>
         </div>
