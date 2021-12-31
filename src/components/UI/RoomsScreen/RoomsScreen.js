@@ -60,8 +60,7 @@ const RoomsScreen = (props) => {
   const { state } = useLocation();
 
   const onClickRoom = (roomName) => {
-      if(state.friendMatch) navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: state.username, userType: userTypes['creator'], roomName: roomName }});
-	  else navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: false, username: state.username, roomName: roomName }});
+      navigate('/connect', { state: { mode: gameModes['P2P'], friendMatch: true, username: state.username, userType: userTypes['creator'], roomName: roomName } });
   }
 
     return (
