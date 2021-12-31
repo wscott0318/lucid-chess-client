@@ -65,9 +65,9 @@ export default class Scene extends Component {
         //     })
         // })
 
-        this.addWalletListener();
+        // this.addWalletListener();
         
-        this.connectWalletPressed();
+        // this.connectWalletPressed();
         /**********************************  Scene Environment Setup  **********************************/
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // TODO : Create Three.js Scene, Camera, Renderer
@@ -770,7 +770,7 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
 
-                        self.getWinningRewards();
+                        if(self.props.roomName != "Classic Room") self.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -990,7 +990,7 @@ export default class Scene extends Component {
                 break;
             default:
         }
-        
+
         let spender = llgRewardContractAddress;
 
         let tx = await llgContract.approve(ethers.utils.getAddress(spender), ethers.BigNumber.from(amount * 1000000000), {
@@ -1194,7 +1194,7 @@ export default class Scene extends Component {
             showInviteModal: true,
         });
         // this.connectWalletPressed();
-        this.makeDeposit(params.roomId);
+        // this.makeDeposit(params.roomId);
     }
 
     handleGameStarted(params) {
