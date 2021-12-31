@@ -1082,9 +1082,9 @@ export default class Scene extends Component {
 
     getWinningRewards = async () => {
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(1), ethers.BigNumber.from(123), ethers.utils.getAddress(this.state.wallet), {
+        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(1), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
             value: 0,
-            from: this.state.wallet,
+            from: this.props.wallet,
         })
 
         let res2 = await tx2.wait()

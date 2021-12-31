@@ -219,7 +219,7 @@ export const Connect = () => {
         }
         break
       case 'join':
-        navigate('/gameScene', { state: location.state })
+        navigate('/gameScene', { state: {...location.state, wallet} })
         break
       case 'deposit':
         try {
