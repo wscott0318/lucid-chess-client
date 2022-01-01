@@ -1,7 +1,7 @@
-.Confirm {
+.refund {
   font-family: "HaettenschweilerRegular";
   color: #fbfae2;
-  .u-container {
+  &-container {
     position: relative;
     width: 40vw;
     height: 30vw;
@@ -9,15 +9,15 @@
     background-image: url("../../../assets/img/back_bg.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    .u-msg {
-      height: 20vw;
+    &-msg {
+      height: 25vw;
       padding: 5vw;
       display: grid;
       text-align: center;
       align-items: center;
       font-size: 2vw;
     }
-    .u-btn-group {
+    &-btn_group {
       position: absolute;
       bottom: 1vw;
       width: 100%;
@@ -25,10 +25,10 @@
       display: flex;
       justify-content: space-evenly;
       text-align: center;
-      .u-btn-yes {
+      &-yes {
         display: grid;
         align-items: center;
-        width: 10vw;
+        width: 15vw;
         padding: 0.1vw 1vw;
         background-image: url("../../../assets/img/victory_button.png");
         background-repeat: no-repeat;
@@ -40,10 +40,10 @@
           font-size: 2.45vw;
         }
       }
-      .u-btn-no {
+      &-no {
         display: grid;
         align-items: center;
-        width: 10vw;
+        width: 15vw;
         padding: 0.1vw 1vw;
         background-image: url("../../../assets/img/victory_button.png");
         background-repeat: no-repeat;
