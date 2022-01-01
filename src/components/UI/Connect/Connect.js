@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './Connect.scss'
+import { gameModes, userTypes } from "../../../utils/constant";
 
 import {
   connectWallet,
@@ -29,6 +30,7 @@ export const Connect = () => {
   const location = useLocation()
   let amount
   const [wallet, setWallet] = useState()
+  const [roomKey, setRoomKey] = useState()
   const [status, setStatus] = useState()
   const [loading, setLoading] = useState(false)
 
@@ -70,6 +72,20 @@ export const Connect = () => {
       text: 'Transaction failed. You need ' + amount + 'LLG to start the game',
       button: 'Deposit LLG'
     }
+  }
+
+  const getRandomString = (length) => {
+    // var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxyz';
+    var numbers = '0123456789';
+
+    var string = '';
+
+    for (var i = 0; i < length; i++) {
+        var randomNumber = Math.floor(Math.random() * numbers.length);
+        string += numbers.substring(randomNumber, randomNumber + 1);
+    }
+
+    return string;
   }
 
   /************************************************************************************* */
@@ -133,6 +149,8 @@ export const Connect = () => {
     // })
     setWallet(walletResponse.address)
     setStatus(walletResponse.status)
+
+    // alert(walletResponse.address)
     return walletResponse.address != null
   }
 
@@ -163,6 +181,12 @@ export const Connect = () => {
     }
 
     let spender = llgRewardContractAddress
+    
+    let newPrivKey = Date.now() + getRandomString(64);
+
+    let roomKey = location.state.userType == userTypes['joiner'] ? 0 : newPrivKey;
+    setRoomKey(roomKey);
+    console.log(roomKey);
 
     let tx = await llgContract.approve(
       ethers.utils.getAddress(spender),
@@ -180,8 +204,10 @@ export const Connect = () => {
         llgRewardContractAddress,
         llgRewardContractABI
       )
+
+
       let tx2 = await llgRewardContract.depositForRoom(
-        ethers.BigNumber.from(1),
+        ethers.BigNumber.from(roomKey),
         ethers.utils.getAddress(wallet),
         ethers.BigNumber.from(amount),
         {
@@ -219,7 +245,7 @@ export const Connect = () => {
         }
         break
       case 'join':
-        navigate('/gameScene', { state: {...location.state, wallet} })
+        navigate('/gameScene', { state: {...location.state, wallet, roomKey} })
         break
       case 'deposit':
         try {

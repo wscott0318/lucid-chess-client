@@ -836,7 +836,6 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
 
-                        if(self.props.roomName != "Classic Room") self.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -851,7 +850,6 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
 
-                        // this.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -1082,13 +1080,21 @@ export default class Scene extends Component {
 
     getWinningRewards = async () => {
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(1), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
+        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
             value: 0,
             from: this.props.wallet,
         })
 
         let res2 = await tx2.wait()
+        
+        if(res2.transactionHash) {
+            window.location = '/';
+        }
 
+    }
+
+    onClickLLGSymbol = () => {
+        this.getWinningRewards();
     }
 
     /************************************************************************************* */
@@ -1473,7 +1479,8 @@ export default class Scene extends Component {
             showLeaveNotificationMessage: username + ' logged out!'
         });
 
-        // this.isFinished = true;
+         this.isFinished = true;
+         this.side = !this.currentTurn;
     }
 
     handleForceExit(params) {
@@ -1620,7 +1627,7 @@ export default class Scene extends Component {
             />
 
             {/* Victory modal */}
-            <Victory show={this.state && this.state.showVictoryModal} />
+            <Victory show={this.state && this.state.showVictoryModal} llgAmountDeposited={50} llgAmountToGetPaid={12} onClickLLGSymbol={this.onClickLLGSymbol} />
 
             {/* Lost Modal */}
             <Popup
@@ -1643,7 +1650,7 @@ export default class Scene extends Component {
 
             {/* Invite friend modal */}
             <InviteFriend
-              show={this.state && this.state.showInviteModal && this.props.roomName != "Classic Room"}
+              show={this.state && this.state.showInviteModal}
               hideAction={() => this.setState({ showInviteModal: false })}
               roomId={this.state && this.state.roomId}
             />

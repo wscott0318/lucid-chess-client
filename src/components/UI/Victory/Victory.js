@@ -5,8 +5,16 @@ import backImg from "../../../assets/img/back_bg.png";
 import markImg from "../../../assets/img/victory_mark.png";
 import item1Img from "../../../assets/img/victory_item1.png";
 import item2Img from "../../../assets/img/victory_item2.png";
+import {useState} from "react";
 
-export const Victory = ({ show }) => {
+export const Victory = ({ show, llgAmountToGetPaid, llgAmountDeposited, onClickLLGSymbol }) => {
+    const [loading, setLoading] = useState(false);
+
+    const onClick = () => {
+      onClickLLGSymbol();
+      setLoading(true);
+    }
+
     return (
       <Modal
         className="Victory"
@@ -23,14 +31,14 @@ export const Victory = ({ show }) => {
               <div className="u-list">
                 <div className="u-list-item">
                   <Image className="u-item-image" src={item1Img}></Image>
-                  <div className="u-item-text">2446</div>
+                  <div className="u-item-text">{llgAmountDeposited}</div>
                 </div>
                 <div className="u-list-item">
                   <Image className="u-item-image" src={item2Img}></Image>
-                  <div className="u-item-text">7</div>
+                  <div className="u-item-text">{llgAmountToGetPaid}</div>
                 </div>
               </div>
-              <button className="u-button" onClick={ () => window.location = '/' }>Return Home</button>
+              <button className="u-button" disabled={loading} onClick={onClick}>{loading ? "Loading..." : "Return Home"}</button>
             </div>
           </div>
         </Modal.Body>
