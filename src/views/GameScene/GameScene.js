@@ -150,6 +150,9 @@ export default class Scene extends Component {
         // TODO: Scene Outline Effect - Effect composer
         const whiteTeamObjects = []
         const blackTeamObjects = []
+
+        this.whiteTeamObjects = whiteTeamObjects;
+        this.blackTeamObjects = blackTeamObjects;
         
         const outlineParams = {
             edgeStrength: 3,
@@ -1131,6 +1134,8 @@ export default class Scene extends Component {
                     n.material= material
                 }
             });
+
+            this.whiteTeamObjects.push(mesh);
         } else {
             mesh.traverse(n => {
                 if ( n.isMesh ) {
@@ -1143,6 +1148,8 @@ export default class Scene extends Component {
                     n.material= material
                 }
             });
+            
+            this.blackTeamObjects.push(mesh);
         }
         return mesh
     }
