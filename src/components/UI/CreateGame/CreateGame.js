@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./CreateGame.scss";
-import { gameModes, userTypes } from "../../../utils/constant";
 import { useState } from "react";
 
 export const CreateGame = () => {
@@ -13,7 +12,6 @@ export const CreateGame = () => {
 		if( name === '' )
 			return;
 
-        // navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['creator'] }});
 		navigate('/friendPlay/rooms', { state: { username: name, friendMatch: true }});
     }
 

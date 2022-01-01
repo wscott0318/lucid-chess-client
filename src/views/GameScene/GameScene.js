@@ -6,13 +6,10 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval, heroItems, timeLimit } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
 import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
-import io from 'socket.io-client';
-import { socketServerPort } from "../../config";
 import { socketEvents } from "../../utils/packet";
 import PawnModal from "../../components/UI/PawnModal/PawnModal";
 import Victory from "../../components/UI/Victory/Victory";
@@ -414,34 +411,16 @@ export default class Scene extends Component {
             console.error('load finished!');
 
             if( this.props.mode === gameModes['P2P'] ) {
-                this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
-                
-                const data = {};
+                this.socket = this.props.socket;
 
-                data.roomName = this.props.roomName;
-
-                if( this.props.friendMatch ) {  // friend match
-                    if( this.props.userType === userTypes['creator'] ) {
-                        // create Room
-                        data.username = this.props.username;
-                        data.friendMatch = this.props.friendMatch;
-    
-                        this.socket.emit( socketEvents['CS_CreateRoom'], data );
-                        this.socket.on( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
-                    } else if( this.props.userType === userTypes['joiner'] ) {
-                        //join Friend Match Room
-                        data.username = this.props.username;
-                        data.friendMatch = this.props.friendMatch;
-                        data.roomId = this.props.roomId;
-    
-                        this.socket.emit( socketEvents['CS_JoinRoom'], data );
-                    }
-                } else {    // match matching
-                    data.username = this.props.username;
-                    data.friendMatch = false;
-
-                    this.socket.emit( socketEvents['CS_MatchPlayLogin'], data );
+                if( this.props.roomId ) {
+                    this.setState({
+                        roomId: this.props.roomId,
+                        showInviteModal: true,
+                    });
                 }
+
+                this.socket.emit( socketEvents['CS_Ready'] );
                 
                 this.setState({
                     waitingModalTitle: 'Waiting other player to Join',
