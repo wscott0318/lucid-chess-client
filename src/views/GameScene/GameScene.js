@@ -1643,7 +1643,7 @@ export default class Scene extends Component {
 
             {/* Invite friend modal */}
             <InviteFriend
-              show={this.state && this.state.showInviteModal && this.props.roomName != "Classic Room"}
+              show={this.state && this.state.showInviteModal}
               hideAction={() => this.setState({ showInviteModal: false })}
               roomId={this.state && this.state.roomId}
             />

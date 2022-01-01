@@ -62,9 +62,9 @@ const RoomsScreen = (props) => {
   const onClickRoom = (roomName) => {
       console.log(roomName)
       if (roomName === 'Classic Room') {
-        navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: state.username, userType: userTypes['creator'], roomName: roomName } });
+        navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: state.friendMatch, username: state.username, userType: userTypes['creator'], roomName: roomName } });
       } else {
-        navigate('/connect', { state: { mode: gameModes['P2P'], friendMatch: true, username: state.username, userType: userTypes['creator'], roomName: roomName } });
+        navigate('/connect', { state: { mode: gameModes['P2P'], friendMatch: state.friendMatch, username: state.username, userType: userTypes['creator'], roomName: roomName } });
       }
   }
 
