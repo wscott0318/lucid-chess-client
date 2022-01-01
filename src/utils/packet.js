@@ -7,6 +7,7 @@ export const socketEvents = {
     'CS_UnSelectPiece': 0xff0006,
     'CS_MatchPlayLogin': 0xff0007,
     'CS_ActivateItem': 0xff0008,
+    'CS_Ready': 0xff0009,
 
     'SC_RoomCreated': 0xff1001,
     'SC_GameStarted': 0xff1002,
@@ -19,4 +20,5 @@ export const socketEvents = {
     'SC_UnSelectPiece': 0xff0009,
     'SC_RemainingTime': 0xff0010,
     'SC_ActivateItem': 0xff0011,
+    'SC_JoinRoom': 0xff0012,
 }
