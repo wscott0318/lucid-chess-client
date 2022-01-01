@@ -21,6 +21,7 @@ import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
 import GameStateHeader from "../../components/UI/GameState/GameStateHeader";
 import GameStateFooter from "../../components/UI/GameState/GameStateFooter";
+import Confirm from "../../components/UI/Confirm/Confirm";
 
 import backPic from '../../assets/img/background.jpg';
 
@@ -34,7 +35,18 @@ import { throttle } from 'lodash-es';
 import Inventory from "../../components/UI/Inventory/Inventory";
 import "./GameScene.scss";
 
-import Confirm from "../../components/UI/Confirm/Confirm";
+import {
+  connectWallet,
+  getCurrentWalletConnected,
+} from "../../utils/interact.js";
+import {chainId, llgContractAddress, llgRewardContractAddress} from '../../utils/address';
+
+import {getContractWithSigner, getContractWithoutSigner} from '../../utils/interact';
+import { ethers } from 'ethers'
+
+const llgContractABI = require("../../utils/llg-contract-abi.json");
+const llgRewardContractABI = require("../../utils/llg-reward-contract-abi.json");
+
 
 export default class Scene extends Component {
     componentDidMount() {
@@ -44,9 +56,21 @@ export default class Scene extends Component {
             showWaitingModal: true,
             waitingModalTitle: "Loading...",
             showInviteModal: false,
+            wallet: '',
+            status: '',
             showConfirmModal: false,
         });
 
+        // getCurrentWalletConnected((address, status) => {
+        //     this.setState({
+        //         wallet: address,
+        //         status,
+        //     })
+        // })
+
+        // this.addWalletListener();
+        
+        // this.connectWalletPressed();
         /**********************************  Scene Environment Setup  **********************************/
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // TODO : Create Three.js Scene, Camera, Renderer
@@ -241,6 +265,8 @@ export default class Scene extends Component {
             iceMesh.rotation.y = Math.PI / 2;
             this.meshArray['iceWall'] = iceMesh;
 
+            this.meshArray['petrify'] = iceMesh.clone();
+
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
                 this.boardGroundArray.push([]);
@@ -386,10 +412,14 @@ export default class Scene extends Component {
             renderer.domElement.addEventListener('mousemove', mouseMoveAction);
 
             console.error('load finished!');
+
             if( this.props.mode === gameModes['P2P'] ) {
                 this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
                 
                 const data = {};
+
+                data.roomName = this.props.roomName;
+
                 if( this.props.friendMatch ) {  // friend match
                     if( this.props.userType === userTypes['creator'] ) {
                         // create Room
@@ -494,6 +524,10 @@ export default class Scene extends Component {
                                 }
                             }
 
+                            if( self.state.currentItem === heroItems['petrify'] ) {
+                                effectArray.push( getFenFromMatrixIndex( self.boardGroundArray[i][j].rowIndex, self.boardGroundArray[i][j].colIndex ) );
+                            }
+
                             const data = {
                                 effectArray,
                                 type: self.state.currentItem
@@ -508,6 +542,8 @@ export default class Scene extends Component {
                     self.currentMouseMeshes.forEach((item) => {
                         scene.remove(item);
                     });
+
+                    self.currentMouseMeshes = [];
                 }
                 return;
             }
@@ -623,6 +659,30 @@ export default class Scene extends Component {
                                         self.currentMouseMeshes[t + 1].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
                                     }
                                 }
+                            }
+
+                            if( self.state.currentItem === heroItems['petrify'] ) {
+                                const activeBoard = self.boardGroundArray[i][j];
+                                const position = getMeshPosition( activeBoard.rowIndex, activeBoard.colIndex );
+                                const pieceIndex = self.boardPiecesArray.findIndex((item) => 
+                                    item.rowIndex === activeBoard.rowIndex 
+                                    && item.colIndex === activeBoard.colIndex 
+                                    && item.pieceType !== 'Q' 
+                                    && item.pieceType !== 'q'
+                                    && item.pieceType !== 'K'
+                                    && item.pieceType !== 'k'
+                                );
+                                
+                                self.currentMouseMeshes[0].children[0].material = self.currentMouseMeshes[0].children[0].material.clone();
+                                self.currentMouseMeshes[0].material = self.currentMouseMeshes[0].children[0].material;
+
+                                if( pieceIndex === -1 ) {
+                                    self.currentMouseMeshes[0].material.color = new THREE.Color('#d75050');
+                                } else {
+                                    self.currentMouseMeshes[0].material.color = new THREE.Color('#50d760');
+                                }
+
+                                self.currentMouseMeshes[0].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
                             }
     
                             return;
@@ -775,6 +835,8 @@ export default class Scene extends Component {
                             showVictoryModal: true,
                             showLoseModal: false,
                         });
+
+                        if(self.props.roomName != "Classic Room") self.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -788,6 +850,8 @@ export default class Scene extends Component {
                             showVictoryModal: true,
                             showLoseModal: false,
                         });
+
+                        // this.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -902,8 +966,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            renderer.render(scene, camera);
-            // composer.render();
+            // renderer.render(scene, camera);
+            composer.render();
         };
         this.animate = animate;
     }
@@ -924,6 +988,111 @@ export default class Scene extends Component {
 
         this.socket.close();
     }
+
+    /************************************************************************************* */
+    addWalletListener = () => {
+        if (window.ethereum) {
+            window.ethereum.on("accountsChanged", (accounts) => {
+                if (accounts.length > 0) {
+                    this.setState({
+                        wallet: accounts[0],
+                        status: "Wallet connected",
+                    });
+                } else {
+                    this.setState({
+                        wallet: "",
+                        status: "🦊 Connect to Metamask.",
+                    });
+                }
+            });
+            window.ethereum.on("chainChanged", (chain) => {
+                this.connectWalletPressed()
+                if (chain !== chainId) {
+                }
+            });
+        } else {
+            this.setState({
+                status: (
+                    <p>
+                    {" "}
+                    🦊{" "}
+                    {/* <a target="_blank" href={`https://metamask.io/download.html`}> */}
+                        You must install Metamask, a virtual Ethereum wallet, in your
+                        browser.(https://metamask.io/download.html)
+                    {/* </a> */}
+                    </p>
+                )
+            })
+        }
+    }
+
+    connectWalletPressed = async () => {
+        const walletResponse = await connectWallet();
+        this.setState({
+            status: walletResponse.status,
+            wallet: walletResponse.address,
+        })
+    }
+
+    makeDeposit = async (roomId) => {
+        const llgContract = getContractWithSigner(llgContractAddress, llgContractABI);
+
+        let amount = 50;
+        switch(this.props.roomName) {
+            case "Classic Room":
+                amount = 0;
+                break;
+            case "Silver Room":
+                amount = 50;
+                break;
+            case "Gold Room":
+                amount = 100;
+                break;
+            case "Platinum Room":
+                amount = 200;
+                break;
+            case "Diamond Room":
+                amount = 500;
+                break;
+            default:
+        }
+
+        let spender = llgRewardContractAddress;
+
+        let tx = await llgContract.approve(ethers.utils.getAddress(spender), ethers.BigNumber.from(amount * 1000000000), {
+            value: 0,
+            from: this.state.wallet,
+        })
+
+        let res = await tx.wait()
+        if (res.transactionHash) {
+            const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+            let tx2 = await llgRewardContract.depositForRoom(ethers.BigNumber.from(roomId), ethers.utils.getAddress(this.state.wallet), ethers.BigNumber.from(amount), {
+                value: 0,
+                from: this.state.wallet,
+            })
+
+            let res2 = await tx2.wait();
+
+            if (res2.transactionHash) {
+
+            }
+        }
+    }
+
+    getWinningRewards = async () => {
+        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(1), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
+            value: 0,
+            from: this.props.wallet,
+        })
+
+        let res2 = await tx2.wait()
+
+    }
+
+    /************************************************************************************* */
+
     getWidthHeight(aspect) {
         let width = window.innerWidth;
         let height = window.innerHeight;
@@ -935,6 +1104,7 @@ export default class Scene extends Component {
         }
         return { width: width, height: height };
     }
+
     checkIfFinished() {
         const moves = this.props.game.moves();
         let totalCount = 0;
@@ -1114,6 +1284,11 @@ export default class Scene extends Component {
                 mesh.position.set(1000, 1000, 1000);
                 this.scene.add( mesh );
             }
+        } else if( item === heroItems['petrify'] ) {
+            const mesh = this.meshArray['petrify'].clone();
+            this.currentMouseMeshes.push(mesh);
+            mesh.position.set(1000, 1000, 1000);
+            this.scene.add( mesh );
         }
     }
 
@@ -1134,6 +1309,13 @@ export default class Scene extends Component {
                 this.scene.add(mesh);
                 this.obstacleMeshes.push( mesh );
             }
+            if( obstacle.type === heroItems['petrify'] ) {
+                const mesh = this.meshArray['petrify'].clone();
+                const position = getMeshPosition( getMatrixIndexFromFen( obstacle.position )['rowIndex'], getMatrixIndexFromFen( obstacle.position )['colIndex'] );
+                mesh.position.set(position.x + 0.1 , 1, position.z + 0.06 - 0.5);
+                this.scene.add(mesh);
+                this.obstacleMeshes.push( mesh );
+            }
         })
     }
 
@@ -1143,6 +1325,8 @@ export default class Scene extends Component {
             roomId: params.roomId,
             showInviteModal: true,
         });
+        // this.connectWalletPressed();
+        // this.makeDeposit(params.roomId);
     }
 
     handleGameStarted(params) {
@@ -1260,12 +1444,15 @@ export default class Scene extends Component {
             });
         }
 
+        if( this.selectedPiece ) {
+            this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+            this.selectedPiece = null;
+        }
+        this.possibleMoves = [];
         console.error(params);
     }
 
     handleSelectPiece(params) {
-        console.log(params);
-
         const { fen, possibleMoves } = params;
 
         const matrixIndex = getMatrixIndexFromFen(fen);
@@ -1381,13 +1568,13 @@ export default class Scene extends Component {
             this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
             this.selectedPiece = null;
         }
-        this.possibleMoves = null;
+        this.possibleMoves = [];
     }
 
     handleUnSelectPiece() {
         this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
         this.selectedPiece = null;
-        this.possibleMoves = null;
+        this.possibleMoves = [];
     }
 
     handleRemainingTime(params) {
@@ -1456,7 +1643,7 @@ export default class Scene extends Component {
 
             {/* Invite friend modal */}
             <InviteFriend
-              show={this.state && this.state.showInviteModal}
+              show={this.state && this.state.showInviteModal && this.props.roomName != "Classic Room"}
               hideAction={() => this.setState({ showInviteModal: false })}
               roomId={this.state && this.state.roomId}
             />

@@ -13,7 +13,9 @@ export const MatchPlayLogin = () => {
 		if( name === '' )
 			return;
 
-		navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: false, username: name }});
+		// navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: false, username: name }});
+		navigate('/friendPlay/rooms', { state: { username: name, friendMatch: false }});
+
     }
 
     return (
@@ -29,6 +31,7 @@ export const MatchPlayLogin = () => {
 							type="text"
 							placeholder="Enter your name"
 							onChange={(e) => setName(e.target.value)}
+							onKeyDown={(e) => e.key === 'Enter' ? createAction() : null}
 						/>
 					</div>
 

@@ -7,6 +7,7 @@ import FriendPlay from "./views/FriendPlay";
 import GameScene from "./views/GameScene";
 import MatchPlay from "./views/MatchPlay";
 import Orientation from "./components/UI/Orientation/Orientation";
+import Connect from "./components/UI/Connect/Connect";
 
 function App() {
   const [orientation, setOrientation] = useState(false);
@@ -31,6 +32,7 @@ function App() {
           <Route path="/friendPlay/*" element={<FriendPlay />} />
           <Route path="/machinePlay" element={<Level />} />
           <Route path="/gameScene" element={<GameScene />} />
+          <Route path="/connect" element={<Connect />} />
         </Routes>
         <Orientation show={orientation}></Orientation>
       </div>

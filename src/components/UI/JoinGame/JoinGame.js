@@ -14,7 +14,7 @@ export const JoinGame = () => {
 		if( name === '' || secretKey === '' )
 			return;
 
-        navigate('/gameScene', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['joiner'], roomId: secretKey }});
+        navigate('/connect', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['joiner'], roomId: secretKey, roomName: 'Silver Room' }});
     }
 
     return (
@@ -33,6 +33,7 @@ export const JoinGame = () => {
 							type="text"
 							placeholder="Enter your name"
 							onChange={(e) => setName(e.target.value)}
+							onKeyDown={(e) => e.key === 'Enter' ? joinAction() : null}
 						/>
 					</div>
 
@@ -42,6 +43,7 @@ export const JoinGame = () => {
 							type="text"
 							placeholder="Secret key"
 							onChange={(e) => setSecretKey(e.target.value)}
+							onKeyDown={(e) => e.key === 'Enter' ? joinAction() : null}
 						/>
 					</div>
 
