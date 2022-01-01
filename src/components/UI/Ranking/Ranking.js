@@ -1,11 +1,7 @@
 /* eslint-disable array-callback-return */
 import { Component } from "react";
-import { Image } from "react-bootstrap";
 import RankingRow from "./RankingRow";
 import "./Ranking.scss";
-import rank1 from "../../../assets/img/ranking/1.png";
-import rank2 from "../../../assets/img/ranking/2.png";
-import rank3 from "../../../assets/img/ranking/3.png";
 
 const rankingList = [
   {

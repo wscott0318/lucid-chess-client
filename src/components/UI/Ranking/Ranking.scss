@@ -27,17 +27,16 @@
     width: 60vw;
     height: calc(100vh - 17vw);
     overflow: hidden;
-    border-radius: 1vw;
-    border: 0.2vw solid #110919;
+    border-radius: 0.5vw;
+    outline: 0.2vw solid #110919;
     background-color: rgba($color: #311437, $alpha: 0.39);
     &-head {
       background-color: rgba($color: #3c183c, $alpha: 0.62);
-      border: 1px solid #0e0616;
-      border-radius: 1vw;
+      outline: 1px solid #0e0616;
+      border-radius: 0.5vw;
       color: #ecbc6a;
       -webkit-text-stroke: #0c6c6d;
       font-size: 2vw;
-      border-radius: 1vw;
       display: flex;
       height: 3vw;
       &-rank {
