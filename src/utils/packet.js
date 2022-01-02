@@ -8,6 +8,7 @@ export const socketEvents = {
     'CS_MatchPlayLogin': 0xff0007,
     'CS_ActivateItem': 0xff0008,
     'CS_Ready': 0xff0009,
+    'CS_CurrentItem': 0xff0010,
 
     'SC_RoomCreated': 0xff1001,
     'SC_GameStarted': 0xff1002,

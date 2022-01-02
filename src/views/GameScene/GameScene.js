@@ -496,7 +496,7 @@ export default class Scene extends Component {
         
             raycaster.setFromCamera( mouse, camera );
 
-            if( self.state.currentItem ) {
+            if( self.state.currentItem && self.state.currentItem !== heroItems['jumpyShoe'] ) {
                 for( let i = 0; i < self.boardGroundArray.length; i++ ) {
                     for( let j = 0; j < self.boardGroundArray.length; j++ ) {
                         const intersect = raycaster.intersectObject( self.boardGroundArray[i][j].mesh );
@@ -555,7 +555,7 @@ export default class Scene extends Component {
                 if( intersect.length > 0 ) {
                     if( self.props.mode === gameModes['P2P'] ) {
                         const fen = getFenFromMatrixIndex( myPiecesArray[i].rowIndex, myPiecesArray[i].colIndex );
-                        self.socket.emit( socketEvents['CS_SelectPiece'], { fen } );
+                        self.socket.emit( socketEvents['CS_SelectPiece'], { fen, currentItem: self.state.currentItem } );
                     } else {
                         // TODO : this mesh has been clicked
                         self.selectPiece( myPiecesArray[i] );
@@ -1264,8 +1264,6 @@ export default class Scene extends Component {
     }
 
     selectItem(item) {
-        this.setState({ currentItem: item });
-
         // initialize mouse move meshes
         if( this.currentMouseMeshes ) {
             this.currentMouseMeshes.forEach((item) => {
@@ -1274,18 +1272,28 @@ export default class Scene extends Component {
         }
         this.currentMouseMeshes = [];
 
-        if( item === heroItems['iceWall'] ) {
-            for( let i = 0; i < 3; i++ ) {
-                const mesh = this.meshArray['iceWall'].clone();
-                this.currentMouseMeshes.push( mesh );
+        if( item === this.state.currentItem ) {
+            this.setState({ currentItem: null });
+
+            this.socket.emit( socketEvents['CS_CurrentItem'], { currentItem: null } );
+        } else {
+            this.setState({ currentItem: item });
+
+            if( item === heroItems['iceWall'] ) {
+                for( let i = 0; i < 3; i++ ) {
+                    const mesh = this.meshArray['iceWall'].clone();
+                    this.currentMouseMeshes.push( mesh );
+                    mesh.position.set(1000, 1000, 1000);
+                    this.scene.add( mesh );
+                }
+            } else if( item === heroItems['petrify'] ) {
+                const mesh = this.meshArray['petrify'].clone();
+                this.currentMouseMeshes.push(mesh);
                 mesh.position.set(1000, 1000, 1000);
                 this.scene.add( mesh );
+            } else if( item === heroItems['jumpyShoe'] ) {
+                this.socket.emit( socketEvents['CS_CurrentItem'], { currentItem: item } );
             }
-        } else if( item === heroItems['petrify'] ) {
-            const mesh = this.meshArray['petrify'].clone();
-            this.currentMouseMeshes.push(mesh);
-            mesh.position.set(1000, 1000, 1000);
-            this.scene.add( mesh );
         }
     }
 
@@ -1505,7 +1513,7 @@ export default class Scene extends Component {
     }
 
     handlePerformMove(params) {
-        const { from, to, castling, pieceType } = params;
+        const { from, to, castling, pieceType, enPassant } = params;
 
         const fromMatrixIndex = getMatrixIndexFromFen(from);
         const toMatrixIndex = getMatrixIndexFromFen(to);
@@ -1520,6 +1528,22 @@ export default class Scene extends Component {
 
         // move chese piece to the target position
         const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === fromMatrixIndex.rowIndex && item.colIndex === fromMatrixIndex.colIndex );
+
+        // enpassant case
+        if( fromIndex !== -1 && (this.boardPiecesArray[ fromIndex ].pieceType === 'p' || this.boardPiecesArray[ fromIndex ].pieceType === 'P') && to === enPassant ) {
+            const targetMatrixIndex = { ...toMatrixIndex };
+            if( this.currentTurn === 'white' ) {
+                targetMatrixIndex.rowIndex -= 1;
+            } else {
+                targetMatrixIndex.rowIndex += 1;
+            }
+
+            const targetIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === targetMatrixIndex.rowIndex && item.colIndex === targetMatrixIndex.colIndex);
+            if( targetIndex !== -1 ) {
+                this.scene.remove( this.boardPiecesArray[targetIndex].mesh );
+                this.boardPiecesArray.splice( targetIndex, 1 );
+            }
+        }
 
         if( fromIndex !== -1 ) {
             if( pieceType ) {
