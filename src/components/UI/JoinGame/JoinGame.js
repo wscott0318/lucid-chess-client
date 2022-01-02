@@ -1,6 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { gameModes, userTypes } from "../../../utils/constant";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import io from 'socket.io-client';
+import { socketServerPort } from "../../../config";
+import { socketEvents } from "../../../utils/packet";
+import store from "../../../store/store";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./JoinGame.scss";
@@ -9,13 +13,50 @@ export const JoinGame = () => {
     const [name, setName] = useState('');
     const [secretKey, setSecretKey] = useState('');
     const navigate = useNavigate();
+	const [ socket, setSocket ] = useState();
+
+    const updateSocket = store( state => state.updateSocket );
 
     const joinAction = () => {
 		if( name === '' || secretKey === '' )
 			return;
 
-        navigate('/connect', { state: { mode: gameModes['P2P'], friendMatch: true, username: name, userType: userTypes['joiner'], roomId: secretKey, roomName: 'Silver Room' }});
+		const data = {};
+		data.username = name;
+		data.friendMatch = true;
+		data.roomId = secretKey;
+
+		socket.emit( socketEvents['CS_JoinRoom'], data );
     }
+
+	const handleJoinRoom = ( params ) => {
+		const { roomName, roomKey } = params;
+		
+		const stateData = {
+			mode: gameModes['P2P'],
+			friendMatch: true,
+			username: name,
+			userType: userTypes['joiner'],
+			roomId: secretKey,
+			roomName: roomName,
+			roomKey: roomKey,
+		}
+
+		if (roomName === 'Classic Room') {
+            navigate('/gameScene', { state: { ...stateData } });
+        } else {
+            navigate('/connect', { state: { ...stateData } });
+        }
+	}
+
+	useEffect(() => {
+        const skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
+        setSocket( skt );
+
+        skt.on( socketEvents['SC_JoinRoom'], (params) => handleJoinRoom(params) );
+
+		updateSocket( skt );
+    }, []);
 
     return (
 		<div className="JoinGame">

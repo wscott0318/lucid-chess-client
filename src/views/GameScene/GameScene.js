@@ -6,13 +6,10 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { cameraProps, alphaBet, tileSize, lightTone, darkTone, selectTone, modelProps, boardSize, historyTone, dangerTone, gameModes, orbitControlProps, bloomParams, hemiLightProps, spotLightProps, spotLightProps2, pieceMoveSpeed, modelSize, userTypes, resizeUpdateInterval, heroItems, timeLimit } from "../../utils/constant";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
-import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
+import { ang2Rad, getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
-import io from 'socket.io-client';
-import { socketServerPort } from "../../config";
 import { socketEvents } from "../../utils/packet";
 import PawnModal from "../../components/UI/PawnModal/PawnModal";
 import Victory from "../../components/UI/Victory/Victory";
@@ -153,6 +150,9 @@ export default class Scene extends Component {
         // TODO: Scene Outline Effect - Effect composer
         const whiteTeamObjects = []
         const blackTeamObjects = []
+
+        this.whiteTeamObjects = whiteTeamObjects;
+        this.blackTeamObjects = blackTeamObjects;
         
         const outlineParams = {
             edgeStrength: 3,
@@ -414,34 +414,16 @@ export default class Scene extends Component {
             console.error('load finished!');
 
             if( this.props.mode === gameModes['P2P'] ) {
-                this.socket = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
-                
-                const data = {};
+                this.socket = this.props.socket;
 
-                data.roomName = this.props.roomName;
-
-                if( this.props.friendMatch ) {  // friend match
-                    if( this.props.userType === userTypes['creator'] ) {
-                        // create Room
-                        data.username = this.props.username;
-                        data.friendMatch = this.props.friendMatch;
-    
-                        this.socket.emit( socketEvents['CS_CreateRoom'], data );
-                        this.socket.on( socketEvents['SC_RoomCreated'], this.handleRoomCreated.bind(this) );
-                    } else if( this.props.userType === userTypes['joiner'] ) {
-                        //join Friend Match Room
-                        data.username = this.props.username;
-                        data.friendMatch = this.props.friendMatch;
-                        data.roomId = this.props.roomId;
-    
-                        this.socket.emit( socketEvents['CS_JoinRoom'], data );
-                    }
-                } else {    // match matching
-                    data.username = this.props.username;
-                    data.friendMatch = false;
-
-                    this.socket.emit( socketEvents['CS_MatchPlayLogin'], data );
+                if( this.props.roomId && this.props.friendMatch ) {
+                    this.setState({
+                        roomId: this.props.roomId,
+                        showInviteModal: true,
+                    });
                 }
+
+                this.socket.emit( socketEvents['CS_Ready'] );
                 
                 this.setState({
                     waitingModalTitle: 'Waiting other player to Join',
@@ -836,7 +818,6 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
 
-                        if(self.props.roomName != "Classic Room") self.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -851,7 +832,6 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
 
-                        // this.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -1082,13 +1062,21 @@ export default class Scene extends Component {
 
     getWinningRewards = async () => {
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(1), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
+        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
             value: 0,
             from: this.props.wallet,
         })
 
         let res2 = await tx2.wait()
+        
+        if(res2.transactionHash) {
+            window.location = '/';
+        }
 
+    }
+
+    onClickLLGSymbol = () => {
+        this.getWinningRewards();
     }
 
     /************************************************************************************* */
@@ -1152,6 +1140,8 @@ export default class Scene extends Component {
                     n.material= material
                 }
             });
+
+            this.whiteTeamObjects.push(mesh);
         } else {
             mesh.traverse(n => {
                 if ( n.isMesh ) {
@@ -1164,6 +1154,8 @@ export default class Scene extends Component {
                     n.material= material
                 }
             });
+
+            this.blackTeamObjects.push(mesh);
         }
         return mesh
     }
@@ -1403,19 +1395,22 @@ export default class Scene extends Component {
                         texture = new THREE.TextureLoader().load(thunderstorm);
                     }
     
-                    const itemGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5,)
+                    const itemGeo = new THREE.PlaneBufferGeometry(0.8, 0.8, 100, 100)
                     const itemMaterial = new THREE.MeshStandardMaterial({
-                        // color: '#c0ff00',
                         side: THREE.DoubleSide,
                         roughness: 1,
                         metalness: 0,
                         refractionRatio: 0,
-                        map: texture
+                        map: texture,
+                        transparent: true,
                     });
                     const itemMesh = new THREE.Mesh( itemGeo, itemMaterial );
+
+                    itemMesh.rotateX( ang2Rad( this.side === 'white' ? -90 : 90) );
+                    itemMesh.rotateY( ang2Rad( this.side === 'white' ? 0 : 180 ) );
     
                     const itemIndex = getMatrixIndexFromFen( newMesh.position );
-                    itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 1, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
+                    itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 0.6, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
     
                     this.scene.add(itemMesh);
     
@@ -1473,7 +1468,8 @@ export default class Scene extends Component {
             showLeaveNotificationMessage: username + ' logged out!'
         });
 
-        // this.isFinished = true;
+         this.isFinished = true;
+         this.side = !this.currentTurn;
     }
 
     handleForceExit(params) {
@@ -1620,7 +1616,7 @@ export default class Scene extends Component {
             />
 
             {/* Victory modal */}
-            <Victory show={this.state && this.state.showVictoryModal} />
+            <Victory show={this.state && this.state.showVictoryModal} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />
 
             {/* Lost Modal */}
             <Popup
@@ -1643,7 +1639,7 @@ export default class Scene extends Component {
 
             {/* Invite friend modal */}
             <InviteFriend
-              show={this.state && this.state.showInviteModal && this.props.roomName != "Classic Room"}
+              show={this.state && this.state.showInviteModal}
               hideAction={() => this.setState({ showInviteModal: false })}
               roomId={this.state && this.state.roomId}
             />
