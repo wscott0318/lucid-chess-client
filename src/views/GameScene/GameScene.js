@@ -669,7 +669,7 @@ export default class Scene extends Component {
                                     self.currentMouseMeshes[0].material.color = new THREE.Color('#50d760');
                                 }
 
-                                self.currentMouseMeshes[0].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
+                                self.currentMouseMeshes[0].position.set( position.x , 0.6, position.z );
                             }
     
                             return;
@@ -1309,7 +1309,7 @@ export default class Scene extends Component {
             if( obstacle.type === heroItems['petrify'] ) {
                 const mesh = this.meshArray['petrify'].clone();
                 const position = getMeshPosition( getMatrixIndexFromFen( obstacle.position )['rowIndex'], getMatrixIndexFromFen( obstacle.position )['colIndex'] );
-                mesh.position.set(position.x + 0.1 , 1, position.z + 0.06 - 0.5);
+                mesh.position.set(position.x , 0.6, position.z);
                 this.scene.add(mesh);
                 this.obstacleMeshes.push( mesh );
             }
