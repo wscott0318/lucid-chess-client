@@ -13,6 +13,9 @@ function App() {
   const [orientation, setOrientation] = useState(false);
 
   useEffect(() => {
+    window.screen.orientation.lock("landscape").catch((e) => {
+      console.log(e);
+    });
     window.addEventListener(
       "resize",
       function () {

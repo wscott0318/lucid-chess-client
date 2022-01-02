@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './Connect.scss'
+import { gameModes, userTypes } from "../../../utils/constant";
 
 import {
   connectWallet,
@@ -33,6 +34,8 @@ export const Connect = () => {
   const [loading, setLoading] = useState(false)
 
   const [stage, setStage] = useState('connect')
+
+  console.log(location.state);
 
   switch (location.state.roomName) {
     case 'Classic Room':
@@ -133,6 +136,8 @@ export const Connect = () => {
     // })
     setWallet(walletResponse.address)
     setStatus(walletResponse.status)
+
+    // alert(walletResponse.address)
     return walletResponse.address != null
   }
 
@@ -141,6 +146,8 @@ export const Connect = () => {
       llgContractAddress,
       llgContractABI
     )
+
+    console.error(location.state.roomName + ' ' + location.state.roomKey)
 
     let amount = 50
     switch (location.state.roomName) {
@@ -163,7 +170,7 @@ export const Connect = () => {
     }
 
     let spender = llgRewardContractAddress
-
+    
     let tx = await llgContract.approve(
       ethers.utils.getAddress(spender),
       ethers.BigNumber.from(amount * 1000000000),
@@ -180,8 +187,10 @@ export const Connect = () => {
         llgRewardContractAddress,
         llgRewardContractABI
       )
+
+
       let tx2 = await llgRewardContract.depositForRoom(
-        ethers.BigNumber.from(1),
+        ethers.BigNumber.from(location.state.roomKey),
         ethers.utils.getAddress(wallet),
         ethers.BigNumber.from(amount),
         {

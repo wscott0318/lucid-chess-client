@@ -74,32 +74,33 @@ const RoomsScreen = () => {
         if( !state.friendMatch ) {
             socket.emit( socketEvents['CS_MatchPlayLogin'], data );
 
-            const stateData = {
-                mode: gameModes['P2P'],
-                friendMatch: state.friendMatch,
-                username: state.username,
-                roomName: roomName,
-            }
+            // const stateData = {
+            //     mode: gameModes['P2P'],
+            //     friendMatch: state.friendMatch,
+            //     username: state.username,
+            //     roomName: roomName,
+            // }
     
-            if (roomName === 'Classic Room') {
-                navigate('/gameScene', { state: { ...stateData } });
-            } else {
-                navigate('/connect', { state: { ...stateData } });
-            }
+            // if (roomName === 'Classic Room') {
+            //     navigate('/gameScene', { state: { ...stateData } });
+            // } else {
+            //     navigate('/connect', { state: { ...stateData } });
+            // }
         } else {
             socket.emit( socketEvents['CS_CreateRoom'], data );
         }
     }
 
     const handleRoomCreated = (params) => {
-        const { roomId, roomName } = params;
+        const { roomId, roomName, roomKey } = params;
 
         const stateData = {
             mode: gameModes['P2P'],
             friendMatch: state.friendMatch,
             username: state.username,
             roomName: roomName,
-            roomId: roomId
+            roomId: roomId,
+            roomKey: roomKey,
         }
 
         if (roomName === 'Classic Room') {

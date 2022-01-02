@@ -49,16 +49,7 @@
             font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
             color: #f7cf29;
             font-size: 6vmin;
-            // -webkit-text-stroke: 0.07em #390b13;
-            text-shadow: 1px 1px 0 #390b13, -1px 1px 0 #390b13,
-              1px -1px 0 #390b13, -1px -1px 0 #390b13, 0px 1px 0 #390b13,
-              0px -1px 0 #390b13, -1px 0px 0 #390b13, 1px 0px 0 #390b13,
-              2px 2px 0 #390b13, -2px 2px 0 #390b13, 2px -2px 0 #390b13,
-              -2px -2px 0 #390b13, 0px 2px 0 #390b13, 0px -2px 0 #390b13,
-              -2px 0px 0 #390b13, 2px 0px 0 #390b13, 1px 2px 0 #390b13,
-              -1px 2px 0 #390b13, 1px -2px 0 #390b13, -1px -2px 0 #390b13,
-              2px 1px 0 #390b13, -2px 1px 0 #390b13, 2px -1px 0 #390b13,
-              -2px -1px 0 #390b13;
+            -webkit-text-stroke: 0.05em #390b13;
             padding-right: 15%;
           }
         }
@@ -81,19 +72,11 @@
         font-size: 4vmin;
         background-color: transparent;
         border-color: transparent;
-        // -webkit-text-stroke: 0.07em #0c6c6d;
-        text-shadow: 1px 1px 0 #0c6c6d, -1px 1px 0 #0c6c6d, 1px -1px 0 #0c6c6d,
-          -1px -1px 0 #0c6c6d, 0px 1px 0 #0c6c6d, 0px -1px 0 #0c6c6d,
-          -1px 0px 0 #0c6c6d, 1px 0px 0 #0c6c6d, 2px 2px 0 #0c6c6d,
-          -2px 2px 0 #0c6c6d, 2px -2px 0 #0c6c6d, -2px -2px 0 #0c6c6d,
-          0px 2px 0 #0c6c6d, 0px -2px 0 #0c6c6d, -2px 0px 0 #0c6c6d,
-          2px 0px 0 #0c6c6d, 1px 2px 0 #0c6c6d, -1px 2px 0 #0c6c6d,
-          1px -2px 0 #0c6c6d, -1px -2px 0 #0c6c6d, 2px 1px 0 #0c6c6d,
-          -2px 1px 0 #0c6c6d, 2px -1px 0 #0c6c6d, -2px -1px 0 #0c6c6d;
+        -webkit-text-stroke: 0.05em #0c6c6d;
       }
 
       .u-button:active {
-        font-size: 3.9vmin;
+        font-size: 3.95vmin;
       }
     }
   }
