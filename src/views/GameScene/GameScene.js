@@ -8,7 +8,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { aiMove } from 'js-chess-engine';
-import { getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
+import { ang2Rad, getFenFromMatrixIndex, getMatrixIndexFromFen, getMeshPosition, isSamePoint } from "../../utils/helper";
 
 import { socketEvents } from "../../utils/packet";
 import PawnModal from "../../components/UI/PawnModal/PawnModal";
@@ -150,6 +150,9 @@ export default class Scene extends Component {
         // TODO: Scene Outline Effect - Effect composer
         const whiteTeamObjects = []
         const blackTeamObjects = []
+
+        this.whiteTeamObjects = whiteTeamObjects;
+        this.blackTeamObjects = blackTeamObjects;
         
         const outlineParams = {
             edgeStrength: 3,
@@ -1137,6 +1140,8 @@ export default class Scene extends Component {
                     n.material= material
                 }
             });
+
+            this.whiteTeamObjects.push(mesh);
         } else {
             mesh.traverse(n => {
                 if ( n.isMesh ) {
@@ -1149,6 +1154,8 @@ export default class Scene extends Component {
                     n.material= material
                 }
             });
+
+            this.blackTeamObjects.push(mesh);
         }
         return mesh
     }
@@ -1388,19 +1395,22 @@ export default class Scene extends Component {
                         texture = new THREE.TextureLoader().load(thunderstorm);
                     }
     
-                    const itemGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5,)
+                    const itemGeo = new THREE.PlaneBufferGeometry(0.8, 0.8, 100, 100)
                     const itemMaterial = new THREE.MeshStandardMaterial({
-                        // color: '#c0ff00',
                         side: THREE.DoubleSide,
                         roughness: 1,
                         metalness: 0,
                         refractionRatio: 0,
-                        map: texture
+                        map: texture,
+                        transparent: true,
                     });
                     const itemMesh = new THREE.Mesh( itemGeo, itemMaterial );
+
+                    itemMesh.rotateX( ang2Rad( this.side === 'white' ? -90 : 90) );
+                    itemMesh.rotateY( ang2Rad( this.side === 'white' ? 0 : 180 ) );
     
                     const itemIndex = getMatrixIndexFromFen( newMesh.position );
-                    itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 1, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
+                    itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 0.6, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
     
                     this.scene.add(itemMesh);
     
