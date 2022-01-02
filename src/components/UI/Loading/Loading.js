@@ -15,7 +15,7 @@ export const Loading = ({ title }) => {
   useEffect(() => {
     timeInterval.current = setInterval(() => {
       setCurrentTime((prev) => prev + 1);
-      if (currentTime > 10) setRefund(true);
+      // if (currentTime > 10) setRefund(true);
     }, 1000);
 
     return () => clearInterval(timeInterval.current);

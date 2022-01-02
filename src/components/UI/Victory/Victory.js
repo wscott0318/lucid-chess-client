@@ -28,7 +28,7 @@ export const Victory = ({ show, roomName, onClickLLGSymbol }) => {
     const calcLLGs = () => {
       let tax = 5;
       switch(roomName) {
-          case "Siver Room":
+          case "Silver Room":
               setLLGToGetPaid(100);
               setLLGDeposited(100 * (100 - tax) / 100);
               break;
