@@ -421,7 +421,7 @@ export default class Scene extends Component {
             if( this.props.mode === gameModes['P2P'] ) {
                 this.socket = this.props.socket;
 
-                if( this.props.roomId ) {
+                if( this.props.roomId && this.props.friendMatch ) {
                     this.setState({
                         roomId: this.props.roomId,
                         showInviteModal: true,
@@ -823,7 +823,6 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
 
-                        if(self.props.roomName != "Classic Room") self.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -838,7 +837,6 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
 
-                        // this.getWinningRewards();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -1069,13 +1067,21 @@ export default class Scene extends Component {
 
     getWinningRewards = async () => {
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(1), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
+        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
             value: 0,
             from: this.props.wallet,
         })
 
         let res2 = await tx2.wait()
+        
+        if(res2.transactionHash) {
+            window.location = '/';
+        }
 
+    }
+
+    onClickLLGSymbol = () => {
+        this.getWinningRewards();
     }
 
     /************************************************************************************* */
@@ -1467,7 +1473,8 @@ export default class Scene extends Component {
             showLeaveNotificationMessage: username + ' logged out!'
         });
 
-        // this.isFinished = true;
+         this.isFinished = true;
+         this.side = !this.currentTurn;
     }
 
     handleForceExit(params) {
@@ -1614,7 +1621,7 @@ export default class Scene extends Component {
             />
 
             {/* Victory modal */}
-            <Victory show={this.state && this.state.showVictoryModal} />
+            <Victory show={this.state && this.state.showVictoryModal} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />
 
             {/* Lost Modal */}
             <Popup

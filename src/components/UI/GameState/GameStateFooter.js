@@ -7,7 +7,7 @@ export const GameStateFooter = ({quitAction, showInventoryAction}) => {
       <div className="u-back" onClick={ showInventoryAction }></div>
       <div className="u-footer-right">
         <div className="u-undo" onClick={quitAction}></div>
-        <div className="u-setting"></div>
+        {/* <div className="u-setting"></div> */}
       </div>
     </div>
   );

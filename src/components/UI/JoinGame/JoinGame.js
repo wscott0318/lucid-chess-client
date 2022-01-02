@@ -30,8 +30,8 @@ export const JoinGame = () => {
     }
 
 	const handleJoinRoom = ( params ) => {
-		const { roomName } = params;
-
+		const { roomName, roomKey } = params;
+		
 		const stateData = {
 			mode: gameModes['P2P'],
 			friendMatch: true,
@@ -39,6 +39,7 @@ export const JoinGame = () => {
 			userType: userTypes['joiner'],
 			roomId: secretKey,
 			roomName: roomName,
+			roomKey: roomKey,
 		}
 
 		if (roomName === 'Classic Room') {
