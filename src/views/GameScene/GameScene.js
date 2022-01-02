@@ -413,7 +413,7 @@ export default class Scene extends Component {
             if( this.props.mode === gameModes['P2P'] ) {
                 this.socket = this.props.socket;
 
-                if( this.props.roomId ) {
+                if( this.props.roomId && this.props.friendMatch ) {
                     this.setState({
                         roomId: this.props.roomId,
                         showInviteModal: true,
