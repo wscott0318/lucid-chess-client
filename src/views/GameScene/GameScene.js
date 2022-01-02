@@ -235,7 +235,8 @@ export default class Scene extends Component {
             loader.loadAsync( 'models/piece/Fox.glb' ),
             loader.loadAsync( 'models/piece/Lucifer.glb' ),
             loader.loadAsync( 'models/chess-cell.glb' ),
-            loader.loadAsync( 'models/item/ice-wall.glb' )
+            loader.loadAsync( 'models/item/ice-wall.glb' ),
+            loader.loadAsync( 'models/item/net.glb' ),
         ]).then((gltfArray) => {
             
             // TODO : Add chess board to the scene
@@ -265,7 +266,11 @@ export default class Scene extends Component {
             iceMesh.rotation.y = Math.PI / 2;
             this.meshArray['iceWall'] = iceMesh;
 
-            this.meshArray['petrify'] = iceMesh.clone();
+            const petrifyMesh = gltfArray[11].scene.clone();
+            petrifyMesh.scale.set(0.01, 0.01, 0.01);
+            petrifyMesh.position.set(0, 1, 0);
+            // scene.add(petrifyMesh);
+            this.meshArray['petrify'] = petrifyMesh.clone();
 
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
