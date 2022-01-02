@@ -92,14 +92,15 @@ const RoomsScreen = () => {
     }
 
     const handleRoomCreated = (params) => {
-        const { roomId, roomName } = params;
+        const { roomId, roomName, roomKey } = params;
 
         const stateData = {
             mode: gameModes['P2P'],
             friendMatch: state.friendMatch,
             username: state.username,
             roomName: roomName,
-            roomId: roomId
+            roomId: roomId,
+            roomKey: roomKey,
         }
 
         if (roomName === 'Classic Room') {

@@ -1606,7 +1606,7 @@ export default class Scene extends Component {
             />
 
             {/* Victory modal */}
-            <Victory show={this.state && this.state.showVictoryModal} llgAmountDeposited={50} llgAmountToGetPaid={12} onClickLLGSymbol={this.onClickLLGSymbol} />
+            <Victory show={this.state && this.state.showVictoryModal} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />
 
             {/* Lost Modal */}
             <Popup

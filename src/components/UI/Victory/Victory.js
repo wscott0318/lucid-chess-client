@@ -5,15 +5,47 @@ import backImg from "../../../assets/img/back_bg.png";
 import markImg from "../../../assets/img/victory_mark.png";
 import item1Img from "../../../assets/img/victory_item1.png";
 import item2Img from "../../../assets/img/victory_item2.png";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
-export const Victory = ({ show, llgAmountToGetPaid, llgAmountDeposited, onClickLLGSymbol }) => {
+export const Victory = ({ show, roomName, onClickLLGSymbol }) => {
     const [loading, setLoading] = useState(false);
+    const [llgToGetPaid, setLLGToGetPaid] = useState(0); 
+    const [llgDeposited, setLLGDeposited] = useState(0); 
+
+    useEffect(() => {
+      calcLLGs();
+    })
 
     const onClick = () => {
-      onClickLLGSymbol();
-      setLoading(true);
+      if(roomName == "Classic Room") window.location = '/';
+      else {
+        onClickLLGSymbol();
+        setLoading(true);
+      }
     }
+
+
+    const calcLLGs = () => {
+      let tax = 5;
+      switch(roomName) {
+          case "Siver Room":
+              setLLGToGetPaid(100);
+              setLLGDeposited(100 * (100 - tax) / 100);
+              break;
+          case "Gold Room":
+              setLLGToGetPaid(200);
+              setLLGDeposited(200 * (100 - tax) / 100);
+              break;
+          case "Platinum Room":
+              setLLGToGetPaid(400);
+              setLLGDeposited(400 * (100 - tax) / 100);
+              break;
+          case "Diamond Room":
+              setLLGToGetPaid(1000);
+              setLLGDeposited(1000 * (100 - tax) / 100);
+              break;
+      }
+  }
 
     return (
       <Modal
@@ -31,11 +63,11 @@ export const Victory = ({ show, llgAmountToGetPaid, llgAmountDeposited, onClickL
               <div className="u-list">
                 <div className="u-list-item">
                   <Image className="u-item-image" src={item1Img}></Image>
-                  <div className="u-item-text">{llgAmountDeposited}</div>
+                  <div className="u-item-text">{llgToGetPaid}</div>
                 </div>
                 <div className="u-list-item">
                   <Image className="u-item-image" src={item2Img}></Image>
-                  <div className="u-item-text">{llgAmountToGetPaid}</div>
+                  <div className="u-item-text">{llgDeposited}</div>
                 </div>
               </div>
               <button className="u-button" disabled={loading} onClick={onClick}>{loading ? "Loading..." : "Return Home"}</button>

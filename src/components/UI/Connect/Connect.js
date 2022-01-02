@@ -30,11 +30,12 @@ export const Connect = () => {
   const location = useLocation()
   let amount
   const [wallet, setWallet] = useState()
-  const [roomKey, setRoomKey] = useState()
   const [status, setStatus] = useState()
   const [loading, setLoading] = useState(false)
 
   const [stage, setStage] = useState('connect')
+
+  console.log(location.state);
 
   switch (location.state.roomName) {
     case 'Classic Room':
@@ -72,20 +73,6 @@ export const Connect = () => {
       text: 'Transaction failed. You need ' + amount + 'LLG to start the game',
       button: 'Deposit LLG'
     }
-  }
-
-  const getRandomString = (length) => {
-    // var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxyz';
-    var numbers = '0123456789';
-
-    var string = '';
-
-    for (var i = 0; i < length; i++) {
-        var randomNumber = Math.floor(Math.random() * numbers.length);
-        string += numbers.substring(randomNumber, randomNumber + 1);
-    }
-
-    return string;
   }
 
   /************************************************************************************* */
@@ -160,6 +147,8 @@ export const Connect = () => {
       llgContractABI
     )
 
+    console.error(location.state.roomName + ' ' + location.state.roomKey)
+
     let amount = 50
     switch (location.state.roomName) {
       case 'Classic Room':
@@ -182,12 +171,6 @@ export const Connect = () => {
 
     let spender = llgRewardContractAddress
     
-    let newPrivKey = Date.now() + getRandomString(64);
-
-    let roomKey = location.state.userType == userTypes['joiner'] ? 0 : newPrivKey;
-    setRoomKey(roomKey);
-    console.log(roomKey);
-
     let tx = await llgContract.approve(
       ethers.utils.getAddress(spender),
       ethers.BigNumber.from(amount * 1000000000),
@@ -207,7 +190,7 @@ export const Connect = () => {
 
 
       let tx2 = await llgRewardContract.depositForRoom(
-        ethers.BigNumber.from(roomKey),
+        ethers.BigNumber.from(location.state.roomKey),
         ethers.utils.getAddress(wallet),
         ethers.BigNumber.from(amount),
         {
@@ -245,7 +228,7 @@ export const Connect = () => {
         }
         break
       case 'join':
-        navigate('/gameScene', { state: {...location.state, wallet, roomKey} })
+        navigate('/gameScene', { state: {...location.state, wallet} })
         break
       case 'deposit':
         try {
