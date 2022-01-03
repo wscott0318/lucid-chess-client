@@ -54,13 +54,15 @@ export default class Scene extends Component {
             showWaitingModal: true,
             waitingModalTitle: "Loading...",
             showInviteModal: false,
-            wallet: '',
+            wallet: this.props.wallet,
             status: '',
             showConfirmModal: false,
             showClaimModal: false,
-            numConsecutiveWins: 0,
+            numConsecutiveWins: window.localStorage.getItem("wins") ? window.localStorage.getItem("wins") : 0,
             bonusReward: 0,
         });
+
+
 
         // getCurrentWalletConnected((address, status) => {
         //     this.setState({
@@ -822,12 +824,21 @@ export default class Scene extends Component {
                             showLoseModal: false,
                         });
                         
-                        self.determineIfHasBonus();
+                        if(!self.props.friendMatch) {
+                            window.localStorage.setItem("wins", parseInt(self.state.numConsecutiveWins) + 1)
+                            
+                            if(window.localStorage.getItem("chance") == null | window.localStorage.getItem("chance") == "1") self.determineIfHasBonus();
+                        }
                     } else {
                         self.setState({
                             showVictoryModal: false,
                             showLoseModal: true,
                         });
+                        
+                        if(!self.props.friendMatch) {
+                            window.localStorage.setItem("chance", 0)
+                            window.localStorage.setItem("wins", 0)
+                        }
                     }
                     return;
                 } else if( self.checkIfFinished() ) {
@@ -1095,7 +1106,8 @@ export default class Scene extends Component {
 
     determineIfHasBonus = async () => {
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-        let numConsecutiveWins = await llgRewardContract.getNumOfConsecutiveWins(ethers.utils.getAddress(this.props.wallet));
+        let numConsecutiveWins = window.localStorage.getItem("wins");
+        // let numConsecutiveWins = await llgRewardContract.getNumOfConsecutiveWins(ethers.utils.getAddress(this.props.wallet));
         if(numConsecutiveWins == "3" | numConsecutiveWins == "5" | numConsecutiveWins == "10") {
             this.setState({
                 numConsecutiveWins,
@@ -1108,8 +1120,10 @@ export default class Scene extends Component {
     getBonusReward = async () => {
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         
-        console.error('*****', llgRewardContract)
-        let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(this.props.wallet), ethers.BigNumber.from(123), {
+        let wallet = this.props.wallet ? this.props.wallet : this.state.wallet;
+        console.error('*****', wallet)
+
+        let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(wallet), ethers.BigNumber.from(123), ethers.BigNumber.from(this.state.numConsecutiveWins), {
             value: 0,
             from: this.props.wallet,
         })
@@ -1157,11 +1171,18 @@ export default class Scene extends Component {
     }
 
     onClickLLGSymbol = () => {
-        this.getWinningRewards();
+        if(this.props.roomName == "Classic Room") {
+            this.getWinningRewards();
+        } else {
+            window.location = '/';
+        }
     }
 
     onClickClaim = () => {
-        this.getBonusReward();
+        if(!this.state.wallet) this.connectWalletPressed();
+        else {
+            this.getBonusReward();
+        }
     }
 
     onClickRefund = () => {
@@ -1705,7 +1726,7 @@ export default class Scene extends Component {
             />
 
             {/* Claim modal */}
-            <Claim show={this.state && this.state.showClaimModal} msg={`Congratulation, You won ${this.state && this.state.numConsecutiveWins} matches in a row. You earn ${this.state && this.state.bonusReward} LGG more!`} onClickClaim={this.onClickClaim}/>
+            <Claim show={this.state && this.state.showClaimModal} msg={`Congratulation, You won ${this.state && this.state.numConsecutiveWins} matches in a row. You earn ${this.state && this.state.bonusReward} LGG more!`} onClickClaim={this.onClickClaim} btnText={this.state && this.state.wallet ? "Claim Reward" : "Connect Wallet"}/>
 
             {/* Victory modal */}
             <Victory show={this.state && this.state.showVictoryModal} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />

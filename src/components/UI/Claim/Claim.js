@@ -2,7 +2,7 @@ import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Claim.scss";
 
-export const Claim = ({ show, msg, onClickClaim }) => {
+export const Claim = ({ show, msg, onClickClaim, btnText }) => {
   return (
     <Modal
       className="Claim"
@@ -16,7 +16,7 @@ export const Claim = ({ show, msg, onClickClaim }) => {
           <div className="u-content">
             <div className="u-content-container">
               <div className="u-text">{msg}</div>
-              <div className="u-button" onClick={onClickClaim}>Claim reward</div>
+              <div className="u-button" onClick={onClickClaim}>{btnText}</div>
             </div>
           </div>
         </div>
