@@ -8,6 +8,7 @@ import GameScene from "./views/GameScene";
 import MatchPlay from "./views/MatchPlay";
 import Orientation from "./components/UI/Orientation/Orientation";
 import Connect from "./components/UI/Connect/Connect";
+import Ranking from "./components/UI/Ranking/Ranking";
 
 function App() {
   const [orientation, setOrientation] = useState(false);
@@ -36,6 +37,7 @@ function App() {
           <Route path="/machinePlay" element={<Level />} />
           <Route path="/gameScene" element={<GameScene />} />
           <Route path="/connect" element={<Connect />} />
+          <Route path="/ranking" element={ <Ranking /> } />
         </Routes>
         <Orientation show={orientation}></Orientation>
       </div>
