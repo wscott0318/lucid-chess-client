@@ -16,6 +16,7 @@ import Victory from "../../components/UI/Victory/Victory";
 import Loading from "../../components/UI/Loading/Loading";
 import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
+import Loser from "../../components/UI/Loser/Loser";
 import GameStateHeader from "../../components/UI/GameState/GameStateHeader";
 import GameStateFooter from "../../components/UI/GameState/GameStateFooter";
 import Confirm from "../../components/UI/Confirm/Confirm";
@@ -1179,7 +1180,7 @@ export default class Scene extends Component {
         if(this.props.roomName == "Classic Room") {
             this.getWinningRewards();
         } else {
-            window.location = '/';
+            window.location.href = '/';
         }
     }
 
@@ -1761,10 +1762,9 @@ export default class Scene extends Component {
             <Victory show={this.state && this.state.showVictoryModal} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />
 
             {/* Lost Modal */}
-            <Popup
+            <Loser
               show={this.state && this.state.showLoseModal}
-              type={"leaveNotification"}
-              message={"You are lost"}
+              msg={"You are lost"}
             />
 
             {/* leave room notification popup */}

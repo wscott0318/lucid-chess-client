@@ -1,10 +1,10 @@
 .ranking {
-  position: absolute;
+  position: relative;
   text-align: center;
-  width: 100vw;
-  height: 100vh;
+  width: 70vw;
+  height: 90vh;
   font-family: "HaettenschweilerRegular";
-  background-image: url("../../../assets/img/modal_back.png");
+  background-image: url("../../../assets/img/back_bg.png");
   background-repeat: no-repeat;
   background-size: 100% 100%;
   color: #fbfae2;
@@ -18,14 +18,14 @@
     background-image: url("../../../assets/img/ribbon.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    margin: 1vw auto;
+    margin: 2vw auto 1vw auto;
     font-size: 4.5vw;
     -webkit-text-stroke: 0.05em #792a4d;
   }
   &-table {
     margin: 1vw auto;
     width: 60vw;
-    height: calc(100vh - 17vw);
+    height: calc(90vh - 19vw);
     overflow: hidden;
     border-radius: 0.5vw;
     outline: 0.2vw solid #110919;
@@ -109,12 +109,12 @@
     background-image: url("../../../assets/img/victory_button.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    margin: 1vw auto;
+    margin: 1vw auto 2vw auto;
     font-size: 3vw;
     -webkit-text-stroke: 0.05em #0c6c6d;
     cursor: pointer;
     &:active {
-      font-size: 2.99vw;
+      font-size: 2.95vw;
     }
   }
 }
