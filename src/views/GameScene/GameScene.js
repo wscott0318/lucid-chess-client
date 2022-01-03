@@ -19,6 +19,7 @@ import Popup from "../../components/UI/Popup/Popup";
 import GameStateHeader from "../../components/UI/GameState/GameStateHeader";
 import GameStateFooter from "../../components/UI/GameState/GameStateFooter";
 import Confirm from "../../components/UI/Confirm/Confirm";
+import Claim from "../../components/UI/Claim/Claim";
 
 import backPic from '../../assets/img/background.jpg';
 
@@ -39,7 +40,7 @@ import {
 import {chainId, llgContractAddress, llgRewardContractAddress} from '../../utils/address';
 
 import {getContractWithSigner, getContractWithoutSigner} from '../../utils/interact';
-import { ethers } from 'ethers'
+import { Contract, ethers } from 'ethers'
 
 const llgContractABI = require("../../utils/llg-contract-abi.json");
 const llgRewardContractABI = require("../../utils/llg-reward-contract-abi.json");
@@ -56,6 +57,9 @@ export default class Scene extends Component {
             wallet: '',
             status: '',
             showConfirmModal: false,
+            showClaimModal: false,
+            numConsecutiveWins: 0,
+            bonusReward: 0,
         });
 
         // getCurrentWalletConnected((address, status) => {
@@ -809,7 +813,7 @@ export default class Scene extends Component {
         this.performMove = performMove;
 
         // render every frame
-        var animate = function () {
+        var animate = function  () {
             if( self.moveFinished() ) {
                 if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
                     if( self.side !== self.currentTurn ) {
@@ -817,7 +821,8 @@ export default class Scene extends Component {
                             showVictoryModal: true,
                             showLoseModal: false,
                         });
-
+                        
+                        self.determineIfHasBonus();
                     } else {
                         self.setState({
                             showVictoryModal: false,
@@ -1041,15 +1046,15 @@ export default class Scene extends Component {
 
         let tx = await llgContract.approve(ethers.utils.getAddress(spender), ethers.BigNumber.from(amount * 1000000000), {
             value: 0,
-            from: this.state.wallet,
+            from: this.props.wallet,
         })
 
         let res = await tx.wait()
         if (res.transactionHash) {
             const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-            let tx2 = await llgRewardContract.depositForRoom(ethers.BigNumber.from(roomId), ethers.utils.getAddress(this.state.wallet), ethers.BigNumber.from(amount), {
+            let tx2 = await llgRewardContract.deposit(ethers.BigNumber.from(roomId), ethers.utils.getAddress(this.props.wallet), ethers.BigNumber.from(amount), {
                 value: 0,
-                from: this.state.wallet,
+                from: this.props.wallet,
             })
 
             let res2 = await tx2.wait();
@@ -1060,9 +1065,68 @@ export default class Scene extends Component {
         }
     }
 
+    calcBonus = (wins) => {
+        if(wins == 3) return 50;
+        else if(wins == 5) return 100;
+        else if(wins == 10) return 300;
+        else return 0;
+    }
+
+    calcRefundAmount = (roomName) => {
+        let amount;
+        switch(roomName) {
+            case "Silver Room":
+                amount = 50;
+                break;
+            case "Gold Room":
+                amount = 100;
+                break;
+            case "Platinum Room":
+                amount = 200;
+                break;
+            case "Diamond Room":
+                amount = 500;
+                break;
+            default:
+        }
+
+        return amount;
+    }
+
+    determineIfHasBonus = async () => {
+        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let numConsecutiveWins = await llgRewardContract.getNumOfConsecutiveWins(ethers.utils.getAddress(this.props.wallet));
+        if(numConsecutiveWins == "3" | numConsecutiveWins == "5" | numConsecutiveWins == "10") {
+            this.setState({
+                numConsecutiveWins,
+                bonusReward: this.calcBonus(numConsecutiveWins),
+                showClaimModal: true,
+            });
+        }
+    }
+    
+    getBonusReward = async () => {
+        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        
+        console.error('*****', llgRewardContract)
+        let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(this.props.wallet), ethers.BigNumber.from(123), {
+            value: 0,
+            from: this.props.wallet,
+        })
+        let res = await tx.wait()
+        
+        if(res.transactionHash) {
+            // window.location = '/';
+            this.setState({
+                showClaimModal: false
+            })
+            
+        }
+    }
+
     getWinningRewards = async () => {
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), {
+        let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), this.props.friendMatch, {
             value: 0,
             from: this.props.wallet,
         })
@@ -1070,13 +1134,38 @@ export default class Scene extends Component {
         let res2 = await tx2.wait()
         
         if(res2.transactionHash) {
+            console.error(res2);
+            // window.location = '/';
+        }
+    }
+
+    getRefund = async () => {
+        let refundAmount;
+        refundAmount = this.calcRefundAmount(this.props.roomName);
+        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let tx2 = await llgRewardContract.refund(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), ethers.BigNumber.from(refundAmount), {
+            value: 0,
+            from: this.props.wallet,
+        })
+
+        let res2 = await tx2.wait()
+        
+        if(res2.transactionHash) {
+            console.error(res2);
             window.location = '/';
         }
-
     }
 
     onClickLLGSymbol = () => {
         this.getWinningRewards();
+    }
+
+    onClickClaim = () => {
+        this.getBonusReward();
+    }
+
+    onClickRefund = () => {
+        this.getRefund();
     }
 
     /************************************************************************************* */
@@ -1463,10 +1552,10 @@ export default class Scene extends Component {
     handlePlayerLogOut(params) {
         const username = params.username;
         
-        this.setState({
-            showLeaveNotificationModal: true,
-            showLeaveNotificationMessage: username + ' logged out!'
-        });
+        // this.setState({
+        //     showLeaveNotificationModal: true,
+        //     showLeaveNotificationMessage: username + ' logged out!'
+        // });
 
          this.isFinished = true;
          this.side = !this.currentTurn;
@@ -1615,6 +1704,9 @@ export default class Scene extends Component {
               pawnTransform={this.pawnTransform.bind(this)}
             />
 
+            {/* Claim modal */}
+            <Claim show={this.state && this.state.showClaimModal} msg={`Congratulation, You won ${this.state && this.state.numConsecutiveWins} matches in a row. You earn ${this.state && this.state.bonusReward} LGG more!`} onClickClaim={this.onClickClaim}/>
+
             {/* Victory modal */}
             <Victory show={this.state && this.state.showVictoryModal} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />
 
@@ -1634,7 +1726,7 @@ export default class Scene extends Component {
 
             {/* loading screen */}
             {this.state && this.state.showWaitingModal ? (
-              <Loading title={this.state.waitingModalTitle} />
+              <Loading title={this.state.waitingModalTitle} onClickRefund={this.onClickRefund} roomName={this.props.roomName} />
             ) : null}
 
             {/* Invite friend modal */}

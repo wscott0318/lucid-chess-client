@@ -189,7 +189,7 @@ export const Connect = () => {
       )
 
 
-      let tx2 = await llgRewardContract.depositForRoom(
+      let tx2 = await llgRewardContract.deposit(
         ethers.BigNumber.from(location.state.roomKey),
         ethers.utils.getAddress(wallet),
         ethers.BigNumber.from(amount),

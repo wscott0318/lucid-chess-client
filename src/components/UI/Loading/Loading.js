@@ -7,7 +7,7 @@ import Refund from "../Refund/Refund";
 
 const starArray = [0, 1, 2, 3, 4, 5];
 
-export const Loading = ({ title }) => {
+export const Loading = ({ title, onClickRefund, roomName }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [refund, setRefund] = useState(false);
   const timeInterval = useRef(0);
@@ -15,7 +15,10 @@ export const Loading = ({ title }) => {
   useEffect(() => {
     timeInterval.current = setInterval(() => {
       setCurrentTime((prev) => prev + 1);
-      // if (currentTime > 10) setRefund(true);
+      if (currentTime > 10) {
+        if(roomName != "Classic Room") setRefund(true);
+        setCurrentTime(0);
+      }
     }, 1000);
 
     return () => clearInterval(timeInterval.current);
@@ -40,7 +43,12 @@ export const Loading = ({ title }) => {
           <p>{title}</p>
         </div>
       </div>
-      <Refund show={refund} msg={"Can't load a room!"}></Refund>
+      <Refund
+        show={refund}
+        msg={"Can't load a room!"}
+        hideAction={() => setRefund(false)}
+        onClickRefund={onClickRefund}
+      ></Refund>
     </div>
   );
 };

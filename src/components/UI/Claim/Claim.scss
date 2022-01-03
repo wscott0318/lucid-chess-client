@@ -1,0 +1,66 @@
+.Claim {
+  font-family: "HaettenschweilerRegular";
+  color: #fbfae2;
+  .u-container {
+    position: relative;
+    width: 45vw;
+    height: calc(45vw * 0.6);
+    top: 5vw;
+    margin: auto;
+    background-image: url("../../../assets/img/level_back.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+    .u-ribbon {
+      position: absolute;
+      width: 60%;
+      height: 6vw;
+      left: 20%;
+      top: -2.5vw;
+      background-image: url("../../../assets/img/ribbon.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      font-size: 3vw;
+      text-align: center;
+      font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+      color: #fbfae2;
+      -webkit-text-stroke: 0.05em #792a4d;
+    }
+    .u-content {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: calc(45vw * 0.6 - 3vw);
+      display: grid;
+      align-items: center;
+      font-family: "HaettenschweilerRegular";
+      color: #f9f8cb;
+      .u-content-container {
+        display: grid;
+        align-items: center;
+        width: 100%;
+        height: 40%;
+        .u-text {
+          font-size: 2vw;
+        }
+        .u-button {
+          margin: auto;
+          background-image: url("../../../assets/img/victory_button.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          -webkit-text-stroke: 0.05em #0c6c6d;
+          width: 20vw;
+          height: 5vw;
+          font-size: 2.5vw;
+          display: grid;
+          text-align: center;
+          align-items: center;
+          cursor: pointer;
+          &:active {
+            font-size: 2.45vw;
+          }
+        }
+      }
+    }
+  }
+}
