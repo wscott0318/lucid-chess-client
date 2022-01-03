@@ -232,7 +232,7 @@ export const Connect = () => {
         break
       case 'deposit':
         try {
-          let res1 = 1//await makeDeposit()
+          let res1 = await makeDeposit()
           if (res1) setStage('join')
           else setStage('depositFail')
         } catch (e) {
