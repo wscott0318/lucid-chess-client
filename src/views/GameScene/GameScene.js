@@ -241,7 +241,8 @@ export default class Scene extends Component {
             loader.loadAsync( 'models/piece/Fox.glb' ),
             loader.loadAsync( 'models/piece/Lucifer.glb' ),
             loader.loadAsync( 'models/chess-cell.glb' ),
-            loader.loadAsync( 'models/item/ice-wall.glb' )
+            loader.loadAsync( 'models/item/ice-wall.glb' ),
+            loader.loadAsync( 'models/item/net.glb' ),
         ]).then((gltfArray) => {
             
             // TODO : Add chess board to the scene
@@ -271,7 +272,11 @@ export default class Scene extends Component {
             iceMesh.rotation.y = Math.PI / 2;
             this.meshArray['iceWall'] = iceMesh;
 
-            this.meshArray['petrify'] = iceMesh.clone();
+            const petrifyMesh = gltfArray[11].scene.clone();
+            petrifyMesh.scale.set(0.01, 0.01, 0.01);
+            petrifyMesh.position.set(0, 1, 0);
+            // scene.add(petrifyMesh);
+            this.meshArray['petrify'] = petrifyMesh.clone();
 
             // add and initialize board ground and characters 
             for( let i = 0; i < boardSize; i++ ) {
@@ -497,7 +502,7 @@ export default class Scene extends Component {
         
             raycaster.setFromCamera( mouse, camera );
 
-            if( self.state.currentItem ) {
+            if( self.state.currentItem && self.state.currentItem !== heroItems['jumpyShoe'] ) {
                 for( let i = 0; i < self.boardGroundArray.length; i++ ) {
                     for( let j = 0; j < self.boardGroundArray.length; j++ ) {
                         const intersect = raycaster.intersectObject( self.boardGroundArray[i][j].mesh );
@@ -556,7 +561,7 @@ export default class Scene extends Component {
                 if( intersect.length > 0 ) {
                     if( self.props.mode === gameModes['P2P'] ) {
                         const fen = getFenFromMatrixIndex( myPiecesArray[i].rowIndex, myPiecesArray[i].colIndex );
-                        self.socket.emit( socketEvents['CS_SelectPiece'], { fen } );
+                        self.socket.emit( socketEvents['CS_SelectPiece'], { fen, currentItem: self.state.currentItem } );
                     } else {
                         // TODO : this mesh has been clicked
                         self.selectPiece( myPiecesArray[i] );
@@ -670,7 +675,7 @@ export default class Scene extends Component {
                                     self.currentMouseMeshes[0].material.color = new THREE.Color('#50d760');
                                 }
 
-                                self.currentMouseMeshes[0].position.set( position.x + 0.1 , 1, position.z + 0.06 - 0.5 );
+                                self.currentMouseMeshes[0].position.set( position.x , 0.6, position.z );
                             }
     
                             return;
@@ -1369,8 +1374,6 @@ export default class Scene extends Component {
     }
 
     selectItem(item) {
-        this.setState({ currentItem: item });
-
         // initialize mouse move meshes
         if( this.currentMouseMeshes ) {
             this.currentMouseMeshes.forEach((item) => {
@@ -1379,18 +1382,28 @@ export default class Scene extends Component {
         }
         this.currentMouseMeshes = [];
 
-        if( item === heroItems['iceWall'] ) {
-            for( let i = 0; i < 3; i++ ) {
-                const mesh = this.meshArray['iceWall'].clone();
-                this.currentMouseMeshes.push( mesh );
+        if( item === this.state.currentItem ) {
+            this.setState({ currentItem: null });
+
+            this.socket.emit( socketEvents['CS_CurrentItem'], { currentItem: null } );
+        } else {
+            this.setState({ currentItem: item });
+
+            if( item === heroItems['iceWall'] ) {
+                for( let i = 0; i < 3; i++ ) {
+                    const mesh = this.meshArray['iceWall'].clone();
+                    this.currentMouseMeshes.push( mesh );
+                    mesh.position.set(1000, 1000, 1000);
+                    this.scene.add( mesh );
+                }
+            } else if( item === heroItems['petrify'] ) {
+                const mesh = this.meshArray['petrify'].clone();
+                this.currentMouseMeshes.push(mesh);
                 mesh.position.set(1000, 1000, 1000);
                 this.scene.add( mesh );
+            } else if( item === heroItems['jumpyShoe'] ) {
+                this.socket.emit( socketEvents['CS_CurrentItem'], { currentItem: item } );
             }
-        } else if( item === heroItems['petrify'] ) {
-            const mesh = this.meshArray['petrify'].clone();
-            this.currentMouseMeshes.push(mesh);
-            mesh.position.set(1000, 1000, 1000);
-            this.scene.add( mesh );
         }
     }
 
@@ -1414,7 +1427,7 @@ export default class Scene extends Component {
             if( obstacle.type === heroItems['petrify'] ) {
                 const mesh = this.meshArray['petrify'].clone();
                 const position = getMeshPosition( getMatrixIndexFromFen( obstacle.position )['rowIndex'], getMatrixIndexFromFen( obstacle.position )['colIndex'] );
-                mesh.position.set(position.x + 0.1 , 1, position.z + 0.06 - 0.5);
+                mesh.position.set(position.x , 0.6, position.z);
                 this.scene.add(mesh);
                 this.obstacleMeshes.push( mesh );
             }
@@ -1610,7 +1623,7 @@ export default class Scene extends Component {
     }
 
     handlePerformMove(params) {
-        const { from, to, castling, pieceType } = params;
+        const { from, to, castling, pieceType, enPassant } = params;
 
         const fromMatrixIndex = getMatrixIndexFromFen(from);
         const toMatrixIndex = getMatrixIndexFromFen(to);
@@ -1625,6 +1638,22 @@ export default class Scene extends Component {
 
         // move chese piece to the target position
         const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === fromMatrixIndex.rowIndex && item.colIndex === fromMatrixIndex.colIndex );
+
+        // enpassant case
+        if( fromIndex !== -1 && (this.boardPiecesArray[ fromIndex ].pieceType === 'p' || this.boardPiecesArray[ fromIndex ].pieceType === 'P') && to === enPassant ) {
+            const targetMatrixIndex = { ...toMatrixIndex };
+            if( this.currentTurn === 'white' ) {
+                targetMatrixIndex.rowIndex -= 1;
+            } else {
+                targetMatrixIndex.rowIndex += 1;
+            }
+
+            const targetIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === targetMatrixIndex.rowIndex && item.colIndex === targetMatrixIndex.colIndex);
+            if( targetIndex !== -1 ) {
+                this.scene.remove( this.boardPiecesArray[targetIndex].mesh );
+                this.boardPiecesArray.splice( targetIndex, 1 );
+            }
+        }
 
         if( fromIndex !== -1 ) {
             if( pieceType ) {
