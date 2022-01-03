@@ -16,13 +16,13 @@ export default class Ranking extends Component {
     return (
       <div className="ranking-table-body-row">
         <div className="ranking-table-body-row-rank">
-          {this.props.ind < 3 ? (
+          {this.props.index < 3 ? (
             <Image
               className="ranking-table-body-row-rank-img"
-              src={this.arrImg[this.props.ind]}
+              src={this.arrImg[this.props.index]}
             ></Image>
           ) : (
-            this.props.ind + 1
+            this.props.index + 1
           )}
         </div>
         <div className="ranking-table-body-row-name">{this.props.name}</div>

@@ -2,64 +2,34 @@
 import { Component } from "react";
 import RankingRow from "./RankingRow";
 import "./Ranking.scss";
-
-const rankingList = [
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-  {
-    name: "keval jaiswal",
-    won: "12.30",
-    earn: "120",
-  },
-];
+import axios from "axios";
+import { socketServerPort } from "../../../config";
 
 export default class Ranking extends Component {
   // eslint-disable-next-line no-useless-constructor
   constructor(props) {
     super(props);
+  }
+
+  componentDidMount() {
+    axios.post(`http://${window.location.hostname}:${socketServerPort}/api/rankAll`).then((res) => {
+      let rankData = [ ...res.data.rankData ];
+      rankData.sort((a, b) => {
+        if( ( b.won / (b.won + b.lost) ) > ( a.won / (a.won + a.lost) ) ) {
+          return 1;
+        } else if( ( b.won / (b.won + b.lost) ) < ( a.won / (a.won + a.lost) ) ) {
+          return -1;
+        } else {
+          return b.won - a.won;
+        }
+      } )
+
+      this.setState({
+        rankData
+      })
+
+      console.log(this.state.rankData);
+    })
   }
 
   render() {
@@ -74,10 +44,19 @@ export default class Ranking extends Component {
             <div className="ranking-table-head-earn">LLG earn</div>
           </div>
           <div className="ranking-table-body">
-            {rankingList.map((val, ind) => {
-              const info = { ...val, key: ind, ind: ind };
-              return <RankingRow {...info}></RankingRow>;
-            })}
+            {
+              this.state && this.state.rankData ? this.state.rankData.map((item, index) => {
+                const info = {
+                  name: item.username,
+                  won: `${item.won} / ${item.lost}`,
+                  earn: item.earn,
+                  key: index,
+                  index: index,
+                };
+
+                return <RankingRow {...info}></RankingRow>;
+              }) : null
+            }
           </div>
         </div>
         <div className="ranking-btn_choose">Choose room to play</div>
