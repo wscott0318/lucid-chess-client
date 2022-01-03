@@ -61,6 +61,7 @@ export default class Scene extends Component {
             showClaimModal: false,
             numConsecutiveWins: window.localStorage.getItem("wins") ? window.localStorage.getItem("wins") : 0,
             bonusReward: 0,
+            showInventory: true,
         });
 
 
@@ -274,9 +275,8 @@ export default class Scene extends Component {
             this.meshArray['iceWall'] = iceMesh;
 
             const petrifyMesh = gltfArray[11].scene.clone();
-            petrifyMesh.scale.set(0.01, 0.01, 0.01);
+            petrifyMesh.scale.set(0.015, 0.015, 0.015);
             petrifyMesh.position.set(0, 1, 0);
-            // scene.add(petrifyMesh);
             this.meshArray['petrify'] = petrifyMesh.clone();
 
             // add and initialize board ground and characters 
@@ -451,6 +451,7 @@ export default class Scene extends Component {
                 this.socket.on( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
                 this.socket.on( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
                 this.socket.on( socketEvents['SC_ActivateItem'], this.handleActivateItem.bind(this) );
+                this.socket.on( socketEvents['SC_ItemInfo'], this.handleItemInfo.bind(this) );
             } else {
                 this.setState({
                     showWaitingModal: false,
@@ -922,10 +923,12 @@ export default class Scene extends Component {
             if( self.props.mode === gameModes['P2P'] && self.dangerKing && ( self.dangerKing['K'] || self.dangerKing['k'] ) ) {
                 const pieceType = self.dangerKing['K'] ? 'K' : 'k';
                 const kIndex = self.boardPiecesArray.findIndex((item) => item.pieceType === pieceType);
-                const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
-                const colIndex = self.boardPiecesArray[kIndex].colIndex;
-
-                self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
+                if( kIndex !== -1 ) {
+                    const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
+                    const colIndex = self.boardPiecesArray[kIndex].colIndex;
+    
+                    self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
+                }
             } else {
                 const pieceType = self.props.game.board.getPlayingColor() === 'white' ? 'K' : 'k';
 
@@ -987,6 +990,8 @@ export default class Scene extends Component {
         this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
         this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
         this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
+        this.socket.off( socketEvents['SC_ActivateItem'], this.handleActivateItem.bind(this) );
+        this.socket.off( socketEvents['SC_ItemInfo'], this.handleItemInfo.bind(this) );
 
         this.socket.close();
     }
@@ -1729,6 +1734,74 @@ export default class Scene extends Component {
         });
 
         this.setObstacles( obstacleArray );
+    }
+
+    handleItemInfo( params ) {
+        if( params.randomItems ) {
+            if( this.itemMeshes ) {
+                for( let i = 0; i < this.itemMeshes.length; i++ ) {
+                    this.scene.remove( this.itemMeshes[i].mesh );
+                }
+            }
+
+            this.randomItems = params.randomItems;
+
+            this.itemMeshes = [];
+            this.randomItems.forEach((item) => {
+                const newMesh = {};
+                newMesh.position = item.position;
+                newMesh.type = item.type;
+
+                // if( newMesh.type !== heroItems['springPad'] || newMesh.type !== heroItems['thunderstorm'] ) {
+                    let texture;
+                    if( newMesh.type === heroItems['iceWall'] ) {
+                        texture = new THREE.TextureLoader().load(iceWall);
+                    } else if( newMesh.type === heroItems['petrify'] ) {
+                        texture = new THREE.TextureLoader().load(petrify);
+                    } else if( newMesh.type === heroItems['jumpyShoe'] ) {
+                        texture = new THREE.TextureLoader().load(jumpyShoe);
+                    } else if( newMesh.type === heroItems['springPad'] ) {
+                        texture = new THREE.TextureLoader().load(springPad);
+                    } else if( newMesh.type === heroItems['thunderstorm'] ) {
+                        texture = new THREE.TextureLoader().load(thunderstorm);
+                    }
+    
+                    const itemGeo = new THREE.PlaneBufferGeometry(0.8, 0.8, 100, 100)
+                    const itemMaterial = new THREE.MeshStandardMaterial({
+                        side: THREE.DoubleSide,
+                        roughness: 1,
+                        metalness: 0,
+                        refractionRatio: 0,
+                        map: texture,
+                        transparent: true,
+                    });
+                    const itemMesh = new THREE.Mesh( itemGeo, itemMaterial );
+
+                    itemMesh.rotateX( ang2Rad( this.side === 'white' ? -90 : 90) );
+                    itemMesh.rotateY( ang2Rad( this.side === 'white' ? 0 : 180 ) );
+    
+                    const itemIndex = getMatrixIndexFromFen( newMesh.position );
+                    itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 0.6, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
+    
+                    this.scene.add(itemMesh);
+    
+                    newMesh.mesh = itemMesh;
+    
+                    this.itemMeshes.push( newMesh );
+                // }
+            })
+        }
+
+        if( params.userItems ) {
+            const myItems = params.userItems[ this.socket.id ];
+            this.setState({
+                myItems: myItems
+            });
+        }
+
+        if( params.obstacleArray ) {
+            this.setObstacles( params.obstacleArray )
+        }
     }
 
     /***************************************************************************************************************************/

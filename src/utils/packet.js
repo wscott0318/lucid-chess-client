@@ -22,4 +22,5 @@ export const socketEvents = {
     'SC_RemainingTime': 0xff0010,
     'SC_ActivateItem': 0xff0011,
     'SC_JoinRoom': 0xff0012,
+    'SC_ItemInfo': 0xff0013,
 }
