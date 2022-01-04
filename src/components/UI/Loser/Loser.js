@@ -9,6 +9,10 @@ export const Loser = ({ show, msg, onClickDrawHome }) => {
   const [loading, setLoading] = useState(false);
 
   const onClickHome = () => {
+    if(msg == "You are lost") {
+      window.location = '/';
+      return;
+    }
     if(loading) return;
     onClickDrawHome();
     setLoading(true);
