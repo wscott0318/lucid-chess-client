@@ -28,14 +28,18 @@ let arrInfo = {}
 export const Connect = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  let amount
   const [wallet, setWallet] = useState()
   const [status, setStatus] = useState()
   const [loading, setLoading] = useState(false)
 
   const [stage, setStage] = useState('connect')
 
+  let amount
   let walletAddr;
+
+  useEffect(() => {
+    addWalletListener()
+  }) 
 
   console.log(location.state);
 
@@ -131,7 +135,7 @@ export const Connect = () => {
   }
 
   const connectWalletPressed = async () => {
-    const walletResponse = await connectWallet()
+    let walletResponse = await connectWallet()
     // this.setState({
     //   status: walletResponse.status,
     //   wallet: walletResponse.address
@@ -144,7 +148,7 @@ export const Connect = () => {
   }
 
   const makeDeposit = async () => {
-    const llgContract = getContractWithSigner(
+    let llgContract = getContractWithSigner(
       llgContractAddress,
       llgContractABI
     )
@@ -185,7 +189,7 @@ export const Connect = () => {
     if (tx.code == 4001) return false
     let res = await tx.wait()
     if (res.transactionHash) {
-      const llgRewardContract = getContractWithSigner(
+      let llgRewardContract = getContractWithSigner(
         llgRewardContractAddress,
         llgRewardContractABI
       )

@@ -8,8 +8,8 @@ export const Claim = ({ show, msg, onClickClaim, btnText }) => {
 
   const onClick = () => {
     if(loading) return;
-    if(btnText == "Claim Reward") setLoading(true);
     onClickClaim();
+    if(btnText == "Claim Reward") setLoading(true);
   }
   return (
     <Modal
