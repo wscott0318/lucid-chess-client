@@ -222,7 +222,13 @@ export const Connect = () => {
       case 'connect':
         try {
           let res = await connectWalletPressed()
-          if (res) setStage('deposit')
+          if (res) {
+            if(location.state.roomName == "Classic Room") {
+              navigate('/gameScene', { state: {...location.state, wallet} })
+            } else {
+              setStage('deposit')
+            }
+          }
         } catch (e) {
           alert('Please connect wallet...')
         }
