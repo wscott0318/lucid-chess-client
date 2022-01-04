@@ -28,15 +28,15 @@ export const Inventory = ({ show, items, myTurn, selectItem, currentItem }) => {
     }
 
     const renderIceWallTooltip = props => (
-        <Tooltip {...props}>✅ Ice Wall - block movement in 3 space blocks</Tooltip>
+        <Tooltip {...props}>Ice Wall - block movement in 3 space blocks</Tooltip>
     );
 
     const renderPetrifyTooltip = props => (
-        <Tooltip {...props}>✅ Petrify - immobilize opponent's hero piece (except King or Queen)</Tooltip>
+        <Tooltip {...props}>Petrify - immobilize opponent's hero piece (except King or Queen)</Tooltip>
     );
 
     const renderJumpyShoeTooltip = props => (
-        <Tooltip {...props}>✅ Jumpy Shoe - Jump over obstacle</Tooltip>
+        <Tooltip {...props}>Jumpy Shoe - Jump over obstacle</Tooltip>
     );
 
     const enteringAction = (e) => {
