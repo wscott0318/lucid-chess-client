@@ -4,8 +4,15 @@ import "./Loser.scss";
 import Ranking from "../Ranking/Ranking";
 import { useState } from "react";
 
-export const Loser = ({ show, msg }) => {
+export const Loser = ({ show, msg, onClickDrawHome }) => {
   const [ranking, setRanking] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const onClick = () => {
+    if(loading) return;
+    onClickDrawHome();
+    setLoading(true);
+  }
 
   return (
     <Modal
@@ -20,9 +27,7 @@ export const Loser = ({ show, msg }) => {
         <div className="u-btn-group">
           <div
             className="u-btn-yes"
-            onClick={() => {
-              window.location.href = "/";
-            }}
+            onClick={onClick}
           >
             Return Home
           </div>
