@@ -13,6 +13,9 @@ export default class Ranking extends Component {
   }
 
   addressFormat( string ) {
+    if( !string )
+      return '';
+
     return string.slice(0, 7) + '...' + string.slice( string.length - 7, string.length );
   }
 

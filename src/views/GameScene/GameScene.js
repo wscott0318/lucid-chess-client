@@ -64,7 +64,7 @@ export default class Scene extends Component {
             showInventory: true,
         });
 
-
+        console.error( this.props.wallet );
         // getCurrentWalletConnected((address, status) => {
         //     this.setState({
         //         wallet: address,
