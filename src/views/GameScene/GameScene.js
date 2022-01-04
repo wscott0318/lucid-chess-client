@@ -975,8 +975,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            renderer.render(scene, camera);
-            // composer.render();
+            // renderer.render(scene, camera);
+            composer.render();
         };
         this.animate = animate;
     }
@@ -1532,7 +1532,7 @@ export default class Scene extends Component {
                 newMesh.position = item.position;
                 newMesh.type = item.type;
 
-                // if( newMesh.type !== heroItems['springPad'] || newMesh.type !== heroItems['thunderstorm'] ) {
+                if( newMesh.type !== heroItems['springPad'] && newMesh.type !== heroItems['thunderstorm'] ) {
                     let texture;
                     if( newMesh.type === heroItems['iceWall'] ) {
                         texture = new THREE.TextureLoader().load(iceWall);
@@ -1568,7 +1568,7 @@ export default class Scene extends Component {
                     newMesh.mesh = itemMesh;
     
                     this.itemMeshes.push( newMesh );
-                // }
+                }
             })
         }
 
@@ -1735,7 +1735,8 @@ export default class Scene extends Component {
     }
 
     handleUnSelectPiece() {
-        this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+        if( this.selectedPiece )
+            this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
         this.selectedPiece = null;
         this.possibleMoves = [];
     }
