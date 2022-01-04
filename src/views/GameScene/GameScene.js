@@ -437,7 +437,7 @@ export default class Scene extends Component {
                 this.socket.emit( socketEvents['CS_Ready'], { walletAddress: this.props.wallet } );
                 
                 this.setState({
-                    waitingModalTitle: 'Waiting for player',
+                    waitingModalTitle: 'Waiting for players',
                 })
 
                 this.socket.on( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
