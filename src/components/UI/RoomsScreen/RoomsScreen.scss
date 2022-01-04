@@ -79,6 +79,21 @@
         display: flex;
         justify-content: center;
         cursor: pointer;
+
+        &.closed {
+          &::after {
+            content: "";
+            width: 6vw;
+            height: 6vw;
+            background-image: url('../../../assets/img/coming-soon.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: absolute;
+            right: 0;
+            top: 0;
+          }
+        }
+
         &-icon {
           position: absolute;
           background-size: 100% 100%;

@@ -28,7 +28,7 @@ export const Inventory = ({ show, items, myTurn, selectItem, currentItem }) => {
     }
 
     const renderIceWallTooltip = props => (
-        <Tooltip {...props}>✅ Ice Wall - block movement in 3 space blacks</Tooltip>
+        <Tooltip {...props}>✅ Ice Wall - block movement in 3 space blocks</Tooltip>
     );
 
     const renderPetrifyTooltip = props => (

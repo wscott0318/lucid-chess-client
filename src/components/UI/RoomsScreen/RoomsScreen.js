@@ -66,6 +66,9 @@ const RoomsScreen = () => {
     const updateSocket = store( state => state.updateSocket );
 
     const onClickRoom = (roomName) => {
+        if( roomName !== 'Classic Room' )
+            return;
+
         const data = {};
         data.roomName = roomName;
         data.username = state.username;
@@ -130,7 +133,7 @@ const RoomsScreen = () => {
                 <div className="rooms-container-content-rooms">
                     {
                         ROOMS.map((room, index) => (
-                            <div className="rooms-container-content-room" key={index} style={{backgroundImage: `url(${room.bg})`}} onClick={() => onClickRoom(room.name)}>
+                            <div className={`rooms-container-content-room ${ room.name !== 'Classic Room' ? 'closed' : '' }`} key={index} style={{backgroundImage: `url(${room.bg})`}} onClick={() => onClickRoom(room.name)}>
                                 <div className="rooms-container-content-room-icon" style={{backgroundImage: `url(${room.icon})`}}></div>
                                 <div className="rooms-container-content-room-texts">
                                     <div className="rooms-container-content-room-name">{room.name}</div>
