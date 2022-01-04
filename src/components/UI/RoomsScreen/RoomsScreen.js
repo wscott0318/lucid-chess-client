@@ -103,7 +103,7 @@ const RoomsScreen = () => {
             roomKey: roomKey,
         }
 
-        if (roomName === 'Classic Room') {
+        if (roomName === 'Classic Room' && state.friendMatch === true) {
             navigate('/gameScene', { state: { ...stateData } });
         } else {
             navigate('/connect', { state: { ...stateData } });

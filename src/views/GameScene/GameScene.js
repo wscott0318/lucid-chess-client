@@ -839,7 +839,7 @@ export default class Scene extends Component {
                             showVictoryModal: false,
                             showLoseModal: true,
                         });
-                        
+                        console.error("loser")
                         if(!self.props.friendMatch) {
                             window.localStorage.setItem("chance", 0)
                             window.localStorage.setItem("wins", 0)
@@ -1123,24 +1123,34 @@ export default class Scene extends Component {
     }
     
     getBonusReward = async () => {
-        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
-        
-        let wallet = this.props.wallet ? this.props.wallet : this.state.wallet;
-        console.error('*****', wallet)
+        try {
+            const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+            
+            let wallet = this.props.wallet ? this.props.wallet : this.state.wallet;
+            console.error('*****', wallet)
 
-        let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(wallet), ethers.BigNumber.from(123), ethers.BigNumber.from(this.state.numConsecutiveWins), {
-            value: 0,
-            from: this.props.wallet,
-        })
-        let res = await tx.wait()
-        
-        if(res.transactionHash) {
-            // window.location = '/';
+            let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(wallet), ethers.BigNumber.from(123), ethers.BigNumber.from(this.state.numConsecutiveWins), {
+                value: 0,
+                from: this.props.wallet,
+            })
+            let res = await tx.wait()
+            
+            if(res.transactionHash) {
+                // window.location = '/';
+                window.localStorage.setItem("lastRewardTime", Date.now());
+                this.setState({
+                    showClaimModal: false
+                })
+                
+            }
+        } catch(e) {
+            window.localStorage.setItem("lastRewardTime", Date.now());
             this.setState({
                 showClaimModal: false
             })
-            
         }
+
+        
     }
 
     getWinningRewards = async () => {
@@ -1154,7 +1164,7 @@ export default class Scene extends Component {
         
         if(res2.transactionHash) {
             console.error(res2);
-            // window.location = '/';
+            window.location = '/';
         }
     }
 
@@ -1176,7 +1186,7 @@ export default class Scene extends Component {
     }
 
     onClickLLGSymbol = () => {
-        if(this.props.roomName == "Classic Room") {
+        if(this.props.roomName != "Classic Room") {
             this.getWinningRewards();
         } else {
             window.location = '/';
@@ -1184,7 +1194,9 @@ export default class Scene extends Component {
     }
 
     onClickClaim = () => {
-        if(!this.state.wallet) this.connectWalletPressed();
+        if(!this.state.wallet) {
+            this.connectWalletPressed();
+        }
         else {
             this.getBonusReward();
         }
