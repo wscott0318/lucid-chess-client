@@ -39,10 +39,15 @@ export const Inventory = ({ show, items, myTurn, selectItem, currentItem }) => {
         <Tooltip {...props}>✅ Jumpy Shoe - Jump over obstacle</Tooltip>
     );
 
+    const enteringAction = (e) => {
+        e.children[0].style.borderBottomColor  = '#0000008c';
+        e.children[1].style.backgroundColor = '#0000008c';
+    }
+
     return (
         <div className={`inventory ${ show ? 'show' : 'hide' }`}>
             <div className='inventory__wrapper'>
-                <OverlayTrigger placement="top" overlay={renderIceWallTooltip}>
+                <OverlayTrigger placement="top" overlay={renderIceWallTooltip} onEntering={enteringAction}>
                     <div 
                         className={`item ${ isEnable(heroItems['iceWall']) ? 'enable' : 'disable' } ${ isEnable(heroItems['iceWall']) && currentItem === heroItems['iceWall'] ? 'active' : '' }`} 
                         onClick={() => itemSelectAction( heroItems['iceWall'] )}
@@ -51,7 +56,7 @@ export const Inventory = ({ show, items, myTurn, selectItem, currentItem }) => {
                     </div>
                 </OverlayTrigger>
 
-                <OverlayTrigger placement="top" overlay={renderPetrifyTooltip}>
+                <OverlayTrigger placement="top" overlay={renderPetrifyTooltip} onEntering={enteringAction}>
                     <div 
                         className={`item ${ isEnable(heroItems['petrify']) ? 'enable' : 'disable' } ${ isEnable(heroItems['petrify']) && currentItem === heroItems['petrify'] ? 'active' : '' }`} 
                         onClick={() => itemSelectAction( heroItems['petrify'] )}
@@ -60,7 +65,7 @@ export const Inventory = ({ show, items, myTurn, selectItem, currentItem }) => {
                     </div>
                 </OverlayTrigger>
 
-                <OverlayTrigger placement="top" overlay={renderJumpyShoeTooltip}>
+                <OverlayTrigger placement="top" overlay={renderJumpyShoeTooltip} onEntering={enteringAction}>
                     <div 
                         className={`item ${ isEnable(heroItems['jumpyShoe']) ? 'enable' : 'disable' } ${ isEnable(heroItems['jumpyShoe']) && currentItem === heroItems['jumpyShoe'] ? 'active' : '' }`} 
                         onClick={() => itemSelectAction( heroItems['jumpyShoe'] )}
