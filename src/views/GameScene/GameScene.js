@@ -1883,6 +1883,14 @@ export default class Scene extends Component {
               message={this.state && this.state.showLeaveNotificationMessage}
             />
 
+            <Inventory 
+                show={ this.state && this.state.showInventory } 
+                items={ this.state && this.state.myItems }
+                myTurn={this.state && this.state.myTurn}
+                selectItem={ this.selectItem.bind(this) }
+                currentItem= { this.state && this.state.currentItem }
+            />
+
             {/* loading screen */}
             {this.state && this.state.showWaitingModal ? (
               <Loading title={this.state.waitingModalTitle} onClickRefund={this.onClickRefund} roomName={this.props.roomName} />
@@ -1901,14 +1909,6 @@ export default class Scene extends Component {
               path={"/"}
               hideAction={() => this.setState({ showConfirmModal: false })}
             ></Confirm>
-
-            <Inventory 
-                show={ this.state && this.state.showInventory } 
-                items={ this.state && this.state.myItems }
-                myTurn={this.state && this.state.myTurn}
-                selectItem={ this.selectItem.bind(this) }
-                currentItem= { this.state && this.state.currentItem }
-            />
 
             {/* match draw notification popup */}
             <Popup
