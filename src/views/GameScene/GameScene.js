@@ -1553,7 +1553,7 @@ export default class Scene extends Component {
                 newMesh.position = item.position;
                 newMesh.type = item.type;
 
-                if( newMesh.type !== heroItems['springPad'] && newMesh.type !== heroItems['thunderstorm'] ) {
+                if( newMesh.type !== heroItems['thunderstorm'] ) {
                     let texture;
                     if( newMesh.type === heroItems['iceWall'] ) {
                         texture = new THREE.TextureLoader().load(iceWall);
