@@ -1127,7 +1127,7 @@ export default class Scene extends Component {
     getStartTimeOfDay = async () => {
         let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         let startTimeOfDay = await llgRewardContract.startTimeOfDay();
-        console.log("tax: ", startTimeOfDay.toNumber())
+        console.log("time: ", startTimeOfDay.toNumber())
 
         this.setState({
             startTimeOfDay: startTimeOfDay.toNumber()
