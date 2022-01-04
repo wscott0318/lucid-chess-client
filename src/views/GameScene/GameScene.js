@@ -442,7 +442,7 @@ export default class Scene extends Component {
                 this.socket.emit( socketEvents['CS_Ready'], { walletAddress: this.props.wallet } );
                 
                 this.setState({
-                    waitingModalTitle: 'Waiting other player to Join',
+                    waitingModalTitle: 'Waiting for players',
                 })
 
                 this.socket.on( socketEvents['SC_GameStarted'], this.handleGameStarted.bind(this) );
@@ -1588,7 +1588,7 @@ export default class Scene extends Component {
                 newMesh.position = item.position;
                 newMesh.type = item.type;
 
-                // if( newMesh.type !== heroItems['springPad'] || newMesh.type !== heroItems['thunderstorm'] ) {
+                if( newMesh.type !== heroItems['thunderstorm'] ) {
                     let texture;
                     if( newMesh.type === heroItems['iceWall'] ) {
                         texture = new THREE.TextureLoader().load(iceWall);
@@ -1624,7 +1624,7 @@ export default class Scene extends Component {
                     newMesh.mesh = itemMesh;
     
                     this.itemMeshes.push( newMesh );
-                // }
+                }
             })
         }
 
@@ -1791,7 +1791,8 @@ export default class Scene extends Component {
     }
 
     handleUnSelectPiece() {
-        this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
+        if( this.selectedPiece )
+            this.selectedPiece.mesh.position.y = this.selectedPiece.currentY;
         this.selectedPiece = null;
         this.possibleMoves = [];
     }
@@ -1830,7 +1831,7 @@ export default class Scene extends Component {
                 newMesh.position = item.position;
                 newMesh.type = item.type;
 
-                // if( newMesh.type !== heroItems['springPad'] || newMesh.type !== heroItems['thunderstorm'] ) {
+                if( newMesh.type !== heroItems['thunderstorm'] ) {
                     let texture;
                     if( newMesh.type === heroItems['iceWall'] ) {
                         texture = new THREE.TextureLoader().load(iceWall);
@@ -1866,7 +1867,7 @@ export default class Scene extends Component {
                     newMesh.mesh = itemMesh;
     
                     this.itemMeshes.push( newMesh );
-                // }
+                }
             })
         }
 

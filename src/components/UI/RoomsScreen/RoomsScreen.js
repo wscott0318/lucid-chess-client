@@ -66,6 +66,9 @@ const RoomsScreen = () => {
     const updateSocket = store( state => state.updateSocket );
 
     const onClickRoom = (roomName) => {
+        if( roomName !== 'Classic Room' )
+            return;
+
         const data = {};
         data.roomName = roomName;
         data.username = state.username;
@@ -126,11 +129,11 @@ const RoomsScreen = () => {
         <div className="rooms-container">
             <div className="rooms-container-header">1 VS 1 MODE</div>
             <div className="rooms-container-content">
-                <p className="rooms-container-content-desc">Have 5 Diffrent rooms. Two players each put in the specifiedamount of $ LLG (base on the room type) into a pool. After each Game , whoever wins the game takes all $ LLG in the pool</p>
+                <p className="rooms-container-content-desc">There are 5 different rooms. Two players each put in the specified amount of LLG (based on the room type) into a pool. After each game, whoever wins the game takes all the LLG in the pool.</p>
                 <div className="rooms-container-content-rooms">
                     {
                         ROOMS.map((room, index) => (
-                            <div className="rooms-container-content-room" key={index} style={{backgroundImage: `url(${room.bg})`}} onClick={() => onClickRoom(room.name)}>
+                            <div className={`rooms-container-content-room ${ room.name !== 'Classic Room' ? 'closed' : '' }`} key={index} style={{backgroundImage: `url(${room.bg})`}} onClick={() => onClickRoom(room.name)}>
                                 <div className="rooms-container-content-room-icon" style={{backgroundImage: `url(${room.icon})`}}></div>
                                 <div className="rooms-container-content-room-texts">
                                     <div className="rooms-container-content-room-name">{room.name}</div>

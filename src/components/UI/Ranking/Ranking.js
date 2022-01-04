@@ -20,9 +20,9 @@ export default class Ranking extends Component {
       .then((res) => {
         let rankData = [...res.data.rankData];
         rankData.sort((a, b) => {
-          if (b.won / (b.won + b.lost) > a.won / (a.won + a.lost)) {
+          if ( (b.won - b.lost) > (a.won - a.lost) ) {
             return 1;
-          } else if (b.won / (b.won + b.lost) < a.won / (a.won + a.lost)) {
+          } else if ( (b.won - b.lost) < (a.won - a.lost) ) {
             return -1;
           } else {
             return b.won - a.won;
