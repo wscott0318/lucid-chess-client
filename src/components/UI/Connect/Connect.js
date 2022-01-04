@@ -143,6 +143,7 @@ export const Connect = () => {
     setWallet(walletResponse.address)
     setStatus(walletResponse.status)
     walletAddr = walletResponse.address;
+
     // alert(walletResponse.address)
     return walletResponse.address != null
   }
@@ -229,6 +230,7 @@ export const Connect = () => {
         try {
           let res = await connectWalletPressed()
           if (res) {
+            if(walletAddr == null || walletAddr == '') break;
             if(location.state.roomName == "Classic Room") {
               navigate('/gameScene', { state: {...location.state, wallet: walletAddr} })
             } else {
@@ -261,7 +263,6 @@ export const Connect = () => {
         }
         break
       default:
-      // setStage('depositFail')
     }
     setLoading(false)
   }
