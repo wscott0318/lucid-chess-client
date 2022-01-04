@@ -55,28 +55,34 @@
         }
       }
 
-      .u-button {
+      .u-btn-group {
         position: absolute;
-        left: calc(50% - 17vmin);
-        bottom: 4vmin;
-        text-align: center;
+        width: 100%;
+        display: flex;
         align-items: center;
-        background-image: url("../../../assets/img/victory_button.png");
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
-        width: 34vmin;
-        height: 10%;
-        border-radius: 100px;
-        color: #f9f8cb;
-        font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
-        font-size: 4vmin;
-        background-color: transparent;
-        border-color: transparent;
-        -webkit-text-stroke: 0.05em #0c6c6d;
-      }
+        text-align: center;
+        justify-content: space-evenly;
+        bottom: 4vmin;
 
-      .u-button:active {
-        font-size: 3.95vmin;
+        .u-button {
+          text-align: center;
+          align-items: center;
+          background-image: url("../../../assets/img/victory_button.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          width: 30vmin;
+          border-radius: 100px;
+          color: #f9f8cb;
+          font-family: "HaettenschweilerRegular", fantasy, Courier, monospace;
+          font-size: 4vmin;
+          background-color: transparent;
+          border-color: transparent;
+          -webkit-text-stroke: 0.05em #0c6c6d;
+        }
+
+        .u-button:active {
+          font-size: 3.95vmin;
+        }
       }
     }
   }

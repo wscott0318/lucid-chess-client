@@ -16,6 +16,7 @@ import Victory from "../../components/UI/Victory/Victory";
 import Loading from "../../components/UI/Loading/Loading";
 import InviteFriend from "../../components/UI/InviteFriend/InviteFriend";
 import Popup from "../../components/UI/Popup/Popup";
+import Loser from "../../components/UI/Loser/Loser";
 import GameStateHeader from "../../components/UI/GameState/GameStateHeader";
 import GameStateFooter from "../../components/UI/GameState/GameStateFooter";
 import Confirm from "../../components/UI/Confirm/Confirm";
@@ -60,8 +61,8 @@ export default class Scene extends Component {
             showClaimModal: false,
             numConsecutiveWins: window.localStorage.getItem("wins") ? window.localStorage.getItem("wins") : 0,
             bonusReward: 0,
+            showInventory: true,
         });
-
 
 
         // getCurrentWalletConnected((address, status) => {
@@ -273,9 +274,8 @@ export default class Scene extends Component {
             this.meshArray['iceWall'] = iceMesh;
 
             const petrifyMesh = gltfArray[11].scene.clone();
-            petrifyMesh.scale.set(0.01, 0.01, 0.01);
+            petrifyMesh.scale.set(0.015, 0.015, 0.015);
             petrifyMesh.position.set(0, 1, 0);
-            // scene.add(petrifyMesh);
             this.meshArray['petrify'] = petrifyMesh.clone();
 
             // add and initialize board ground and characters 
@@ -434,7 +434,7 @@ export default class Scene extends Component {
                     });
                 }
 
-                this.socket.emit( socketEvents['CS_Ready'] );
+                this.socket.emit( socketEvents['CS_Ready'], { walletAddress: this.props.wallet } );
                 
                 this.setState({
                     waitingModalTitle: 'Waiting other player to Join',
@@ -450,6 +450,9 @@ export default class Scene extends Component {
                 this.socket.on( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
                 this.socket.on( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
                 this.socket.on( socketEvents['SC_ActivateItem'], this.handleActivateItem.bind(this) );
+                this.socket.on( socketEvents['SC_ItemInfo'], this.handleItemInfo.bind(this) );
+                this.socket.on( socketEvents['SC_SendDrawRequest'], this.handleSendDrawRequest.bind(this) );
+                this.socket.on( socketEvents['SC_DrawMatch'], this.handleDrawMatch.bind(this) );
             } else {
                 this.setState({
                     showWaitingModal: false,
@@ -821,6 +824,10 @@ export default class Scene extends Component {
 
         // render every frame
         var animate = function  () {
+            if( self.isDrawMatch ) {
+                return;
+            }
+
             if( self.moveFinished() ) {
                 if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
                     if( self.side !== self.currentTurn ) {
@@ -867,9 +874,8 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
             controls.update();
-
             //camera.lookAt( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
 
             // TODO : Selected Piece Animation
@@ -921,10 +927,12 @@ export default class Scene extends Component {
             if( self.props.mode === gameModes['P2P'] && self.dangerKing && ( self.dangerKing['K'] || self.dangerKing['k'] ) ) {
                 const pieceType = self.dangerKing['K'] ? 'K' : 'k';
                 const kIndex = self.boardPiecesArray.findIndex((item) => item.pieceType === pieceType);
-                const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
-                const colIndex = self.boardPiecesArray[kIndex].colIndex;
-
-                self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
+                if( kIndex !== -1 ) {
+                    const rowIndex = self.boardPiecesArray[kIndex].rowIndex;
+                    const colIndex = self.boardPiecesArray[kIndex].colIndex;
+    
+                    self.boardGroundArray[rowIndex][colIndex].mesh.material.color.setStyle( dangerTone );
+                }
             } else {
                 const pieceType = self.props.game.board.getPlayingColor() === 'white' ? 'K' : 'k';
 
@@ -967,8 +975,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            // renderer.render(scene, camera);
-            composer.render();
+            renderer.render(scene, camera);
+            // composer.render();
         };
         this.animate = animate;
     }
@@ -986,6 +994,8 @@ export default class Scene extends Component {
         this.socket.off( socketEvents['SC_PerformMove'], this.handlePerformMove.bind(this) );
         this.socket.off( socketEvents['SC_UnSelectPiece'], this.handleUnSelectPiece.bind(this) );
         this.socket.off( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
+        this.socket.off( socketEvents['SC_ActivateItem'], this.handleActivateItem.bind(this) );
+        this.socket.off( socketEvents['SC_ItemInfo'], this.handleItemInfo.bind(this) );
 
         this.socket.close();
     }
@@ -1189,7 +1199,7 @@ export default class Scene extends Component {
         if(this.props.roomName != "Classic Room") {
             this.getWinningRewards();
         } else {
-            window.location = '/';
+            window.location.href = '/';
         }
     }
 
@@ -1444,6 +1454,25 @@ export default class Scene extends Component {
                 this.obstacleMeshes.push( mesh );
             }
         })
+    }
+
+    sendDrawRequest() {
+        // if( this.state && this.state.canSendDrawRequest ) {
+        //     this.setState({
+        //         canSendDrawRequest: false,
+        //     });
+
+        //     this.socket.emit( socketEvents['CS_SendDrawRequest'] );
+        // }
+        this.socket.emit( socketEvents['CS_SendDrawRequest'] );
+    }
+
+    replyDrawRequest( value ) {
+        this.setState({
+            showDrawRequestModal: false
+        });
+
+        this.socket.emit( socketEvents['CS_ReplyDrawRequest'], { isAgree: value } );
     }
 
     /**************************************************** Socket Handlers ******************************************************/
@@ -1742,6 +1771,87 @@ export default class Scene extends Component {
         this.setObstacles( obstacleArray );
     }
 
+    handleItemInfo( params ) {
+        if( params.randomItems ) {
+            if( this.itemMeshes ) {
+                for( let i = 0; i < this.itemMeshes.length; i++ ) {
+                    this.scene.remove( this.itemMeshes[i].mesh );
+                }
+            }
+
+            this.randomItems = params.randomItems;
+
+            this.itemMeshes = [];
+            this.randomItems.forEach((item) => {
+                const newMesh = {};
+                newMesh.position = item.position;
+                newMesh.type = item.type;
+
+                // if( newMesh.type !== heroItems['springPad'] || newMesh.type !== heroItems['thunderstorm'] ) {
+                    let texture;
+                    if( newMesh.type === heroItems['iceWall'] ) {
+                        texture = new THREE.TextureLoader().load(iceWall);
+                    } else if( newMesh.type === heroItems['petrify'] ) {
+                        texture = new THREE.TextureLoader().load(petrify);
+                    } else if( newMesh.type === heroItems['jumpyShoe'] ) {
+                        texture = new THREE.TextureLoader().load(jumpyShoe);
+                    } else if( newMesh.type === heroItems['springPad'] ) {
+                        texture = new THREE.TextureLoader().load(springPad);
+                    } else if( newMesh.type === heroItems['thunderstorm'] ) {
+                        texture = new THREE.TextureLoader().load(thunderstorm);
+                    }
+    
+                    const itemGeo = new THREE.PlaneBufferGeometry(0.8, 0.8, 100, 100)
+                    const itemMaterial = new THREE.MeshStandardMaterial({
+                        side: THREE.DoubleSide,
+                        roughness: 1,
+                        metalness: 0,
+                        refractionRatio: 0,
+                        map: texture,
+                        transparent: true,
+                    });
+                    const itemMesh = new THREE.Mesh( itemGeo, itemMaterial );
+
+                    itemMesh.rotateX( ang2Rad( this.side === 'white' ? -90 : 90) );
+                    itemMesh.rotateY( ang2Rad( this.side === 'white' ? 0 : 180 ) );
+    
+                    const itemIndex = getMatrixIndexFromFen( newMesh.position );
+                    itemMesh.position.set( itemIndex.colIndex * tileSize - tileSize * 3.5, 0.6, -( itemIndex.rowIndex * tileSize - tileSize * 3.5 ) );
+    
+                    this.scene.add(itemMesh);
+    
+                    newMesh.mesh = itemMesh;
+    
+                    this.itemMeshes.push( newMesh );
+                // }
+            })
+        }
+
+        if( params.userItems ) {
+            const myItems = params.userItems[ this.socket.id ];
+            this.setState({
+                myItems: myItems
+            });
+        }
+
+        if( params.obstacleArray ) {
+            this.setObstacles( params.obstacleArray )
+        }
+    }
+
+    handleSendDrawRequest() {
+        this.setState({
+            showDrawRequestModal: true
+        })
+    }
+
+    handleDrawMatch() {
+        this.isDrawMatch = true;
+        this.setState({
+            showDrawModal: true,
+        })
+    }
+
     /***************************************************************************************************************************/
 
     render() {
@@ -1757,6 +1867,7 @@ export default class Scene extends Component {
                 <GameStateFooter 
                     showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) } 
                     quitAction={() => this.setState({ showConfirmModal: true })}
+                    sendDrawRequest={ this.sendDrawRequest.bind(this) }
                 />
             </div>
 
@@ -1773,10 +1884,9 @@ export default class Scene extends Component {
             <Victory show={this.state && this.state.showVictoryModal} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />
 
             {/* Lost Modal */}
-            <Popup
+            <Loser
               show={this.state && this.state.showLoseModal}
-              type={"leaveNotification"}
-              message={"You are lost"}
+              msg={"You are lost"}
             />
 
             {/* leave room notification popup */}
@@ -1784,6 +1894,14 @@ export default class Scene extends Component {
               show={this.state && this.state.showLeaveNotificationModal}
               type={"leaveNotification"}
               message={this.state && this.state.showLeaveNotificationMessage}
+            />
+
+            <Inventory 
+                show={ this.state && this.state.showInventory } 
+                items={ this.state && this.state.myItems }
+                myTurn={this.state && this.state.myTurn}
+                selectItem={ this.selectItem.bind(this) }
+                currentItem= { this.state && this.state.currentItem }
             />
 
             {/* loading screen */}
@@ -1804,12 +1922,20 @@ export default class Scene extends Component {
               path={"/"}
               hideAction={() => this.setState({ showConfirmModal: false })}
             ></Confirm>
-            <Inventory 
-                show={ this.state && this.state.showInventory } 
-                items={ this.state && this.state.myItems }
-                myTurn={this.state && this.state.myTurn}
-                selectItem={ this.selectItem.bind(this) }
-                currentItem= { this.state && this.state.currentItem }
+
+            {/* match draw notification popup */}
+            <Popup
+              show={this.state && this.state.showDrawRequestModal}
+              type={"drawRequest"}
+              message={"The opponent player wants to draw the match. Are you agree with it?"}
+              agreeAction={ () => this.replyDrawRequest( true ) }
+              disAgreeAction={ () => this.replyDrawRequest( false ) }
+            />
+
+            {/* Show Draw modal */}
+            <Loser
+              show={this.state && this.state.showDrawModal}
+              msg={"This match has drawn."}
             />
           </div>
         );
