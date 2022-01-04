@@ -64,7 +64,7 @@ export default class Scene extends Component {
             showInventory: true,
         });
 
-        console.error( this.props.wallet );
+        console.error(this.props.wallet);
         // getCurrentWalletConnected((address, status) => {
         //     this.setState({
         //         wallet: address,
@@ -1181,6 +1181,7 @@ export default class Scene extends Component {
     getRefund = async () => {
         let refundAmount;
         refundAmount = this.calcRefundAmount(this.props.roomName);
+        alert(refundAmount)
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         let tx2 = await llgRewardContract.refund(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), ethers.BigNumber.from(refundAmount), {
             value: 0,
@@ -1214,6 +1215,13 @@ export default class Scene extends Component {
 
     onClickRefund = () => {
         this.getRefund();
+    }
+
+    onClickDrawHome = () => {
+        if(this.props.roomName != "Classic Room") {
+            window.localStorage.setItem("wins", 0);
+            this.getRefund();
+        }
     }
 
     /************************************************************************************* */
@@ -1937,6 +1945,7 @@ export default class Scene extends Component {
             <Loser
               show={this.state && this.state.showDrawModal}
               msg={"This match has drawn."}
+              onClickDrawHome={this.onClickDrawHome}
             />
           </div>
         );

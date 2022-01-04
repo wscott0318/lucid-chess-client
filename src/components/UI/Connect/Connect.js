@@ -35,6 +35,8 @@ export const Connect = () => {
 
   const [stage, setStage] = useState('connect')
 
+  let walletAddr;
+
   console.log(location.state);
 
   switch (location.state.roomName) {
@@ -136,7 +138,7 @@ export const Connect = () => {
     // })
     setWallet(walletResponse.address)
     setStatus(walletResponse.status)
-
+    walletAddr = walletResponse.address;
     // alert(walletResponse.address)
     return walletResponse.address != null
   }
@@ -224,7 +226,7 @@ export const Connect = () => {
           let res = await connectWalletPressed()
           if (res) {
             if(location.state.roomName == "Classic Room") {
-              navigate('/gameScene', { state: {...location.state, wallet} })
+              navigate('/gameScene', { state: {...location.state, wallet: walletAddr} })
             } else {
               setStage('deposit')
             }
