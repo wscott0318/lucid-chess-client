@@ -1,8 +1,16 @@
+import { useState } from "react";
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Claim.scss";
 
 export const Claim = ({ show, msg, onClickClaim, btnText }) => {
+  const [loading, setLoading] = useState(false);
+
+  const onClick = () => {
+    if(loading) return;
+    if(btnText == "Claim Reward") setLoading(true);
+    onClickClaim();
+  }
   return (
     <Modal
       className="Claim"
@@ -16,7 +24,7 @@ export const Claim = ({ show, msg, onClickClaim, btnText }) => {
           <div className="u-content">
             <div className="u-content-container">
               <div className="u-text">{msg}</div>
-              <div className="u-button" onClick={onClickClaim}>{btnText}</div>
+              <div className="u-button" onClick={onClick}>{loading ? "Loading..." : btnText}</div>
             </div>
           </div>
         </div>
