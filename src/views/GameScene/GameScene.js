@@ -62,7 +62,12 @@ export default class Scene extends Component {
             numConsecutiveWins: window.localStorage.getItem("wins") ? window.localStorage.getItem("wins") : 0,
             bonusReward: 0,
             showInventory: true,
+            tax: 2,
+            startTimeOfDay: 0,
         });
+
+        this.getTax();
+        this.getStartTimeOfDay();
 
         console.error(this.props.wallet);
         // getCurrentWalletConnected((address, status) => {
@@ -1038,7 +1043,7 @@ export default class Scene extends Component {
     }
 
     connectWalletPressed = async () => {
-        const walletResponse = await connectWallet();
+        let walletResponse = await connectWallet();
         this.setState({
             status: walletResponse.status,
             wallet: walletResponse.address,
@@ -1046,7 +1051,7 @@ export default class Scene extends Component {
     }
 
     makeDeposit = async (roomId) => {
-        const llgContract = getContractWithSigner(llgContractAddress, llgContractABI);
+        let llgContract = getContractWithSigner(llgContractAddress, llgContractABI);
 
         let amount = 50;
         switch(this.props.roomName) {
@@ -1077,7 +1082,7 @@ export default class Scene extends Component {
 
         let res = await tx.wait()
         if (res.transactionHash) {
-            const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+            let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
             let tx2 = await llgRewardContract.deposit(ethers.BigNumber.from(roomId), ethers.utils.getAddress(this.props.wallet), ethers.BigNumber.from(amount), {
                 value: 0,
                 from: this.props.wallet,
@@ -1119,8 +1124,34 @@ export default class Scene extends Component {
         return amount;
     }
 
+    getStartTimeOfDay = async () => {
+        let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let startTimeOfDay = await llgRewardContract.startTimeOfDay();
+        console.log("tax: ", startTimeOfDay.toNumber())
+
+        this.setState({
+            startTimeOfDay: startTimeOfDay.toNumber()
+        });
+
+        let diffDays = (Date.now() - startTimeOfDay) / (24*60*60*1000); 
+        if(diffDays >= 1) {
+            window.localStorage.setItem("wins", 0);
+            window.localStorage.setItem("chance", 1);
+        }
+    }
+
+    getTax = async () => {
+        let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let tax = await llgRewardContract.taxPercent();
+        console.log("tax: ", tax.toNumber())
+
+        this.setState({
+            tax: tax.toNumber()
+        })
+    }   
+
     determineIfHasBonus = async () => {
-        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         let numConsecutiveWins = window.localStorage.getItem("wins");
         // let numConsecutiveWins = await llgRewardContract.getNumOfConsecutiveWins(ethers.utils.getAddress(this.props.wallet));
         if(numConsecutiveWins == "3" | numConsecutiveWins == "5" | numConsecutiveWins == "10") {
@@ -1134,12 +1165,12 @@ export default class Scene extends Component {
     
     getBonusReward = async () => {
         try {
-            const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+            let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
             
             let wallet = this.props.wallet ? this.props.wallet : this.state.wallet;
             console.error('*****', wallet)
 
-            let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(wallet), ethers.BigNumber.from(123), ethers.BigNumber.from(this.state.numConsecutiveWins), {
+            let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(wallet), ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.BigNumber.from(this.state.numConsecutiveWins), {
                 value: 0,
                 from: this.props.wallet,
             })
@@ -1164,7 +1195,7 @@ export default class Scene extends Component {
     }
 
     getWinningRewards = async () => {
-        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         let tx2 = await llgRewardContract.offerWinningReward(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), this.props.friendMatch, {
             value: 0,
             from: this.props.wallet,
@@ -1181,8 +1212,7 @@ export default class Scene extends Component {
     getRefund = async () => {
         let refundAmount;
         refundAmount = this.calcRefundAmount(this.props.roomName);
-        alert(refundAmount)
-        const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
+        let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         let tx2 = await llgRewardContract.refund(ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.utils.getAddress(this.props.wallet), ethers.BigNumber.from(refundAmount), {
             value: 0,
             from: this.props.wallet,
@@ -1219,8 +1249,13 @@ export default class Scene extends Component {
 
     onClickDrawHome = () => {
         if(this.props.roomName != "Classic Room") {
-            window.localStorage.setItem("wins", 0);
+            if(this.props.friendMatch != false) {
+                window.localStorage.setItem("wins", 0);
+                window.localStorage.setItem("chance", 0);
+            }
             this.getRefund();
+        } else {
+            window.location.href = '/';
         }
     }
 
@@ -1890,7 +1925,7 @@ export default class Scene extends Component {
             <Claim show={this.state && this.state.showClaimModal} msg={`Congratulation, You won ${this.state && this.state.numConsecutiveWins} matches in a row. You earn ${this.state && this.state.bonusReward} LGG more!`} onClickClaim={this.onClickClaim} btnText={this.state && this.state.wallet ? "Claim Reward" : "Connect Wallet"}/>
 
             {/* Victory modal */}
-            <Victory show={this.state && this.state.showVictoryModal} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />
+            <Victory show={this.state && this.state.showVictoryModal} tax={this.state && this.state.tax} roomName={this.props.roomName} onClickLLGSymbol={this.onClickLLGSymbol} />
 
             {/* Lost Modal */}
             <Loser
