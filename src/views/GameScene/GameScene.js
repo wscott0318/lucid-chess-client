@@ -65,7 +65,6 @@ export default class Scene extends Component {
         });
 
 
-
         // getCurrentWalletConnected((address, status) => {
         //     this.setState({
         //         wallet: address,
@@ -435,7 +434,7 @@ export default class Scene extends Component {
                     });
                 }
 
-                this.socket.emit( socketEvents['CS_Ready'] );
+                this.socket.emit( socketEvents['CS_Ready'], { walletAddress: this.props.wallet } );
                 
                 this.setState({
                     waitingModalTitle: 'Waiting other player to Join',
@@ -452,6 +451,8 @@ export default class Scene extends Component {
                 this.socket.on( socketEvents['SC_RemainingTime'], this.handleRemainingTime.bind(this) );
                 this.socket.on( socketEvents['SC_ActivateItem'], this.handleActivateItem.bind(this) );
                 this.socket.on( socketEvents['SC_ItemInfo'], this.handleItemInfo.bind(this) );
+                this.socket.on( socketEvents['SC_SendDrawRequest'], this.handleSendDrawRequest.bind(this) );
+                this.socket.on( socketEvents['SC_DrawMatch'], this.handleDrawMatch.bind(this) );
             } else {
                 this.setState({
                     showWaitingModal: false,
@@ -823,6 +824,10 @@ export default class Scene extends Component {
 
         // render every frame
         var animate = function  () {
+            if( self.isDrawMatch ) {
+                return;
+            }
+
             if( self.moveFinished() ) {
                 if( self.props.mode === gameModes['P2P'] && self.isFinished ) {
                     if( self.side !== self.currentTurn ) {
@@ -869,9 +874,8 @@ export default class Scene extends Component {
             }
 
             // TODO : Camera Target Update
-            controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
+            // controls.target.set( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
             controls.update();
-
             //camera.lookAt( orbitControlProps.target.x, orbitControlProps.target.y, orbitControlProps.target.z );
 
             // TODO : Selected Piece Animation
@@ -971,8 +975,8 @@ export default class Scene extends Component {
             
             requestAnimationFrame( animate );
             // render composer effect
-            // renderer.render(scene, camera);
-            composer.render();
+            renderer.render(scene, camera);
+            // composer.render();
         };
         this.animate = animate;
     }
@@ -1132,7 +1136,6 @@ export default class Scene extends Component {
         const llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         
         let wallet = this.props.wallet ? this.props.wallet : this.state.wallet;
-        console.error('*****', wallet)
 
         let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(wallet), ethers.BigNumber.from(123), ethers.BigNumber.from(this.state.numConsecutiveWins), {
             value: 0,
@@ -1438,6 +1441,25 @@ export default class Scene extends Component {
                 this.obstacleMeshes.push( mesh );
             }
         })
+    }
+
+    sendDrawRequest() {
+        // if( this.state && this.state.canSendDrawRequest ) {
+        //     this.setState({
+        //         canSendDrawRequest: false,
+        //     });
+
+        //     this.socket.emit( socketEvents['CS_SendDrawRequest'] );
+        // }
+        this.socket.emit( socketEvents['CS_SendDrawRequest'] );
+    }
+
+    replyDrawRequest( value ) {
+        this.setState({
+            showDrawRequestModal: false
+        });
+
+        this.socket.emit( socketEvents['CS_ReplyDrawRequest'], { isAgree: value } );
     }
 
     /**************************************************** Socket Handlers ******************************************************/
@@ -1804,6 +1826,19 @@ export default class Scene extends Component {
         }
     }
 
+    handleSendDrawRequest() {
+        this.setState({
+            showDrawRequestModal: true
+        })
+    }
+
+    handleDrawMatch() {
+        this.isDrawMatch = true;
+        this.setState({
+            showDrawModal: true,
+        })
+    }
+
     /***************************************************************************************************************************/
 
     render() {
@@ -1819,6 +1854,7 @@ export default class Scene extends Component {
                 <GameStateFooter 
                     showInventoryAction={ () => this.setState({ showInventory: !this.state.showInventory }) } 
                     quitAction={() => this.setState({ showConfirmModal: true })}
+                    sendDrawRequest={ this.sendDrawRequest.bind(this) }
                 />
             </div>
 
@@ -1865,12 +1901,28 @@ export default class Scene extends Component {
               path={"/"}
               hideAction={() => this.setState({ showConfirmModal: false })}
             ></Confirm>
+
             <Inventory 
                 show={ this.state && this.state.showInventory } 
                 items={ this.state && this.state.myItems }
                 myTurn={this.state && this.state.myTurn}
                 selectItem={ this.selectItem.bind(this) }
                 currentItem= { this.state && this.state.currentItem }
+            />
+
+            {/* match draw notification popup */}
+            <Popup
+              show={this.state && this.state.showDrawRequestModal}
+              type={"drawRequest"}
+              message={"The opponent player wants to draw the match. Are you agree with it?"}
+              agreeAction={ () => this.replyDrawRequest( true ) }
+              disAgreeAction={ () => this.replyDrawRequest( false ) }
+            />
+
+            {/* Show Draw modal */}
+            <Loser
+              show={this.state && this.state.showDrawModal}
+              msg={"This match has drawn."}
             />
           </div>
         );
