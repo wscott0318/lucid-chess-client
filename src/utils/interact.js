@@ -118,10 +118,10 @@ export const getCurrentWalletConnected = async () => {
 
 // Contract can be used to write Contract
 export  const getContractWithSigner = (contractAddress, contractABI) => {
-    const infuraProvider = new ethers.providers.Web3Provider(window.ethereum)
-    const signer = infuraProvider.getSigner()
+    let infuraProvider = new ethers.providers.Web3Provider(window.ethereum)
+    let signer = infuraProvider.getSigner()
 
-    const contract = new ethers.Contract(
+    let contract = new ethers.Contract(
         contractAddress,
         contractABI,
         signer
@@ -132,9 +132,9 @@ export  const getContractWithSigner = (contractAddress, contractABI) => {
 
   // Contract can be used to read Contract
 export  const getContractWithoutSigner = (contractAddress, contractABI) => {
-    const infuraProvider = new ethers.providers.Web3Provider(window.ethereum)
+    let infuraProvider = new ethers.providers.Web3Provider(window.ethereum)
 
-    const contract = new ethers.Contract(
+    let contract = new ethers.Contract(
         contractAddress,
         contractABI,
         infuraProvider
@@ -144,9 +144,9 @@ export  const getContractWithoutSigner = (contractAddress, contractABI) => {
 }
 
 export  const getContract = (contractAddress, contractABI) => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
+    let provider = new ethers.providers.Web3Provider(window.ethereum);
+    let signer = provider.getSigner();
 
-    const contract = new ethers.Contract(contractAddress, contractABI, signer)
+    let contract = new ethers.Contract(contractAddress, contractABI, signer)
     return contract
 }

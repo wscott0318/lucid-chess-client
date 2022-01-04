@@ -8,7 +8,7 @@ export const Loser = ({ show, msg, onClickDrawHome }) => {
   const [ranking, setRanking] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const onClick = () => {
+  const onClickHome = () => {
     if(loading) return;
     onClickDrawHome();
     setLoading(true);
@@ -27,9 +27,9 @@ export const Loser = ({ show, msg, onClickDrawHome }) => {
         <div className="u-btn-group">
           <div
             className="u-btn-yes"
-            onClick={onClick}
+            onClick={onClickHome}
           >
-            Return Home
+            {loading ? "Loading..." : "Return Home"}
           </div>
           <div className="u-btn-no" onClick={() => setRanking(true)}>Ranking</div>
         </div>

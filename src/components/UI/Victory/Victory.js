@@ -8,7 +8,7 @@ import item2Img from "../../../assets/img/victory_item2.png";
 import { useEffect, useState } from "react";
 import Ranking from "../Ranking/Ranking";
 
-export const Victory = ({ show, roomName, onClickLLGSymbol }) => {
+export const Victory = ({ show, roomName, onClickLLGSymbol, tax }) => {
   const [loading, setLoading] = useState(false);
   const [llgToGetPaid, setLLGToGetPaid] = useState(0);
   const [llgDeposited, setLLGDeposited] = useState(0);
@@ -27,7 +27,6 @@ export const Victory = ({ show, roomName, onClickLLGSymbol }) => {
   };
 
   const calcLLGs = () => {
-    let tax = 5;
     switch (roomName) {
       case "Silver Room":
         setLLGToGetPaid(100);
