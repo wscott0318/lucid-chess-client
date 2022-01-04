@@ -36,7 +36,7 @@ export const InviteFriend = ({ show, hideAction, roomId }) => {
 					<button className="u-copy-button" onClick={copyCodeToClipboard}></button>
 				</div>
 					<div className="u-description">
-						Share the secrect key above, so  your friend can join this game !
+						Share the secret key above, so  your friend can join this game!
 					</div>
 					<button className="u-button" onClick={hideAction}>Got it</button>
 				</div>
