@@ -1449,6 +1449,7 @@ export default class Scene extends Component {
 
         if( item === this.state.currentItem ) {
             this.setState({ currentItem: null });
+            this.possibleMoves = [];
 
             this.socket.emit( socketEvents['CS_CurrentItem'], { currentItem: null } );
         } else {
