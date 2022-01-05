@@ -104,7 +104,7 @@ const RoomsScreen = () => {
     useEffect(() => {
         var skt;
         if (window.location.hostname.includes('chess.lucidlands.io')) {
-            skt = io.connect(`http://${productServer}:${socketServerPort}`);
+            skt = io.connect(`https://${productServer}:${socketServerPort}`);
         } else {
             skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
         }
