@@ -1725,7 +1725,10 @@ export default class Scene extends Component {
         const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === fromMatrixIndex.rowIndex && item.colIndex === fromMatrixIndex.colIndex );
 
         // enpassant case
-        if( fromIndex !== -1 && (this.boardPiecesArray[ fromIndex ].pieceType === 'p' || this.boardPiecesArray[ fromIndex ].pieceType === 'P') && to === enPassant ) {
+        if( fromIndex !== -1 
+            && (this.boardPiecesArray[ fromIndex ].pieceType === 'p' || this.boardPiecesArray[ fromIndex ].pieceType === 'P') 
+            && to === enPassant
+            && from[0] !== to[0] ) {
             const targetMatrixIndex = { ...toMatrixIndex };
             if( this.currentTurn === 'white' ) {
                 targetMatrixIndex.rowIndex -= 1;
