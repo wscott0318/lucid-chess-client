@@ -1707,7 +1707,11 @@ export default class Scene extends Component {
     }
 
     handlePerformMove(params) {
-        const { from, to, castling, pieceType, enPassant } = params;
+        const { from, to, castling, pieceType, enPassant, dangerKing } = params;
+
+        if( dangerKing ) {
+            this.dangerKing = dangerKing;
+        }
 
         const fromMatrixIndex = getMatrixIndexFromFen(from);
         const toMatrixIndex = getMatrixIndexFromFen(to);
