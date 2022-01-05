@@ -19,6 +19,7 @@ import io from 'socket.io-client';
 import { socketServerPort } from "../../../config";
 import { socketEvents } from "../../../utils/packet";
 import store from "../../../store/store";
+import { productServer } from '../../../../src/config/index'
 
 const ROOMS = [
     {
@@ -114,7 +115,12 @@ const RoomsScreen = () => {
     }
 
     useEffect(() => {
-        const skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
+        var skt;
+        if (window.location.hostname.includes('localhost')) {
+            skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
+        } else {
+            skt = io.connect(`http://${productServer}:${socketServerPort}`);
+        }
         setSocket( skt );
 
         skt.on( socketEvents['SC_RoomCreated'], (params) => handleRoomCreated(params) );
