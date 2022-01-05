@@ -5,7 +5,6 @@ import io from 'socket.io-client';
 import { socketServerPort } from "../../../config";
 import { socketEvents } from "../../../utils/packet";
 import store from "../../../store/store";
-import { productServer } from '../../../../src/config/index'
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./JoinGame.scss";
@@ -51,18 +50,11 @@ export const JoinGame = () => {
 	}
 
 	useEffect(() => {
-				var skt;
-        if (window.location.hostname.includes('chess.lucidlands.io')) {
-					skt = io.connect(`https://${productServer}:${socketServerPort}`);
-				} else {
-					skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
-				}
-        setSocket( skt );
-
-        skt.on( socketEvents['SC_JoinRoom'], (params) => handleJoinRoom(params) );
-
+		var skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
+		setSocket( skt );
+		skt.on( socketEvents['SC_JoinRoom'], (params) => handleJoinRoom(params) );
 		updateSocket( skt );
-    }, []);
+	}, []);
 
     return (
 		<div className="JoinGame">

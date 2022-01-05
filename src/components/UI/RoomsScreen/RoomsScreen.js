@@ -19,7 +19,6 @@ import io from 'socket.io-client';
 import { socketServerPort } from "../../../config";
 import { socketEvents } from "../../../utils/packet";
 import store from "../../../store/store";
-import { productServer } from '../../../../src/config/index'
 
 const ROOMS = [
     {
@@ -102,16 +101,9 @@ const RoomsScreen = () => {
     }
 
     useEffect(() => {
-        var skt;
-        if (window.location.hostname.includes('chess.lucidlands.io')) {
-            skt = io.connect(`https://${productServer}:${socketServerPort}`);
-        } else {
-            skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
-        }
+        var skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
         setSocket( skt );
-
         skt.on( socketEvents['SC_RoomCreated'], (params) => handleRoomCreated(params) );
-
         updateSocket( skt );
     }, []);
 
