@@ -36,12 +36,11 @@ import "./GameScene.scss";
 
 import {
   connectWallet,
-  getCurrentWalletConnected,
 } from "../../utils/interact.js";
 import {chainId, llgContractAddress, llgRewardContractAddress} from '../../utils/address';
 
-import {getContractWithSigner, getContractWithoutSigner} from '../../utils/interact';
-import { Contract, ethers } from 'ethers'
+import {getContractWithSigner} from '../../utils/interact';
+import { ethers } from 'ethers'
 
 const llgContractABI = require("../../utils/llg-contract-abi.json");
 const llgRewardContractABI = require("../../utils/llg-reward-contract-abi.json");
@@ -69,17 +68,6 @@ export default class Scene extends Component {
         this.getTax();
         this.getStartTimeOfDay();
 
-        console.error(this.props.wallet);
-        // getCurrentWalletConnected((address, status) => {
-        //     this.setState({
-        //         wallet: address,
-        //         status,
-        //     })
-        // })
-
-        // this.addWalletListener();
-        
-        // this.connectWalletPressed();
         /**********************************  Scene Environment Setup  **********************************/
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // TODO : Create Three.js Scene, Camera, Renderer
@@ -143,21 +131,6 @@ export default class Scene extends Component {
         const renderScene = new RenderPass( scene, camera );
         
         composer.addPass( renderScene );
-
-        // const redOut = new CustomOutlinePass(
-        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
-        //     this.scene,
-        //     this.camera,
-        //     0
-        // );
-        // const blueOut = new CustomOutlinePass(
-        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
-        //     this.scene,
-        //     this.camera,
-        //     1
-        // );
-        // composer.addPass(redOut);
-        // composer.addPass(blueOut);
 
         // TODO: Scene Outline Effect - Effect composer
         const whiteTeamObjects = []
@@ -493,7 +466,6 @@ export default class Scene extends Component {
 
         const self = this;
         var mouseDownAction = function (event) {
-            // event.preventDefault();
 
             if( self.props.mode === gameModes['P2P'] && self.currentPlayer !== self.socket.id ) {
                 return;
@@ -851,7 +823,6 @@ export default class Scene extends Component {
                             showVictoryModal: false,
                             showLoseModal: true,
                         });
-                        console.error("loser")
                         if(!self.props.friendMatch) {
                             window.localStorage.setItem("chance", 0)
                             window.localStorage.setItem("wins", 0)
@@ -1127,7 +1098,6 @@ export default class Scene extends Component {
     getStartTimeOfDay = async () => {
         let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         let startTimeOfDay = await llgRewardContract.startTimeOfDay();
-        console.log("time: ", startTimeOfDay.toNumber())
 
         this.setState({
             startTimeOfDay: startTimeOfDay.toNumber()
@@ -1143,7 +1113,6 @@ export default class Scene extends Component {
     getTax = async () => {
         let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         let tax = await llgRewardContract.taxPercent();
-        console.log("tax: ", tax.toNumber())
 
         this.setState({
             tax: tax.toNumber()
@@ -1153,7 +1122,6 @@ export default class Scene extends Component {
     determineIfHasBonus = async () => {
         let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
         let numConsecutiveWins = window.localStorage.getItem("wins");
-        // let numConsecutiveWins = await llgRewardContract.getNumOfConsecutiveWins(ethers.utils.getAddress(this.props.wallet));
         if(numConsecutiveWins == "3" | numConsecutiveWins == "5" | numConsecutiveWins == "10") {
             this.setState({
                 numConsecutiveWins,
@@ -1168,7 +1136,6 @@ export default class Scene extends Component {
             let llgRewardContract = getContractWithSigner(llgRewardContractAddress, llgRewardContractABI);
             
             let wallet = this.props.wallet ? this.props.wallet : this.state.wallet;
-            console.error('*****', wallet)
 
             let tx = await llgRewardContract.giveBonusReward(ethers.utils.getAddress(wallet), ethers.BigNumber.from(this.props.roomKey), ethers.BigNumber.from(123), ethers.BigNumber.from(this.state.numConsecutiveWins), {
                 value: 0,
@@ -1177,7 +1144,6 @@ export default class Scene extends Component {
             let res = await tx.wait()
             
             if(res.transactionHash) {
-                // window.location = '/';
                 window.localStorage.setItem("lastRewardTime", Date.now());
                 this.setState({
                     showClaimModal: false
@@ -1190,8 +1156,6 @@ export default class Scene extends Component {
                 showClaimModal: false
             })
         }
-
-        
     }
 
     getWinningRewards = async () => {
@@ -1204,7 +1168,6 @@ export default class Scene extends Component {
         let res2 = await tx2.wait()
         
         if(res2.transactionHash) {
-            console.error(res2);
             window.location = '/';
         }
     }
@@ -1221,7 +1184,6 @@ export default class Scene extends Component {
         let res2 = await tx2.wait()
         
         if(res2.transactionHash) {
-            console.error(res2);
             window.location = '/';
         }
     }
@@ -1308,6 +1270,13 @@ export default class Scene extends Component {
         if( type === 'q' ) {
             mesh = this.meshArray['fox'].clone();
         }
+        if( type === 'K' ) {
+            mesh = this.meshArray['lucifer'].clone();
+        }
+        if( type === 'k' ) {
+            mesh = this.meshArray['king'].clone();
+        }
+
         if (type === type.toUpperCase()) {
             mesh.traverse(n => {
                 if ( n.isMesh ) {
@@ -1501,13 +1470,6 @@ export default class Scene extends Component {
     }
 
     sendDrawRequest() {
-        // if( this.state && this.state.canSendDrawRequest ) {
-        //     this.setState({
-        //         canSendDrawRequest: false,
-        //     });
-
-        //     this.socket.emit( socketEvents['CS_SendDrawRequest'] );
-        // }
         this.socket.emit( socketEvents['CS_SendDrawRequest'] );
     }
 
@@ -1525,8 +1487,6 @@ export default class Scene extends Component {
             roomId: params.roomId,
             showInviteModal: true,
         });
-        // this.connectWalletPressed();
-        // this.makeDeposit(params.roomId);
     }
 
     handleGameStarted(params) {
@@ -1652,6 +1612,52 @@ export default class Scene extends Component {
             this.selectedPiece = null;
         }
         this.possibleMoves = [];
+
+        if( params.pieces ) {
+            const pieces = params.pieces;
+
+            for( const position in pieces ) {
+                const piece = pieces[ position ];
+
+                const pieceIndex = this.boardPiecesArray.findIndex((boardPiece) => {
+                    const fen = getFenFromMatrixIndex( boardPiece.rowIndex, boardPiece.colIndex );
+                    return fen === position && piece === boardPiece.pieceType;
+                });
+
+                if( pieceIndex === -1 ) {
+                    const matrixIndex = getMatrixIndexFromFen( position );
+                    
+                    const temp = {};
+                    temp.pieceType = piece;
+                    temp.rowIndex = matrixIndex.rowIndex;
+                    temp.colIndex = matrixIndex.colIndex;
+
+                    temp.mesh = this.getTargetMesh( piece );
+                    const position = getMeshPosition( temp.rowIndex, temp.colIndex );
+                    temp.mesh.position.set(position.x, position.y, position.z);
+                    temp.mesh.scale.set(modelSize, modelSize, modelSize);
+                    temp.mesh.rotation.y = piece === piece.toUpperCase() ? Math.PI : 0;
+
+                    this.scene.add(temp);
+                    this.boardPiecesArray.push(temp);
+                }
+            }
+
+            const tempArray = [];
+            this.boardPiecesArray.forEach(( boardPiece ) => {
+                const pieceIndex = Object.keys( pieces ).findIndex( position => 
+                    position === getFenFromMatrixIndex( boardPiece.rowIndex, boardPiece.colIndex ) 
+                    && pieces[ position ] === boardPiece.pieceType
+                )
+
+                if( pieceIndex !== -1 ) {
+                    tempArray.push( boardPiece );
+                } else {
+                    this.scene.remove( boardPiece.mesh );
+                }
+            });
+            this.boardPiecesArray = [ ...tempArray ];
+        }
         console.error(params);
     }
 
@@ -1670,11 +1676,6 @@ export default class Scene extends Component {
 
     handlePlayerLogOut(params) {
         const username = params.username;
-        
-        // this.setState({
-        //     showLeaveNotificationModal: true,
-        //     showLeaveNotificationMessage: username + ' logged out!'
-        // });
 
          this.isFinished = true;
          this.side = !this.currentTurn;
@@ -1686,8 +1687,6 @@ export default class Scene extends Component {
             showLeaveNotificationModal: true,
             showLeaveNotificationMessage: params.message
         });
-
-        // this.isFinished = true;
     }
 
     handlePawnTransform(params) {
@@ -1722,7 +1721,7 @@ export default class Scene extends Component {
         }
 
         // move chese piece to the target position
-        const fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === fromMatrixIndex.rowIndex && item.colIndex === fromMatrixIndex.colIndex );
+        let fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === fromMatrixIndex.rowIndex && item.colIndex === fromMatrixIndex.colIndex );
 
         // enpassant case
         if( fromIndex !== -1 
@@ -1742,6 +1741,8 @@ export default class Scene extends Component {
                 this.boardPiecesArray.splice( targetIndex, 1 );
             }
         }
+
+        fromIndex = this.boardPiecesArray.findIndex((item) => item.rowIndex === fromMatrixIndex.rowIndex && item.colIndex === fromMatrixIndex.colIndex );
 
         if( fromIndex !== -1 ) {
             if( pieceType ) {

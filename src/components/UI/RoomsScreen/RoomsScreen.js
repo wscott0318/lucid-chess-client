@@ -77,19 +77,6 @@ const RoomsScreen = () => {
 
         if( !state.friendMatch ) {
             socket.emit( socketEvents['CS_MatchPlayLogin'], data );
-
-            // const stateData = {
-            //     mode: gameModes['P2P'],
-            //     friendMatch: state.friendMatch,
-            //     username: state.username,
-            //     roomName: roomName,
-            // }
-    
-            // if (roomName === 'Classic Room') {
-            //     navigate('/gameScene', { state: { ...stateData } });
-            // } else {
-            //     navigate('/connect', { state: { ...stateData } });
-            // }
         } else {
             socket.emit( socketEvents['CS_CreateRoom'], data );
         }
