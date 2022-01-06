@@ -9,8 +9,6 @@ import store from "../../store/store";
 
 const game = new Game();
 
-console.error(game);
-
 export const GameScene = () => {
     const location = useLocation();
 

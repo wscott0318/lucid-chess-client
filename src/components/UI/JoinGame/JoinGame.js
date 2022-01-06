@@ -50,13 +50,11 @@ export const JoinGame = () => {
 	}
 
 	useEffect(() => {
-        const skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
-        setSocket( skt );
-
-        skt.on( socketEvents['SC_JoinRoom'], (params) => handleJoinRoom(params) );
-
+		var skt = io.connect(`http://${window.location.hostname}:${socketServerPort}`);
+		setSocket( skt );
+		skt.on( socketEvents['SC_JoinRoom'], (params) => handleJoinRoom(params) );
 		updateSocket( skt );
-    }, []);
+	}, []);
 
     return (
 		<div className="JoinGame">
